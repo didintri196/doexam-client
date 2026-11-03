@@ -23,6 +23,8 @@ server {
 
     location = /healthz { access_log off; default_type text/plain; return 200 "ok\n"; }
     location = / { return 302 /exam/; }
+    # the router uses /exam (no trailing slash) as its root URL: a reload must not 404
+    location = /exam { return 302 /exam/; }
 
     # hashed build assets never change
     location /assets/ {
