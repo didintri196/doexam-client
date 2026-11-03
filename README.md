@@ -2,7 +2,7 @@
 
 Frontend web DoExam: **exam client** untuk peserta (`/exam/`) dan **panel staf** untuk guru, pengawas, dan admin (`/app/`). Satu project, dua entry yang dibangun sebagai bundle terpisah dengan login dan sesi masing-masing. Rendering di browser (CSR); hasil build berupa file statis.
 
-Rencana & keputusan: [`DOCS/PLAN/09-FRONTEND.md`](../../DOCS/PLAN/09-FRONTEND.md). Aturan coding: [`AGENTS.md`](AGENTS.md).
+Rencana & keputusan: `DOCS/PLAN/09-FRONTEND.md` di repo utama DoExam. Aturan coding: [`AGENTS.md`](AGENTS.md). Backend: [doexam-server](https://github.com/didintri196/doexam-server).
 
 ## Isi
 
@@ -38,7 +38,7 @@ docker run -p 8081:8080 -e API_UPSTREAM=http://host.docker.internal:8080 doexam-
 docker run -p 8082:8080 -e API_UPSTREAM=http://host.docker.internal:8080 doexam-panel
 ```
 
-Atau keduanya sekaligus (server dari `apps/server` sudah berjalan di port 8080):
+Atau keduanya sekaligus (server DoExam sudah berjalan di port 8080):
 
 ```bash
 docker compose up --build
