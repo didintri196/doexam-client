@@ -11,8 +11,6 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
-  PanelLeft,
-  PanelTop,
   Settings,
   Users,
   UsersRound,
@@ -69,39 +67,18 @@ const NAV: NavGroup[] = [
   },
 ];
 
-const MODE_KEY = 'doexam.app.nav';
-
 export function Layout() {
   const can = useCan();
   const groups = NAV.map((g) => ({ ...g, items: g.items.filter((it) => it.perms.length === 0 || can(...it.perms)) })).filter((g) => g.items.length);
-  const [mode, setMode] = useState<'side' | 'top'>(() => {
-    try {
-      return localStorage.getItem(MODE_KEY) === 'top' ? 'top' : 'side';
-    } catch {
-      return 'side';
-    }
-  });
   const [mobile, setMobile] = useState(false);
-  const toggleMode = () => {
-    const next = mode === 'side' ? 'top' : 'side';
-    setMode(next);
-    try {
-      localStorage.setItem(MODE_KEY, next);
-    } catch {
-      /* ignore */
-    }
-  };
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-950">
-      <Header mode={mode} onToggleMode={toggleMode} onMenu={() => setMobile(true)} />
-      {mode === 'top' && <TopNav groups={groups} />}
+      <Header onMenu={() => setMobile(true)} />
       <div className="flex flex-1">
-        {mode === 'side' && (
-          <aside className="no-print hidden w-60 shrink-0 border-r border-slate-200 bg-white p-4 md:block dark:border-slate-800 dark:bg-slate-900">
-            <SideNav groups={groups} />
-          </aside>
-        )}
+        <aside className="no-print hidden w-60 shrink-0 border-r border-slate-200 bg-white p-4 md:block dark:border-slate-800 dark:bg-slate-900">
+          <SideNav groups={groups} />
+        </aside>
         <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <Outlet />
@@ -152,22 +129,7 @@ function SideNav({ groups, onNavigate }: { groups: NavGroup[]; onNavigate?: () =
   );
 }
 
-function TopNav({ groups }: { groups: NavGroup[] }) {
-  return (
-    <nav className="no-print hidden border-b border-slate-200 bg-white md:block dark:border-slate-800 dark:bg-slate-900">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-1 px-4 py-1.5 sm:px-6 lg:px-8">
-        {groups.flatMap((g) => g.items).map((it) => (
-          <NavLink key={it.to} to={it.to} end={it.to === '/'} className={(s) => cx(linkClass(s), 'gap-2 py-1.5')}>
-            {it.icon}
-            <span>{it.label}</span>
-          </NavLink>
-        ))}
-      </div>
-    </nav>
-  );
-}
-
-function Header({ mode, onToggleMode, onMenu }: { mode: 'side' | 'top'; onToggleMode: () => void; onMenu: () => void }) {
+function Header({ onMenu }: { onMenu: () => void }) {
   const { me, logout } = useAuth();
   const { data: tenant } = usePublicTenant();
   const navigate = useNavigate();
@@ -188,15 +150,6 @@ function Header({ mode, onToggleMode, onMenu }: { mode: 'side' | 'top'; onToggle
           </button>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onToggleMode}
-            title={mode === 'side' ? 'Pindah ke menu atas' : 'Pindah ke menu samping'}
-            className="hidden items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-100 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200 md:flex dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-          >
-            {mode === 'side' ? <PanelTop className="h-3.5 w-3.5 text-blue-600" /> : <PanelLeft className="h-3.5 w-3.5 text-blue-600" />}
-            <span className="hidden lg:inline">{mode === 'side' ? 'Menu atas' : 'Menu samping'}</span>
-          </button>
           <ThemeToggle />
           <div className="relative">
             <button
