@@ -1,15 +1,19 @@
 import {
+  Check,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Clock,
   CloudOff,
   Eye,
   FileText,
+  Flag,
   Lock,
   Maximize2,
   Minimize2,
   RefreshCw,
   Send,
+  Settings2,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Navigate, useLocation, useNavigate, useParams } from 'react-router';
@@ -17,11 +21,12 @@ import type { AttemptView, ItemView, Response } from '@/shared/api/types';
 import { RichContent } from '@/shared/item/RichContent';
 import { errorMessage } from '@/shared/lib/errors';
 import { formatClock, labels } from '@/shared/lib/format';
-import { Alert, Button, cx, Loading, Modal, useToast } from '@/shared/ui';
+import { Brand, BrandTitle, usePublicTenant } from '@/shared/auth/pages';
+import { Alert, Badge, Button, cx, IconButton, Loading, Modal, useToast } from '@/shared/ui';
 import { activeSection, isAnswered, useAttemptEngine, type AttemptEngine, type FlatItem, type Snapshot } from '../engine';
 
 type FontScale = 'normal' | 'large' | 'xl';
-const fontClass: Record<FontScale, string> = { normal: 'text-sm', large: 'text-base', xl: 'text-lg' };
+const fontClass: Record<FontScale, string> = { normal: 'text-base', large: 'text-lg', xl: 'text-xl' };
 const PREFS = 'doexam.exam.prefs';
 
 function loadPrefs(): { font: FontScale; contrast: boolean } {
@@ -43,7 +48,7 @@ export function TakePage() {
     return (
       <div className="mx-auto max-w-md p-6">
         <Alert>{s.error ? errorMessage(new Error(s.error)) : 'Ujian tidak bisa dibuka.'}</Alert>
-        <a href="/exam/" className="mt-4 inline-block text-xs font-semibold text-blue-600 hover:underline">
+        <a href="/exam/" className="mt-4 inline-block text-xs font-medium text-blue-700 hover:underline dark:text-blue-300">
           Kembali ke daftar ujian
         </a>
       </div>
@@ -57,7 +62,9 @@ function ExamRoom({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
   const toast = useToast();
   const [prefs, setPrefs] = useState(loadPrefs);
   const [submitOpen, setSubmitOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
   const [fullscreen, setFullscreen] = useState(() => !!document.fullscreenElement);
+  const { data: tenant } = usePublicTenant();
   const view = s.view!;
   const items = s.items;
   const idx = Math.max(0, items.findIndex((i) => i.id === s.current));
@@ -137,55 +144,46 @@ function ExamRoom({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
 
   return (
     <div className={cx('flex min-h-screen flex-col', hc ? 'hc' : 'bg-slate-50 dark:bg-slate-950')}>
-      {/* toolbar */}
-      <div className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-2.5 dark:border-slate-800 dark:bg-slate-900">
-        <div className="min-w-0">
-          <h1 className="max-w-[280px] truncate text-xs font-bold tracking-tight sm:max-w-md sm:text-sm">{view.exam_title}</h1>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            {sequential && section ? `${section.title} · ` : ''}Soal {idx + 1} dari {items.length}
-          </p>
-        </div>
-        <Timer engine={engine} s={s} />
-        <div className="flex items-center gap-2">
-          <SyncBadge engine={engine} s={s} />
-          <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800">
-            {(['normal', 'large', 'xl'] as FontScale[]).map((f, i) => (
-              <button
-                key={f}
-                type="button"
-                onClick={() => setPrefs((p) => ({ ...p, font: f }))}
-                className={cx('rounded px-2 py-1', prefs.font === f ? 'bg-white shadow-xs dark:bg-slate-700' : 'text-slate-500')}
-                title={['Ukuran huruf normal', 'Huruf besar', 'Huruf sangat besar'][i]}
-              >
-                {['A', 'A+', 'A++'][i]}
-              </button>
-            ))}
+      {/* header */}
+      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 sm:gap-3 sm:px-6">
+          <span className="hidden shrink-0 sm:block">
+            <Brand tenant={tenant} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-sm font-semibold leading-5 text-slate-900 dark:text-white">{view.exam_title}</h1>
+            <p className="truncate text-xs leading-4 tabular-nums text-slate-500 dark:text-slate-400">
+              <span className="sm:hidden">
+                Soal {idx + 1}/{items.length}
+              </span>
+              <span className="hidden sm:inline">
+                {tenant?.name ? `${tenant.name} · ` : ''}
+                {sequential && section ? `${section.title} · ` : ''}Soal {idx + 1} dari {items.length}
+              </span>
+            </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setPrefs((p) => ({ ...p, contrast: !p.contrast }))}
-            title="Kontras tinggi"
-            className={cx('rounded-lg border p-1.5', hc ? 'border-yellow-400' : 'border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300')}
-          >
-            <Eye className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={toggleFullscreen}
-            title={fullscreen ? 'Keluar layar penuh' : 'Layar penuh'}
-            className="rounded-lg border border-slate-200 p-1.5 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300"
-          >
-            {fullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-          </button>
+          <SyncBadge engine={engine} s={s} />
+          <Timer engine={engine} s={s} />
+          <div className="hidden items-center gap-1.5 md:flex">
+            <ViewTools prefs={prefs} setPrefs={setPrefs} fullscreen={fullscreen} onFullscreen={toggleFullscreen} />
+          </div>
+          <IconButton label="Tampilan" className="md:hidden" aria-expanded={toolsOpen} onClick={() => setToolsOpen((o) => !o)}>
+            <Settings2 className="h-4 w-4" />
+          </IconButton>
         </div>
-      </div>
+        {toolsOpen && (
+          <div className="flex items-center justify-end gap-1.5 border-t border-slate-200 px-4 py-2 md:hidden dark:border-slate-800">
+            <ViewTools prefs={prefs} setPrefs={setPrefs} fullscreen={fullscreen} onFullscreen={toggleFullscreen} />
+          </div>
+        )}
+      </header>
 
       {s.notice && (
-        <div className="mx-auto mt-3 w-full max-w-7xl px-4">
+        <div className="mx-auto mt-4 w-full max-w-7xl px-4 sm:px-6">
           <Alert tone={s.notice.tone}>
             <div className="flex items-center justify-between gap-2">
               <span>{s.notice.message}</span>
-              <button type="button" className="text-[11px] font-semibold underline" onClick={() => engine.dismissNotice()}>
+              <button type="button" className="text-xs font-medium underline" onClick={() => engine.dismissNotice()}>
                 Tutup
               </button>
             </div>
@@ -193,45 +191,32 @@ function ExamRoom({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
         </div>
       )}
 
-      <div className="mx-auto grid w-full max-w-7xl flex-1 grid-cols-1 gap-6 p-4 sm:p-6 lg:grid-cols-12">
+      <div className="mx-auto grid w-full max-w-7xl flex-1 grid-cols-1 items-start gap-6 p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         {/* question */}
-        <div
-          className="flex flex-col justify-between gap-6 lg:col-span-8"
+        <section
+          className="flex flex-col rounded-2xl border border-slate-200 bg-white shadow-xs lg:min-h-[calc(100vh-7rem)] dark:border-slate-800 dark:bg-slate-900"
           onContextMenu={standard ? (e) => e.preventDefault() : undefined}
           onCopy={standard ? (e) => e.preventDefault() : undefined}
         >
           {item ? (
-            <div className="space-y-5">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-3 dark:border-slate-800">
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="text-base font-bold text-blue-600 dark:text-blue-400">Nomor {item.number}</span>
-                  <span className="text-slate-400">·</span>
-                  <span className="font-medium text-slate-600 dark:text-slate-300">{labels.itemType[item.type]}</span>
-                  <span className="text-slate-400">·</span>
-                  <span className="text-slate-500">{item.max_points} poin</span>
-                </div>
-                <label className="flex cursor-pointer select-none items-center gap-2 text-xs font-medium">
-                  <input
-                    type="checkbox"
-                    checked={!!s.flags[item.id]}
-                    disabled={readOnly}
-                    onChange={(e) => engine.flag(item.id, e.target.checked)}
-                    className="h-4 w-4 rounded text-amber-500 focus:ring-amber-400"
-                  />
-                  <span className={s.flags[item.id] ? 'font-semibold text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400'}>Ragu-ragu</span>
-                </label>
+            <div className="flex-1 space-y-6 px-5 py-6 sm:px-8 sm:py-7">
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <h2 className="text-lg font-semibold tabular-nums text-slate-900 dark:text-white">Soal {item.number}</h2>
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  {labels.itemType[item.type]} · {item.max_points} poin
+                </span>
               </div>
 
               {item.stimulus && (
-                <div className="rounded-xl border border-blue-200/60 bg-blue-50/50 p-4 text-xs text-slate-700 sm:text-sm dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-slate-300">
-                  <div className="mb-2 flex items-center gap-1.5 font-semibold text-blue-700 dark:text-blue-400">
-                    <FileText className="h-3.5 w-3.5" /> {item.stimulus.title || 'Bacaan'}
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-700 sm:text-sm dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-300">
+                  <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-slate-900 dark:text-white">
+                    <FileText className="h-3.5 w-3.5 text-slate-400" /> {item.stimulus.title || 'Bacaan'}
                   </div>
                   <RichContent html={item.stimulus.body} />
                 </div>
               )}
 
-              <RichContent html={item.stem} className={cx('font-medium text-slate-900 select-none dark:text-slate-100', fontClass[prefs.font])} />
+              <RichContent html={item.stem} className={cx('max-w-[72ch] text-slate-900 select-none dark:text-slate-100', fontClass[prefs.font])} />
 
               <AnswerInput
                 key={item.id}
@@ -243,73 +228,112 @@ function ExamRoom({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
               />
             </div>
           ) : (
-            <Alert tone="blue">Tidak ada soal di bagian ini.</Alert>
+            <div className="flex-1 p-6">
+              <Alert tone="blue">Tidak ada soal di bagian ini.</Alert>
+            </div>
           )}
 
-          <div className="flex items-center justify-between gap-2 border-t border-slate-200 pt-4 dark:border-slate-800">
+          <div className="flex items-center gap-2 border-t border-slate-200 px-5 py-4 sm:px-8 dark:border-slate-800">
             <Button variant="secondary" size="lg" disabled={idx === 0 || forwardOnly} onClick={() => go(-1)} icon={<ChevronLeft className="h-4 w-4" />}>
-              Sebelumnya
+              <span className="hidden sm:inline">Sebelumnya</span>
             </Button>
+            {item && (
+              <button
+                type="button"
+                aria-pressed={!!s.flags[item.id]}
+                disabled={readOnly}
+                onClick={() => engine.flag(item.id, !s.flags[item.id])}
+                className={cx(
+                  'inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-lg border px-3.5 text-sm font-medium shadow-xs transition-colors disabled:opacity-55',
+                  s.flags[item.id]
+                    ? 'border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-700 dark:bg-amber-950/50 dark:text-amber-200'
+                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800',
+                )}
+              >
+                <Flag className={cx('h-4 w-4', s.flags[item.id] ? 'fill-amber-400 text-amber-600' : 'text-slate-400')} />
+                Ragu-ragu
+                <kbd className="hidden rounded border border-current/20 px-1 font-sans text-[11px] opacity-60 sm:inline">F</kbd>
+              </button>
+            )}
+            <span className="flex-1" />
             {idx < items.length - 1 ? (
               <Button size="lg" onClick={() => go(1)}>
                 Berikutnya <ChevronRight className="h-4 w-4" />
               </Button>
             ) : (
-              <Button size="lg" variant="success" onClick={() => setSubmitOpen(true)} icon={<Send className="h-4 w-4" />}>
+              <Button size="lg" disabled={readOnly} onClick={() => setSubmitOpen(true)} icon={<Send className="h-4 w-4" />}>
                 {sequential && !isLastSection ? 'Selesai bagian ini' : 'Kumpulkan'}
               </Button>
             )}
           </div>
-        </div>
+        </section>
 
         {/* navigator */}
-        <aside className="space-y-4 lg:col-span-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-xs font-bold">Navigasi soal</h2>
-              <span className="text-[11px] text-slate-500">
-                {answered}/{items.length} terjawab
+        <aside className="space-y-4 lg:sticky lg:top-22">
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-800">
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Navigasi soal</h2>
+              <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
+                {answered}/{items.length}
               </span>
             </div>
-            <div className="grid grid-cols-6 gap-1.5 sm:grid-cols-8 lg:grid-cols-6">
-              {items.map((it, i) => (
-                <NavCell
-                  key={it.id}
-                  item={it}
-                  current={it.id === s.current}
-                  answered={isAnswered(s.responses[it.id])}
-                  flagged={!!s.flags[it.id]}
-                  disabled={forwardOnly && i < s.furthest}
-                  onClick={() => engine.goTo(it.id)}
-                />
+            <div className="p-4">
+              <div className="grid grid-cols-8 gap-1.5 sm:grid-cols-10 lg:grid-cols-5">
+                {items.map((it, i) => (
+                  <NavCell
+                    key={it.id}
+                    item={it}
+                    current={it.id === s.current}
+                    answered={isAnswered(s.responses[it.id])}
+                    flagged={!!s.flags[it.id]}
+                    disabled={forwardOnly && i < s.furthest}
+                    onClick={() => engine.goTo(it.id)}
+                  />
+                ))}
+              </div>
+              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                <Legend className="bg-blue-600" label="Dijawab" />
+                <Legend className="bg-amber-300 ring-1 ring-inset ring-amber-500" label="Ragu-ragu" />
+                <Legend className="bg-white ring-1 ring-inset ring-slate-300 dark:bg-slate-900 dark:ring-slate-600" label="Kosong" />
+              </div>
+            </div>
+            <dl className="grid grid-cols-3 border-t border-slate-200 text-center dark:border-slate-800">
+              {[
+                ['Dijawab', answered],
+                ['Ragu', flagged],
+                ['Kosong', items.length - answered],
+              ].map(([label, n], i) => (
+                <div key={label} className={cx('px-2 py-3', i > 0 && 'border-l border-slate-200 dark:border-slate-800')}>
+                  <dd className="text-lg font-semibold tabular-nums text-slate-900 dark:text-white">{n}</dd>
+                  <dt className="text-[11px] text-slate-500 dark:text-slate-400">{label}</dt>
+                </div>
               ))}
-            </div>
-            <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-slate-500">
-              <Legend className="bg-blue-600" label="Terjawab" />
-              <Legend className="bg-amber-400" label="Ragu-ragu" />
-              <Legend className="border border-slate-300 bg-white dark:bg-slate-800" label="Kosong" />
-            </div>
+            </dl>
           </div>
           {view.sections.length > 1 && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs dark:border-slate-800 dark:bg-slate-900">
-              <h2 className="mb-2 font-bold">Bagian ujian</h2>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs shadow-xs dark:border-slate-800 dark:bg-slate-900">
+              <h2 className="mb-2.5 text-sm font-semibold text-slate-900 dark:text-white">Bagian ujian</h2>
               <ul className="space-y-1.5">
                 {[...view.sections]
                   .sort((a, b) => a.sort_order - b.sort_order)
                   .map((sec) => (
                     <li key={sec.id} className="flex items-center justify-between gap-2">
-                      <span className={sec.state === 'active' ? 'font-semibold text-blue-700 dark:text-blue-300' : 'text-slate-500'}>{sec.title}</span>
-                      <span className="text-[11px] text-slate-400">
-                        {sec.state === 'closed' ? 'selesai' : sec.state === 'pending' ? 'belum' : `${sec.item_count} soal`}
-                      </span>
+                      <span className={sec.state === 'active' ? 'font-medium text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}>{sec.title}</span>
+                      <Badge tone={sec.state === 'active' ? 'blue' : sec.state === 'closed' ? 'green' : 'slate'}>
+                        {sec.state === 'closed' ? 'Selesai' : sec.state === 'pending' ? 'Belum' : `${sec.item_count} soal`}
+                      </Badge>
                     </li>
                   ))}
               </ul>
             </div>
           )}
-          <Button variant="success" size="lg" className="w-full" disabled={readOnly} onClick={() => setSubmitOpen(true)} icon={<Send className="h-4 w-4" />}>
+          <Button size="lg" className="w-full" disabled={readOnly} onClick={() => setSubmitOpen(true)} icon={<Send className="h-4 w-4" />}>
             {sequential && !isLastSection ? 'Selesai bagian ini' : 'Kumpulkan ujian'}
           </Button>
+          {/* phones hide the logo in the header to keep the title readable; the institution shows here instead */}
+          <div className="flex justify-center pt-2 sm:hidden">
+            <BrandTitle tenant={tenant} />
+          </div>
         </aside>
       </div>
 
@@ -329,22 +353,22 @@ function ExamRoom({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
       )}
 
       {s.status === 'locked' && (
-        <Overlay icon={<Lock className="h-10 w-10 text-amber-500" />} title="Ujian dikunci pengawas">
+        <Overlay icon={<Lock className="h-5 w-5 text-amber-600" />} title="Ujian dikunci pengawas">
           Tunggu sampai pengawas membuka kembali. Jawaban Anda aman.
-          <Button variant="secondary" className="mt-4" icon={<RefreshCw className="h-4 w-4" />} onClick={() => void engine.sync()}>
+          <Button variant="secondary" className="mt-5" icon={<RefreshCw className="h-4 w-4" />} onClick={() => void engine.sync()}>
             Periksa lagi
           </Button>
         </Overlay>
       )}
       {s.expired && (
-        <Overlay icon={<CheckCircle2 className="h-10 w-10 text-emerald-500" />} title="Waktu habis">
+        <Overlay icon={<CheckCircle2 className="h-5 w-5 text-emerald-600" />} title="Waktu habis">
           {s.pending > 0 ? 'Mengirim jawaban terakhir… jangan tutup halaman ini.' : 'Jawaban Anda sudah tersimpan.'}
         </Overlay>
       )}
       {standard && !fullscreen && s.status === 'in_progress' && !s.expired && (
-        <Overlay icon={<Maximize2 className="h-10 w-10 text-blue-500" />} title="Ujian dikerjakan dalam layar penuh">
+        <Overlay icon={<Maximize2 className="h-5 w-5 text-blue-600" />} title="Ujian dikerjakan dalam layar penuh">
           Keluar dari layar penuh tercatat oleh pengawas.
-          <Button className="mt-4" size="lg" onClick={toggleFullscreen}>
+          <Button className="mt-5" size="lg" onClick={toggleFullscreen}>
             Masuk layar penuh
           </Button>
         </Overlay>
@@ -353,14 +377,48 @@ function ExamRoom({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
   );
 }
 
+type Prefs = { font: FontScale; contrast: boolean };
+
+function ViewTools({ prefs, setPrefs, fullscreen, onFullscreen }: { prefs: Prefs; setPrefs: (f: (p: Prefs) => Prefs) => void; fullscreen: boolean; onFullscreen: () => void }) {
+  const hc = prefs.contrast;
+  return (
+    <>
+      <div className="flex h-8 items-center rounded-lg border border-slate-200 bg-white p-0.5 shadow-xs dark:border-slate-700 dark:bg-slate-900" role="group" aria-label="Ukuran huruf">
+        {(['normal', 'large', 'xl'] as FontScale[]).map((f, i) => (
+          <button
+            key={f}
+            type="button"
+            aria-pressed={prefs.font === f}
+            onClick={() => setPrefs((p) => ({ ...p, font: f }))}
+            className={cx(
+              'h-full rounded-md px-2 text-xs font-medium',
+              prefs.font === f ? 'bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white',
+            )}
+            title={['Ukuran huruf normal', 'Huruf besar', 'Huruf sangat besar'][i]}
+          >
+            {['A', 'A+', 'A++'][i]}
+          </button>
+        ))}
+      </div>
+      <IconButton label="Kontras tinggi" aria-pressed={hc} onClick={() => setPrefs((p) => ({ ...p, contrast: !p.contrast }))}>
+        <Eye className="h-4 w-4" />
+      </IconButton>
+      <IconButton label={fullscreen ? 'Keluar layar penuh' : 'Layar penuh'} onClick={onFullscreen}>
+        {fullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+      </IconButton>
+    </>
+  );
+}
+
 function Legend({ className, label }: { className: string; label: string }) {
   return (
     <span className="flex items-center gap-1.5">
-      <span className={cx('h-3 w-3 rounded', className)} /> {label}
+      <span className={cx('h-3 w-3 rounded-sm', className)} /> {label}
     </span>
   );
 }
 
+// Status reads without colour too: filled = answered, outline = empty, corner mark = flagged.
 function NavCell({ item, current, answered, flagged, disabled, onClick }: { item: FlatItem; current: boolean; answered: boolean; flagged: boolean; disabled: boolean; onClick: () => void }) {
   return (
     <button
@@ -368,14 +426,20 @@ function NavCell({ item, current, answered, flagged, disabled, onClick }: { item
       onClick={onClick}
       disabled={disabled}
       aria-current={current ? 'step' : undefined}
+      aria-label={`Soal ${item.number}${answered ? ', dijawab' : ', kosong'}${flagged ? ', ragu-ragu' : ''}`}
       className={cx(
-        'relative h-9 rounded-lg text-xs font-bold transition-colors disabled:opacity-40',
-        flagged ? 'bg-amber-400 text-amber-950' : answered ? 'bg-blue-600 text-white' : 'border border-slate-300 bg-white text-slate-700 hover:border-blue-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200',
-        current && 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900',
+        'relative h-9 rounded-lg text-xs font-medium tabular-nums transition-colors disabled:opacity-40',
+        flagged
+          ? 'bg-amber-300 text-amber-950 ring-1 ring-inset ring-amber-500'
+          : answered
+            ? 'bg-blue-600 text-accent-fg hover:bg-blue-700'
+            : 'bg-white text-slate-700 ring-1 ring-inset ring-slate-300 hover:ring-slate-400 dark:bg-slate-900 dark:text-slate-200 dark:ring-slate-600',
+        current && 'outline-2 outline-offset-2 outline-slate-900 dark:outline-white',
       )}
     >
       {item.number}
-      {flagged && answered && <span className="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-blue-700" />}
+      {flagged && <span className="absolute right-0 top-0 h-0 w-0 border-l-[7px] border-t-[7px] border-l-transparent border-t-amber-700" />}
+      {flagged && answered && <span className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-amber-900" />}
     </button>
   );
 }
@@ -392,45 +456,61 @@ function Timer({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
     <div
       role="timer"
       aria-live="off"
+      aria-label="Sisa waktu"
       className={cx(
-        'flex items-center gap-2 rounded-lg border px-3 py-1.5 font-mono text-sm font-semibold',
-        critical ? 'animate-pulse border-red-300 bg-red-50 text-red-600 dark:border-red-800 dark:bg-red-950/40 dark:text-red-400' : 'border-slate-200 bg-slate-100 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200',
+        'flex h-10 items-center gap-2 rounded-lg px-2.5 tabular-nums sm:px-3',
+        critical ? 'bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:ring-rose-900' : 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white',
       )}
     >
-      <span className="hidden font-sans text-[11px] font-medium text-slate-500 sm:inline">Sisa waktu</span>
-      {formatClock(left)}
+      <Clock className={cx('hidden h-4 w-4 sm:block', critical ? 'text-rose-500' : 'text-slate-400')} />
+      <span className="text-lg font-semibold tracking-tight">{formatClock(left)}</span>
     </div>
   );
 }
 
+const clock = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+/** SyncBadge always pairs the claim with its evidence: last server sync and the local queue. */
 function SyncBadge({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
   const offline = !s.online;
   const pending = s.pending > 0;
+  const at = s.lastSyncAt ? clock.format(s.lastSyncAt) : null;
+  const label = offline ? 'Offline' : pending ? 'Menyimpan' : 'Tersimpan';
+  const detail = offline || pending || !at ? `${s.pending} antre` : at;
   return (
     <button
       type="button"
       onClick={() => void engine.sync()}
-      title={offline ? 'Tidak terhubung — jawaban disimpan di perangkat' : pending ? 'Mengirim jawaban…' : 'Semua jawaban tersimpan di server'}
+      title={offline ? 'Tidak terhubung. Jawaban aman di perangkat dan dikirim saat koneksi kembali.' : pending ? 'Mengirim jawaban ke server…' : 'Semua jawaban tersimpan di server. Klik untuk sinkron ulang.'}
       className={cx(
-        'flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium',
-        offline || pending
-          ? 'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300'
-          : 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300',
+        'flex h-8 items-center gap-2 rounded-full px-3 text-xs font-medium ring-1 ring-inset',
+        offline
+          ? 'bg-amber-50 text-amber-900 ring-amber-300 dark:bg-amber-950/50 dark:text-amber-200 dark:ring-amber-800'
+          : pending
+            ? 'bg-slate-50 text-slate-700 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700'
+            : 'bg-emerald-50 text-emerald-800 ring-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-emerald-900',
       )}
     >
-      {offline ? <CloudOff className="h-3.5 w-3.5" /> : pending ? <RefreshCw className={cx('h-3.5 w-3.5', s.syncing && 'animate-spin')} /> : <CheckCircle2 className="h-3.5 w-3.5" />}
-      <span className="hidden sm:inline">{offline ? `Offline · ${s.pending} antre` : pending ? `${s.pending} antre` : 'Tersimpan'}</span>
+      {offline ? (
+        <CloudOff className="h-3.5 w-3.5" />
+      ) : pending ? (
+        <RefreshCw className={cx('h-3.5 w-3.5', s.syncing && 'animate-spin')} />
+      ) : (
+        <span className="h-2 w-2 rounded-full bg-emerald-500" />
+      )}
+      <span className="sr-only sm:not-sr-only">{label}</span>
+      {detail && <span className="tabular-nums sm:opacity-70">{detail}</span>}
     </button>
   );
 }
 
 function Overlay({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
-      <div className="flex max-w-sm flex-col items-center rounded-3xl bg-white p-8 text-center shadow-2xl dark:bg-slate-900">
-        {icon}
-        <h2 className="mt-3 text-lg font-extrabold text-slate-900 dark:text-white">{title}</h2>
-        <div className="mt-1 flex flex-col items-center text-xs text-slate-600 dark:text-slate-300">{children}</div>
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/60 p-4">
+      <div role="alertdialog" aria-label={title} className="flex w-full max-w-sm flex-col items-center rounded-2xl border border-slate-200 bg-white px-6 py-8 text-center shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+        <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">{icon}</span>
+        <h2 className="mt-4 text-base font-semibold text-slate-900 dark:text-white">{title}</h2>
+        <div className="mt-1.5 flex flex-col items-center text-xs text-slate-600 dark:text-slate-300">{children}</div>
       </div>
     </div>
   );
@@ -442,10 +522,10 @@ const letter = (i: number) => String.fromCharCode(65 + i);
 function AnswerInput({ item, value, disabled, font, onChange }: { item: ItemView; value: Response | null; disabled: boolean; font: string; onChange: (r: Response | null) => void }) {
   const optionClass = (on: boolean) =>
     cx(
-      'flex w-full items-start gap-3 rounded-xl border p-3.5 text-left transition-all disabled:cursor-not-allowed',
+      'flex w-full max-w-[72ch] items-start gap-3.5 rounded-xl border px-4 py-3 text-left transition-colors disabled:cursor-not-allowed',
       on
-        ? 'border-blue-500 bg-blue-50 text-blue-950 ring-1 ring-blue-500 dark:bg-blue-950/40 dark:text-blue-100'
-        : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-700',
+        ? 'border-blue-600 bg-blue-50 text-slate-900 ring-1 ring-inset ring-blue-600 dark:border-blue-400 dark:bg-blue-950/50 dark:text-white dark:ring-blue-400'
+        : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800/60',
     );
 
   switch (item.type) {
@@ -457,7 +537,12 @@ function AnswerInput({ item, value, disabled, font, onChange }: { item: ItemView
             const on = sel === o.id;
             return (
               <button key={o.id} type="button" role="radio" aria-checked={on} disabled={disabled} className={optionClass(on)} onClick={() => onChange(on ? null : { selected: o.id })}>
-                <span className={cx('flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold', on ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400')}>
+                <span
+                  className={cx(
+                    'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold',
+                    on ? 'bg-blue-600 text-accent-fg' : 'text-slate-600 ring-1 ring-inset ring-slate-300 dark:text-slate-300 dark:ring-slate-600',
+                  )}
+                >
                   {letter(i)}
                 </span>
                 <RichContent html={o.body} className={cx('flex-1 pt-0.5', font)} />
@@ -471,7 +556,7 @@ function AnswerInput({ item, value, disabled, font, onChange }: { item: ItemView
       const sel = value && 'selected' in value && Array.isArray(value.selected) ? value.selected : [];
       return (
         <div className="space-y-2.5">
-          <p className="text-xs italic text-slate-500">Pilih satu atau lebih jawaban yang benar.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Pilih satu atau lebih jawaban yang benar.</p>
           {item.options?.map((o, i) => {
             const on = sel.includes(o.id);
             return (
@@ -487,8 +572,13 @@ function AnswerInput({ item, value, disabled, font, onChange }: { item: ItemView
                   onChange(next.length ? { selected: next } : null);
                 }}
               >
-                <span className={cx('flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-xs font-bold', on ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300 bg-slate-100 text-slate-500 dark:border-slate-700 dark:bg-slate-800')}>
-                  {on ? '✓' : letter(i)}
+                <span
+                  className={cx(
+                    'flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-xs font-semibold',
+                    on ? 'bg-blue-600 text-accent-fg' : 'text-slate-600 ring-1 ring-inset ring-slate-300 dark:text-slate-300 dark:ring-slate-600',
+                  )}
+                >
+                  {on ? <Check className="h-4 w-4" /> : letter(i)}
                 </span>
                 <RichContent html={o.body} className={cx('flex-1 pt-0.5', font)} />
               </button>
@@ -500,19 +590,21 @@ function AnswerInput({ item, value, disabled, font, onChange }: { item: ItemView
     case 'true_false': {
       const v = value && 'value' in value ? value.value : undefined;
       return (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid max-w-md grid-cols-2 gap-3" role="radiogroup">
           {[
-            { val: true, label: 'Benar', on: 'border-emerald-600 bg-emerald-600 text-white' },
-            { val: false, label: 'Salah', on: 'border-rose-600 bg-rose-600 text-white' },
+            { val: true, label: 'Benar', on: 'border-blue-600 bg-blue-50 text-slate-900 ring-1 ring-inset ring-blue-600 dark:bg-blue-950/50 dark:text-white' },
+            { val: false, label: 'Salah', on: 'border-blue-600 bg-blue-50 text-slate-900 ring-1 ring-inset ring-blue-600 dark:bg-blue-950/50 dark:text-white' },
           ].map((b) => (
             <button
               key={b.label}
               type="button"
+              role="radio"
+              aria-checked={v === b.val}
               disabled={disabled}
               onClick={() => onChange(v === b.val ? null : { value: b.val })}
               className={cx(
-                'rounded-xl border py-4 text-sm font-bold transition-colors',
-                v === b.val ? b.on : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200',
+                'rounded-xl border py-3.5 text-sm font-medium transition-colors',
+                v === b.val ? b.on : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/60',
               )}
             >
               {b.label}
@@ -567,7 +659,7 @@ function TextAnswer({
   };
   const words = text.trim() ? text.trim().split(/\s+/).length : 0;
   const cls = cx(
-    'w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-slate-700 dark:bg-slate-900 dark:text-white',
+    'w-full max-w-[72ch] rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-slate-900 shadow-xs placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-3 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white',
     font,
   );
   return (
@@ -587,7 +679,7 @@ function TextAnswer({
         />
       )}
       {multiline && (
-        <p className={cx('text-right text-[11px]', maxWords && words > maxWords ? 'font-semibold text-rose-600' : 'text-slate-500')}>
+        <p className={cx('max-w-[72ch] text-right text-[11px] tabular-nums', maxWords && words > maxWords ? 'font-medium text-rose-600' : 'text-slate-500')}>
           {words} kata{maxWords ? ` / maks. ${maxWords}` : ''}
         </p>
       )}
@@ -644,27 +736,25 @@ function SubmitDialog({
           <Button variant="secondary" onClick={onClose}>
             Periksa lagi
           </Button>
-          <Button variant="success" loading={busy} onClick={() => void confirm()}>
+          <Button loading={busy} onClick={() => void confirm()}>
             {sectionOnly ? 'Ya, lanjut ke bagian berikutnya' : 'Ya, kumpulkan'}
           </Button>
         </>
       }
     >
       <div className="space-y-3 text-xs">
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="rounded-xl bg-blue-50 p-3 dark:bg-blue-950/40">
-            <p className="text-xl font-extrabold text-blue-700 dark:text-blue-300">{answered}</p>
-            <p className="text-slate-500">Terjawab</p>
-          </div>
-          <div className="rounded-xl bg-amber-50 p-3 dark:bg-amber-950/40">
-            <p className="text-xl font-extrabold text-amber-700 dark:text-amber-300">{flagged}</p>
-            <p className="text-slate-500">Ragu-ragu</p>
-          </div>
-          <div className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
-            <p className="text-xl font-extrabold text-slate-700 dark:text-slate-200">{empty}</p>
-            <p className="text-slate-500">Kosong</p>
-          </div>
-        </div>
+        <dl className="grid grid-cols-3 rounded-xl border border-slate-200 text-center dark:border-slate-700">
+          {[
+            ['Dijawab', answered, 'text-slate-900 dark:text-white'],
+            ['Ragu-ragu', flagged, flagged ? 'text-amber-700 dark:text-amber-300' : 'text-slate-900 dark:text-white'],
+            ['Kosong', empty, empty ? 'text-rose-700 dark:text-rose-300' : 'text-slate-900 dark:text-white'],
+          ].map(([label, n, tone], i) => (
+            <div key={label as string} className={cx('px-2 py-3', i > 0 && 'border-l border-slate-200 dark:border-slate-700')}>
+              <dd className={cx('text-xl font-semibold tabular-nums', tone as string)}>{n}</dd>
+              <dt className="text-[11px] text-slate-500 dark:text-slate-400">{label}</dt>
+            </div>
+          ))}
+        </dl>
         {sectionOnly ? (
           <p className="text-slate-600 dark:text-slate-300">Setelah lanjut, bagian ini tidak bisa dibuka lagi.</p>
         ) : (

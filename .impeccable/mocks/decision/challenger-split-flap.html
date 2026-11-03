@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><title>Papan Keberangkatan</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;600;700&family=Barlow:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+body{width:1440px;height:900px;overflow:hidden;background:#121314;color:#f2f2ee;font-family:'Barlow',sans-serif}
+.top{height:76px;display:flex;align-items:center;gap:6px;padding:0 28px;background:#1d1f21;border-bottom:3px solid #8b9196}
+.cell{background:#0b0c0d;border:1px solid #2a2d30;padding:6px 10px;font-family:'Barlow Semi Condensed';font-weight:700;font-size:22px;letter-spacing:.06em;text-transform:uppercase;position:relative}
+.cell::after{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:#000}
+.lab{font-size:10px;color:#8b9196;letter-spacing:.14em;text-transform:uppercase;margin:0 6px 0 14px}
+.sp{flex:1}
+.amber{color:#f2a900}
+main{display:grid;grid-template-columns:330px 1fr;height:824px}
+aside{background:#17191b;border-right:1px solid #2a2d30;padding:20px}
+.h{font-size:11px;letter-spacing:.14em;color:#8b9196;text-transform:uppercase;margin-bottom:12px}
+.g{display:grid;grid-template-columns:repeat(5,52px);gap:5px}
+.g span{height:42px;background:#0b0c0d;border:1px solid #2a2d30;display:grid;place-items:center;font-family:'Barlow Semi Condensed';font-weight:700;font-size:18px;color:#6c7277;position:relative}
+.g span::after{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:#000}
+.g .a{color:#f2f2ee}.g .f{color:#f2a900;border-color:#f2a90066}.g .c{outline:2px solid #f2f2ee}
+.q{padding:40px 64px;position:relative;background:#1a1c1e}
+.qn{font-family:'Barlow Semi Condensed';font-size:15px;letter-spacing:.12em;color:#8b9196;text-transform:uppercase;margin-bottom:14px}
+.qn b{color:#f2f2ee;font-size:32px;margin-right:12px}
+.stem{font-size:20px;line-height:1.6;max-width:780px;margin-bottom:28px;color:#e8e8e4}
+.opt{display:flex;gap:16px;align-items:center;max-width:780px;padding:14px 16px;background:#121314;border:1px solid #2a2d30;margin-bottom:8px;font-size:18px}
+.opt .k{width:36px;height:36px;background:#0b0c0d;border:1px solid #3a3e42;display:grid;place-items:center;font-family:'Barlow Semi Condensed';font-weight:700}
+.opt.sel{border-color:#f2f2ee}.opt.sel .k{background:#f2f2ee;color:#121314}
+.bar{position:absolute;left:64px;right:64px;bottom:30px;display:flex;gap:10px}
+.btn{padding:12px 22px;font-family:'Barlow Semi Condensed';font-weight:700;font-size:16px;letter-spacing:.08em;text-transform:uppercase;border:1px solid #3a3e42;background:#121314;color:#f2f2ee}
+.btn.p{background:#f2f2ee;color:#121314}.btn.f{color:#f2a900;border-color:#f2a900}
+</style></head><body>
+<div class="top">
+  <span class="cell">SMAN 3 YOGYAKARTA</span>
+  <span class="lab">Ujian</span><span class="cell">MTK WAJIB XI</span>
+  <span class="lab">Ruang</span><span class="cell">LAB 2</span>
+  <span class="sp"></span>
+  <span class="lab">Status</span><span class="cell" style="color:#7fd17a">TERSIMPAN 10.42</span>
+  <span class="lab">Sisa</span><span class="cell amber">01</span><span class="cell amber">12</span><span class="cell amber">45</span>
+</div>
+<main>
+<aside>
+  <div class="h">Nomor soal · 18 / 40</div>
+  <div class="g">
+    <span class="a">1</span><span class="a">2</span><span class="a">3</span><span class="f">4</span><span class="a">5</span>
+    <span class="a">6</span><span class="a">7</span><span class="a">8</span><span class="a">9</span><span class="a">10</span>
+    <span class="a">11</span><span class="f">12</span><span class="a">13</span><span class="a">14</span><span class="a">15</span>
+    <span class="a">16</span><span class="a">17</span><span class="a">18</span><span class="c a">19</span><span>20</span>
+    <span>21</span><span>22</span><span>23</span><span>24</span><span>25</span>
+    <span>26</span><span>27</span><span>28</span><span>29</span><span>30</span>
+    <span>31</span><span>32</span><span>33</span><span>34</span><span>35</span>
+    <span>36</span><span>37</span><span>38</span><span>39</span><span>40</span>
+  </div>
+</aside>
+<section class="q">
+  <div class="qn"><b>19</b>Pilihan ganda · 2 poin</div>
+  <p class="stem">Diketahui fungsi f(x) = 2x² − 8x + 5. Nilai minimum fungsi tersebut dicapai pada x = …, dan nilai minimumnya adalah …</p>
+  <div class="opt"><span class="k">A</span>x = 1, nilai minimum −1</div>
+  <div class="opt sel"><span class="k">B</span>x = 2, nilai minimum −3</div>
+  <div class="opt"><span class="k">C</span>x = 2, nilai minimum 3</div>
+  <div class="opt"><span class="k">D</span>x = 4, nilai minimum 5</div>
+  <div class="opt"><span class="k">E</span>x = −2, nilai minimum 29</div>
+  <div class="bar"><span class="btn">← Sebelumnya</span><span class="btn f">Ragu (F)</span><span style="flex:1"></span><span class="btn p">Berikutnya →</span></div>
+</section>
+</main>
+</body></html>
+

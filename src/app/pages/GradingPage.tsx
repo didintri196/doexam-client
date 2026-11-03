@@ -34,7 +34,7 @@ export function ExamChooser({ title, subtitle, to }: { title: string; subtitle: 
             {items.map((e) => (
               <Link key={e.id} to={to(e.id)} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 hover:border-blue-300 dark:border-slate-800 dark:bg-slate-900">
                 <div>
-                  <p className="text-sm font-bold text-slate-900 dark:text-white">{e.title}</p>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white">{e.title}</p>
                   <p className="text-[11px] text-slate-500">Terbit {formatDateTime(e.published_at)}</p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -66,7 +66,7 @@ export function GradingPage() {
         title={exam.data.title}
         subtitle="Koreksi & regrade"
         back={
-          <Link to="/grading" className="mb-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline">
+          <Link to="/grading" className="mb-2 inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
             <ArrowLeft className="h-3.5 w-3.5" /> Pilih ujian
           </Link>
         }
@@ -168,7 +168,7 @@ function QueueRow({ row, index, active, onClick }: { row: GradingQueueRow; index
     <button
       type="button"
       onClick={onClick}
-      className={cx('flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-xs', active ? 'bg-blue-600 text-white' : 'hover:bg-slate-50 dark:hover:bg-slate-800')}
+      className={cx('flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-xs', active ? 'bg-blue-600 text-accent-fg' : 'hover:bg-slate-50 dark:hover:bg-slate-800')}
     >
       <span className="flex items-center gap-1.5">
         {row.full_name ? row.full_name : (
@@ -439,7 +439,7 @@ function AdjustmentForm({ exam, onClose }: { exam: Exam; onClose: () => void }) 
                       checked={key.includes(o.id)}
                       onChange={() => setKey(picked.type === 'mcq_single' ? [o.id] : key.includes(o.id) ? key.filter((k) => k !== o.id) : [...key, o.id])}
                     />
-                    <span className="font-bold">{String.fromCharCode(65 + i)}.</span>
+                    <span className="font-semibold">{String.fromCharCode(65 + i)}.</span>
                     <RichContent html={o.body} />
                   </label>
                 ))}

@@ -83,7 +83,7 @@ export function SessionsPage() {
                     <Badge tone={sessionTone[s.status]}>{labels.sessionStatus[s.status]}</Badge>
                   </td>
                   <td className={`${td} text-right`}>
-                    <Link to={`/sessions/${s.id}/monitor`} className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline">
+                    <Link to={`/sessions/${s.id}/monitor`} className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
                       <MonitorPlay className="h-3.5 w-3.5" /> Monitor
                     </Link>
                   </td>

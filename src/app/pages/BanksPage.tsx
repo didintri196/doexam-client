@@ -12,7 +12,7 @@ import { useAction, usePaging } from '../components/hooks';
 import { SearchInput, SubjectSelect, useDebounced, UserPicker, useSubjects } from '../components/pickers';
 import { orderCompetencies, useCompetencies } from './SubjectsPage';
 
-const accessTone = { owner: 'purple', editor: 'blue', viewer: 'slate' } as const;
+const accessTone = { owner: 'blue', editor: 'blue', viewer: 'slate' } as const;
 
 export function BanksPage() {
   const { page, setPage, filters, setFilter, query } = usePaging({ q: '', subject_id: '' });
@@ -49,12 +49,12 @@ export function BanksPage() {
             {list.data.items.map((b) => (
               <Link key={b.id} to={`/banks/${b.id}`} className="rounded-2xl border border-slate-200 bg-white p-4 transition-colors hover:border-blue-300 dark:border-slate-800 dark:bg-slate-900">
                 <div className="flex items-start justify-between gap-2">
-                  <p className="text-sm font-bold text-slate-900 dark:text-white">{b.name}</p>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white">{b.name}</p>
                   <Badge tone={accessTone[b.my_access]}>{labels.access[b.my_access]}</Badge>
                 </div>
                 <p className="mt-0.5 text-xs text-slate-500">{subjectName(b.subject_id)}</p>
                 {b.description && <p className="mt-2 line-clamp-2 text-xs text-slate-600 dark:text-slate-300">{b.description}</p>}
-                <p className="mt-3 text-[11px] font-semibold text-blue-600">{b.item_count} soal</p>
+                <p className="mt-3 text-xs tabular-nums text-slate-500 dark:text-slate-400">{b.item_count} soal</p>
               </Link>
             ))}
           </div>
@@ -133,7 +133,7 @@ export function BankDetailPage() {
         title={b.name}
         subtitle={b.description ?? undefined}
         back={
-          <Link to="/banks" className="mb-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline">
+          <Link to="/banks" className="mb-2 inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
             <ArrowLeft className="h-3.5 w-3.5" /> Bank soal
           </Link>
         }

@@ -1,10 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, ArrowLeft, Clock, FileBarChart, Lock, MoreVertical, MonitorSmartphone, Send, Tv2, Unlock } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Clock, FileBarChart, Lock, MoreHorizontal, MonitorSmartphone, Send, Tv2, Unlock } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import type { MonitorRow, Session } from '@/shared/api/types';
 import { formatClock, labels } from '@/shared/lib/format';
-import { Alert, Badge, Button, ConfirmDialog, cx, Field, Input, Loading, Modal, PageHeader, Select, Stat, Table, td, th } from '@/shared/ui';
+import { Alert, Badge, Button, ConfirmDialog, cx, Field, Input, Loading, Modal, PageHeader, Table, td, th } from '@/shared/ui';
 import { attemptApi, sessionApi } from '../api';
 import { useAction } from '../components/hooks';
 import { SearchInput } from '../components/pickers';
@@ -45,17 +45,22 @@ export function MonitorPage() {
   return (
     <>
       <PageHeader
-        title={`Monitor — ${s.name}`}
+        title={`Monitor · ${s.name}`}
         subtitle={
           <span className="flex flex-wrap items-center gap-2">
             <Badge tone={sessionTone[s.status]}>{labels.sessionStatus[s.status]}</Badge>
             {s.exam.title}
             {s.room && ` · ${s.room}`}
-            {monitor.isFetching && <span className="text-[10px] text-slate-400">memperbarui…</span>}
+            {m && (
+              <span className="inline-flex items-center gap-1.5 text-[11px] tabular-nums text-slate-500">
+                <span className={cx('h-1.5 w-1.5 rounded-full', monitor.error ? 'bg-rose-500' : 'bg-emerald-500')} />
+                Diperbarui {new Date(monitor.dataUpdatedAt).toLocaleTimeString('id-ID')}
+              </span>
+            )}
           </span>
         }
         back={
-          <Link to={`/sessions/${id}`} className="mb-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline">
+          <Link to={`/sessions/${id}`} className="mb-2 inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
             <ArrowLeft className="h-3.5 w-3.5" /> Detail sesi
           </Link>
         }
@@ -73,23 +78,37 @@ export function MonitorPage() {
         }
       />
       {s.status === 'scheduled' && <Alert tone="amber" className="mb-4">Sesi belum dibuka. Peserta belum bisa mulai sampai sesi dibuka di halaman detail sesi.</Alert>}
-      <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
-        <Stat label="Belum mulai" value={c.not_started ?? 0} />
-        <Stat label="Mengerjakan" value={c.in_progress ?? 0} tone="blue" />
-        <Stat label="Dikunci" value={c.locked ?? 0} tone="amber" />
-        <Stat label="Dikumpulkan" value={(c.submitted ?? 0) + (c.graded ?? 0)} tone="green" />
-        <Stat label="Perlu perhatian" value={(m?.rows ?? []).filter((r) => r.violations > 0 || isIdle(r, serverNow)).length} tone="red" />
-      </div>
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div role="tablist" aria-label="Saring status" className="flex flex-wrap gap-1.5">
+          {[
+            { v: '', label: 'Semua', n: m?.rows.length ?? 0, dot: '' },
+            { v: 'not_started', label: 'Belum mulai', n: c.not_started ?? 0, dot: 'bg-slate-400' },
+            { v: 'in_progress', label: 'Mengerjakan', n: c.in_progress ?? 0, dot: 'bg-blue-600' },
+            { v: 'locked', label: 'Dikunci', n: c.locked ?? 0, dot: 'bg-amber-500' },
+            { v: 'submitted', label: 'Dikumpulkan', n: (c.submitted ?? 0) + (c.graded ?? 0), dot: 'bg-emerald-500' },
+            { v: 'attention', label: 'Perlu perhatian', n: (m?.rows ?? []).filter((r) => r.violations > 0 || isIdle(r, serverNow)).length, dot: 'bg-rose-500' },
+          ].map((f) => (
+            <button
+              key={f.v}
+              type="button"
+              role="tab"
+              aria-selected={filter === f.v}
+              onClick={() => setFilter(f.v)}
+              className={cx(
+                'inline-flex h-8 items-center gap-2 rounded-lg border px-3 text-xs font-medium transition-colors',
+                filter === f.v
+                  ? 'border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900'
+                  : 'border-slate-200 bg-white text-slate-700 shadow-xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800',
+                f.v === 'attention' && f.n > 0 && filter !== f.v && 'border-rose-200 text-rose-700 dark:border-rose-900 dark:text-rose-300',
+              )}
+            >
+              {f.dot && <span className={cx('h-2 w-2 rounded-full', f.dot)} />}
+              {f.label}
+              <span className={cx('tabular-nums', filter === f.v ? 'opacity-70' : 'text-slate-500 dark:text-slate-400')}>{f.n}</span>
+            </button>
+          ))}
+        </div>
         <SearchInput value={q} onChange={setQ} placeholder="Cari nama, username, kursi…" />
-        <Select className="w-auto" value={filter} onChange={(e) => setFilter(e.target.value)}>
-          <option value="">Semua</option>
-          <option value="not_started">Belum mulai</option>
-          <option value="in_progress">Mengerjakan</option>
-          <option value="locked">Dikunci</option>
-          <option value="submitted">Dikumpulkan</option>
-          <option value="attention">Perlu perhatian</option>
-        </Select>
       </div>
       {monitor.error && <Alert className="mb-4">Gagal memuat monitor. Mencoba lagi…</Alert>}
       <Table>
@@ -132,10 +151,10 @@ function MiniToken({ session }: { session: Session }) {
   const { token, left, enabled } = useToken(session);
   if (!enabled || !token.data) return null;
   return (
-    <div className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 dark:border-blue-900 dark:bg-blue-950/40">
-      <span className="text-[11px] text-slate-500">Token</span>
-      <span className="font-mono text-lg font-extrabold tracking-[0.25em] text-blue-700 dark:text-blue-300">{token.data.code}</span>
-      <span className="font-mono text-[11px] text-slate-500">{formatClock(left)}</span>
+    <div className="flex h-8 items-center gap-2.5 rounded-lg border border-slate-200 bg-white pl-3 pr-2.5 shadow-xs dark:border-slate-700 dark:bg-slate-900">
+      <span className="text-xs text-slate-500 dark:text-slate-400">Token</span>
+      <span className="font-mono text-sm font-semibold tracking-[0.2em] text-slate-900 dark:text-white">{token.data.code}</span>
+      <span className="text-[11px] tabular-nums text-slate-500">{formatClock(left)}</span>
     </div>
   );
 }
@@ -184,15 +203,15 @@ function Row({ row: r, serverNow, sessionId }: { row: MonitorRow; serverNow: num
     submit: 'Jawaban peserta dikumpulkan sekarang dan dinilai. Tidak bisa dibatalkan.',
   };
   return (
-    <tr className={cx(idle || r.violations > 2 ? 'bg-rose-50/60 dark:bg-rose-950/20' : '')}>
-      <td className={`${td} font-mono`}>{r.seat ?? '—'}</td>
+    <tr className={cx(idle || r.violations > 2 ? 'bg-rose-50/70 dark:bg-rose-950/25' : '')}>
+      <td className={`${td} tabular-nums text-slate-500`}>{r.seat ?? '—'}</td>
       <td className={td}>
-        <p className="font-semibold text-slate-900 dark:text-white">{r.full_name}</p>
-        <p className="font-mono text-[11px] text-slate-500">{r.username}</p>
+        <p className="font-medium text-slate-900 dark:text-white">{r.full_name}</p>
+        <p className="text-[11px] text-slate-500 dark:text-slate-400">{r.username}</p>
       </td>
       <td className={td}>
         {r.status ? <Badge tone={statusTone[r.status]}>{labels.attemptStatus[r.status]}</Badge> : <Badge>{labels.attendance[r.attendance] ?? 'Belum mulai'}</Badge>}
-        {r.final_score !== null && <span className="ml-2 font-mono text-[11px] text-slate-500">{r.final_score}</span>}
+        {r.final_score !== null && <span className="ml-2 text-[11px] tabular-nums text-slate-500">{r.final_score}</span>}
       </td>
       <td className={td}>
         {r.status ? (
@@ -200,7 +219,7 @@ function Row({ row: r, serverNow, sessionId }: { row: MonitorRow; serverNow: num
             <div className="h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
               <div className="h-full rounded-full bg-blue-600" style={{ width: `${pct}%` }} />
             </div>
-            <p className="mt-0.5 text-[11px] text-slate-500">
+            <p className="mt-1 text-[11px] tabular-nums text-slate-500">
               {r.answered}/{r.item_count}
             </p>
           </div>
@@ -208,9 +227,9 @@ function Row({ row: r, serverNow, sessionId }: { row: MonitorRow; serverNow: num
           '—'
         )}
       </td>
-      <td className={`${td} font-mono`}>{left === null ? '—' : formatClock(left)}</td>
+      <td className={`${td} tabular-nums`}>{left === null ? '—' : formatClock(left)}</td>
       <td className={td}>
-        <span className={idle ? 'font-semibold text-rose-600' : ''}>{ago(r.last_seen_at, serverNow)}</span>
+        <span className={idle ? 'font-medium text-rose-700 dark:text-rose-400' : 'text-slate-500'}>{ago(r.last_seen_at, serverNow)}</span>
       </td>
       <td className={td}>
         {r.violations > 0 ? (
@@ -224,17 +243,28 @@ function Row({ row: r, serverNow, sessionId }: { row: MonitorRow; serverNow: num
       <td className={`${td} text-right`}>
         <div className="relative inline-flex items-center gap-1">
           {r.attempt_id && (r.status === 'submitted' || r.status === 'graded') && can(Perm.ReportRead, Perm.TenantManage, Perm.GradeWrite) && (
-            <Link to={`/reports/attempts/${r.attempt_id}`} title="Laporan peserta" className="rounded-lg border border-slate-200 p-1.5 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300">
-              <FileBarChart className="h-3.5 w-3.5" />
+            <Link
+              to={`/reports/attempts/${r.attempt_id}`}
+              title="Laporan peserta"
+              aria-label="Laporan peserta"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
+            >
+              <FileBarChart className="h-4 w-4" />
             </Link>
           )}
           {shown.length > 0 && (
-            <button type="button" onClick={() => setMenu((x) => !x)} className="rounded-lg border border-slate-200 p-1.5 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300" aria-label="Tindakan">
-              <MoreVertical className="h-3.5 w-3.5" />
+            <button
+              type="button"
+              aria-expanded={menu}
+              onClick={() => setMenu((x) => !x)}
+              className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
+              aria-label="Tindakan"
+            >
+              <MoreHorizontal className="h-4 w-4" />
             </button>
           )}
           {menu && (
-            <div className="absolute right-0 top-8 z-20 w-44 rounded-xl border border-slate-200 bg-white p-1 text-left shadow-lg dark:border-slate-700 dark:bg-slate-800" onMouseLeave={() => setMenu(false)}>
+            <div className="absolute right-0 top-8 z-20 w-48 rounded-xl border border-slate-200 bg-white p-1 text-left shadow-lg dark:border-slate-700 dark:bg-slate-800" onMouseLeave={() => setMenu(false)}>
               {shown.map((a) => (
                 <button
                   key={a.k}
@@ -243,7 +273,10 @@ function Row({ row: r, serverNow, sessionId }: { row: MonitorRow; serverNow: num
                     setMenu(false);
                     setAction(a.k);
                   }}
-                  className={cx('flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-700', a.k === 'submit' && 'text-rose-600')}
+                  className={cx(
+                    'flex h-8 w-full items-center gap-2 rounded-lg px-2.5 text-xs hover:bg-slate-100 dark:hover:bg-slate-700',
+                    a.k === 'submit' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-200',
+                  )}
                 >
                   {a.icon} {a.label}
                 </button>

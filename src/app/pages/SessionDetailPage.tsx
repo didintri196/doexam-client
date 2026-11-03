@@ -70,7 +70,7 @@ export function SessionDetailPage() {
           </span>
         }
         back={
-          <Link to="/sessions" className="mb-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline">
+          <Link to="/sessions" className="mb-2 inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
             <ArrowLeft className="h-3.5 w-3.5" /> Sesi ujian
           </Link>
         }
@@ -113,7 +113,7 @@ export function SessionDetailPage() {
           {s.groups.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1">
               {s.groups.map((g) => (
-                <Badge key={g.id} tone="purple">
+                <Badge key={g.id} tone="blue">
                   {g.name}
                 </Badge>
               ))}
@@ -147,7 +147,7 @@ export function SessionDetailPage() {
 function MiniStat({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-xl bg-slate-50 p-3 text-center dark:bg-slate-800/60">
-      <p className="text-lg font-extrabold text-slate-900 dark:text-white">{value}</p>
+      <p className="text-lg font-semibold text-slate-900 dark:text-white">{value}</p>
       <p className="text-[11px] text-slate-500">{label}</p>
     </div>
   );
@@ -203,7 +203,7 @@ function TokenCard({ session }: { session: Session }) {
         <p className="text-xs text-slate-500">Token tidak aktif.</p>
       ) : token.data ? (
         <div className="text-center">
-          <p className="font-mono text-4xl font-extrabold tracking-[0.3em] text-blue-600">{token.data.code}</p>
+          <p className="font-mono text-4xl font-semibold tracking-[0.3em] text-blue-600">{token.data.code}</p>
           <p className="mt-1 text-[11px] text-slate-500">berganti dalam {formatClock(left)} · tiap {token.data.rotation_minutes} menit</p>
         </div>
       ) : (
@@ -332,7 +332,7 @@ function Participants({ session, canManage }: { session: Session; canManage: boo
                     )}
                   </td>
                   <td className={td}>{p.seat ?? '—'}</td>
-                  <td className={td}>{p.extra_time_minutes ? <Badge tone="purple">+{p.extra_time_minutes} mnt</Badge> : '—'}</td>
+                  <td className={td}>{p.extra_time_minutes ? <Badge tone="blue">+{p.extra_time_minutes} mnt</Badge> : '—'}</td>
                   <td className={`${td} max-w-48 truncate`}>{p.notes ?? '—'}</td>
                   <td className={`${td} text-right`}>
                     {editable && (

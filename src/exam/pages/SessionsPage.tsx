@@ -57,30 +57,30 @@ export function SessionsPage() {
         <Alert>{errorMessage(sessions.error)}</Alert>
       ) : list.length === 0 ? (
         <Card>
-          <EmptyState icon={<CalendarClock className="h-10 w-10" />} title="Belum ada jadwal ujian">
+          <EmptyState icon={<CalendarClock />} title="Belum ada jadwal ujian">
             Jadwal muncul di sini setelah Anda didaftarkan ke sesi ujian.
           </EmptyState>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
+        <ul className="divide-y divide-slate-200 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900">
           {list.map((s) => {
             const open = s.status === 'open';
             const minutes = (s.total_minutes ?? 0) + s.extra_time_minutes;
             return (
-              <div key={s.session_id} className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-                <div className="space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <h2 className="text-sm font-bold text-slate-900 dark:text-white">{s.exam_title}</h2>
+              <li key={s.session_id} className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{s.exam_title}</h2>
                     <Badge tone={statusTone[s.status]}>{labels.sessionStatus[s.status]}</Badge>
                   </div>
-                  <p className="text-xs text-slate-500">{s.name}</p>
-                  <div className="grid grid-cols-2 gap-2 pt-1 text-[11px] text-slate-600 dark:text-slate-300">
+                  <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{s.name}</p>
+                  <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1.5 text-xs tabular-nums text-slate-600 dark:text-slate-300">
                     <span className="flex items-center gap-1.5">
                       <CalendarClock className="h-3.5 w-3.5 text-slate-400" /> {formatDateTime(s.starts_at)} – {formatTime(s.ends_at)}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <Clock className="h-3.5 w-3.5 text-slate-400" /> {minutes ? `${minutes} menit` : 'Tanpa batas'}
-                      {s.extra_time_minutes > 0 && <Badge tone="purple">+{s.extra_time_minutes}</Badge>}
+                      <Clock className="h-3.5 w-3.5 text-slate-400" /> {minutes ? `${minutes} menit` : 'Tanpa batas waktu'}
+                      {s.extra_time_minutes > 0 && <Badge tone="blue">+{s.extra_time_minutes} mnt</Badge>}
                     </span>
                     {s.room && (
                       <span className="flex items-center gap-1.5">
@@ -96,16 +96,18 @@ export function SessionsPage() {
                 </div>
                 <Button
                   size="lg"
+                  variant={open ? 'primary' : 'secondary'}
+                  className="sm:w-auto"
                   disabled={!open}
                   onClick={() => setStarting(s)}
-                  icon={s.token_required ? <KeyRound className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
+                  icon={open ? (s.token_required ? <KeyRound className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />) : undefined}
                 >
-                  {open ? 'Mulai ujian' : s.status === 'scheduled' ? 'Menunggu dibuka pengawas' : labels.sessionStatus[s.status]}
+                  {open ? 'Mulai ujian' : s.status === 'scheduled' ? 'Menunggu pengawas' : labels.sessionStatus[s.status]}
                 </Button>
-              </div>
+              </li>
             );
           })}
-        </div>
+        </ul>
       )}
 
       {starting && <StartModal session={starting} onClose={() => setStarting(null)} />}
@@ -154,11 +156,11 @@ function StartModal({ session, onClose }: { session: MySession; onClose: () => v
       }
     >
       <form onSubmit={start} className="space-y-4">
-        <div className="rounded-xl bg-slate-50 p-3 text-xs dark:bg-slate-800/60">
-          <p className="font-bold text-slate-900 dark:text-white">{session.exam_title}</p>
-          <p className="text-slate-500">{session.name}</p>
+        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-xs dark:border-slate-700 dark:bg-slate-800/60">
+          <p className="font-semibold text-slate-900 dark:text-white">{session.exam_title}</p>
+          <p className="text-slate-500 dark:text-slate-400">{session.name}</p>
         </div>
-        <ul className="list-disc space-y-1 pl-5 text-xs text-slate-600 dark:text-slate-300">
+        <ul className="list-disc space-y-1 pl-5 text-xs leading-relaxed text-slate-600 marker:text-slate-300 dark:text-slate-300">
           <li>Waktu berjalan sejak Anda menekan Mulai dan mengikuti jam server.</li>
           <li>Jawaban tersimpan otomatis, juga saat jaringan terputus.</li>
           <li>Berpindah tab atau keluar layar penuh tercatat oleh pengawas.</li>
@@ -171,7 +173,7 @@ function StartModal({ session, onClose }: { session: MySession; onClose: () => v
               maxLength={6}
               autoFocus
               autoComplete="off"
-              className="text-center font-mono text-lg tracking-[0.4em] uppercase"
+              className="h-12 text-center font-mono text-xl font-semibold tracking-[0.4em] uppercase"
             />
           </Field>
         )}
