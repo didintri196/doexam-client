@@ -64,7 +64,8 @@ export function ResultPage() {
             </div>
           </Card>
 
-          {r.visible && r.items && r.items.length > 0 && (
+          {/* per-item details only when the exam shows explanations (the server sends them only then) */}
+          {r.visible && r.items?.some((it) => it.explanation) && (
             <Card title="Rincian per soal">
               <div className="divide-y divide-slate-100 dark:divide-slate-800">
                 {r.items.map((it) => (
