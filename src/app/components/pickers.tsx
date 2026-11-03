@@ -31,7 +31,7 @@ export function SubjectSelect({ value, onChange, allowEmpty, invalid }: { value:
   const { data } = useSubjects();
   return (
     <Select value={value} onChange={(e) => onChange(e.target.value)} invalid={invalid}>
-      {allowEmpty !== undefined ? <option value="">{allowEmpty}</option> : <option value="" disabled>Pilih mapel…</option>}
+      {allowEmpty !== undefined ? <option value="">{allowEmpty}</option> : <option value="" disabled>Pilih subjek…</option>}
       {data?.items.map((s: Subject) => (
         <option key={s.id} value={s.id}>
           {s.code} — {s.name}

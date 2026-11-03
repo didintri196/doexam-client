@@ -33,28 +33,28 @@ export function SubjectsPage() {
   const current = subjects.data?.items.find((s) => s.id === selected) ?? subjects.data?.items[0];
   const [editSubject, setEditSubject] = useState<Subject | 'new' | null>(null);
   const [deleting, setDeleting] = useState<Subject | null>(null);
-  const remove = useAction((s: Subject) => subjectApi.remove(s.id), { success: 'Mapel dihapus', invalidate: [['subjects']], onSuccess: () => setDeleting(null) });
+  const remove = useAction((s: Subject) => subjectApi.remove(s.id), { success: 'Subjek dihapus', invalidate: [['subjects']], onSuccess: () => setDeleting(null) });
 
   return (
     <>
       <PageHeader
-        title="Mapel & kompetensi"
+        title="Subjek & kompetensi"
         subtitle="Mata pelajaran (atau bidang kompetensi) dan daftar KD/indikator untuk menandai soal."
         actions={
           <Button icon={<Plus className="h-4 w-4" />} onClick={() => setEditSubject('new')}>
-            Tambah mapel
+            Tambah subjek
           </Button>
         }
       />
       {subjects.isLoading ? (
         <Loading />
       ) : !subjects.data?.items.length ? (
-        <EmptyState icon={<BookOpenCheck className="h-10 w-10" />} title="Belum ada mapel">
-          Buat mapel dulu sebelum membuat bank soal.
+        <EmptyState icon={<BookOpenCheck className="h-10 w-10" />} title="Belum ada subjek">
+          Buat subjek dulu sebelum membuat bank soal.
         </EmptyState>
       ) : (
         <div className="grid gap-6 lg:grid-cols-3">
-          <Card title="Mapel">
+          <Card title="Subjek">
             <div className="space-y-1">
               {subjects.data.items.map((s) => (
                 <div
@@ -85,14 +85,14 @@ export function SubjectsPage() {
       {editSubject && <SubjectForm subject={editSubject === 'new' ? null : editSubject} onClose={() => setEditSubject(null)} />}
       <ConfirmDialog
         open={!!deleting}
-        title="Hapus mapel?"
+        title="Hapus subjek?"
         tone="danger"
         confirmLabel="Hapus"
         loading={remove.isPending}
         onClose={() => setDeleting(null)}
         onConfirm={() => deleting && remove.mutate(deleting)}
       >
-        Mapel <strong>{deleting?.name}</strong> hanya bisa dihapus bila tidak dipakai bank soal.
+        Subjek <strong>{deleting?.name}</strong> hanya bisa dihapus bila tidak dipakai bank soal.
       </ConfirmDialog>
     </>
   );
@@ -101,7 +101,7 @@ export function SubjectsPage() {
 function SubjectForm({ subject, onClose }: { subject: Subject | null; onClose: () => void }) {
   const [f, setF] = useState({ code: subject?.code ?? '', name: subject?.name ?? '' });
   const save = useAction(() => (subject ? subjectApi.update(subject.id, f) : subjectApi.create(f)), {
-    success: 'Mapel disimpan',
+    success: 'Subjek disimpan',
     invalidate: [['subjects']],
     toastErrors: false,
     onSuccess: onClose,
@@ -111,7 +111,7 @@ function SubjectForm({ subject, onClose }: { subject: Subject | null; onClose: (
       open
       onClose={onClose}
       size="sm"
-      title={subject ? 'Ubah mapel' : 'Tambah mapel'}
+      title={subject ? 'Ubah subjek' : 'Tambah subjek'}
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>

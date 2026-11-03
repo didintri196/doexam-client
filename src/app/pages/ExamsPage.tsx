@@ -46,7 +46,7 @@ export function ExamsPage() {
           ))}
         </Select>
         <div className="w-56">
-          <SubjectSelect value={filters.subject_id} onChange={(v) => setFilter('subject_id', v)} allowEmpty="Semua mapel" />
+          <SubjectSelect value={filters.subject_id} onChange={(v) => setFilter('subject_id', v)} allowEmpty="Semua subjek" />
         </div>
         <Checkbox label="Hanya buatan saya" checked={mine} onChange={(e) => setMine(e.target.checked)} />
       </div>
@@ -60,7 +60,7 @@ export function ExamsPage() {
             <thead>
               <tr>
                 <th className={th}>Judul</th>
-                <th className={th}>Mapel</th>
+                <th className={th}>Subjek</th>
                 <th className={th}>Durasi</th>
                 <th className={th}>Bagian</th>
                 <th className={th}>Status</th>
@@ -126,10 +126,10 @@ function NewExam({ onClose }: { onClose: () => void }) {
     >
       <div className="space-y-4">
         <Field label="Judul" error={save.fields.title}>
-          <Input value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="PTS Ganjil Matematika X" />
+          <Input value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Ujian Tengah Matematika Dasar" />
         </Field>
-        <Field label="Mapel" error={save.fields.subject_id}>
-          <SubjectSelect value={f.subject_id} onChange={(v) => setF({ ...f, subject_id: v })} allowEmpty="— lintas mapel —" />
+        <Field label="Subjek" error={save.fields.subject_id}>
+          <SubjectSelect value={f.subject_id} onChange={(v) => setF({ ...f, subject_id: v })} allowEmpty="— lintas subjek —" />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Mode" error={save.fields.mode} hint="Blueprint acak: soal ditarik acak per peserta dari aturan.">

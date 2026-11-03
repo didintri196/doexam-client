@@ -24,8 +24,8 @@ export function GroupsPage() {
   return (
     <>
       <PageHeader
-        title="Kelas & grup"
-        subtitle="Tingkat, kelas, divisi, atau angkatan. Peserta sesi bisa ditambahkan per grup."
+        title="Grup"
+        subtitle="Tingkat, kelompok, departemen, tim, atau angkatan. Peserta sesi bisa ditambahkan per grup."
         actions={
           <Button icon={<Plus className="h-4 w-4" />} onClick={() => setEditing('new')}>
             Tambah grup
@@ -203,7 +203,7 @@ function MembersModal({ group, onClose }: { group: Group; onClose: () => void })
             <div className="flex items-center gap-2">
               <Select className="w-auto" value={role} onChange={(e) => setRole(e.target.value as 'member' | 'leader')}>
                 <option value="member">Anggota</option>
-                <option value="leader">Wali / ketua</option>
+                <option value="leader">Pembina / ketua</option>
               </Select>
               <Button loading={add.isPending} onClick={() => add.mutate(undefined)}>
                 Tambahkan {picked.length}
@@ -225,7 +225,7 @@ function MembersModal({ group, onClose }: { group: Group; onClose: () => void })
                       <p className="font-semibold">{m.full_name}</p>
                       <p className="font-mono text-[11px] text-slate-500">{m.username}</p>
                     </td>
-                    <td className={td}>{m.member_role === 'leader' ? <Badge tone="blue">Wali</Badge> : <Badge>Anggota</Badge>}</td>
+                    <td className={td}>{m.member_role === 'leader' ? <Badge tone="blue">Pembina</Badge> : <Badge>Anggota</Badge>}</td>
                     <td className={`${td} text-right`}>
                       <IconButton label="Keluarkan" onClick={() => remove.mutate(m.user_id)}>
                         <UserMinus className="h-3.5 w-3.5 text-rose-600" />

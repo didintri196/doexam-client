@@ -63,7 +63,7 @@ export function SettingsPage() {
                 </div>
               </Field>
             </div>
-            <Field label="Teks kop" error={fe.letterhead} hint="Dicetak di kartu ujian dan laporan, mis. alamat sekolah. Maks. 500 karakter.">
+            <Field label="Teks kop" error={fe.letterhead} hint="Dicetak di kartu ujian dan laporan, mis. alamat institusi. Maks. 500 karakter.">
               <Textarea value={f.letterhead} onChange={(e) => setF({ ...f, letterhead: e.target.value })} maxLength={500} />
             </Field>
             <div className="flex justify-end">

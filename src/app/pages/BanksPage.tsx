@@ -26,7 +26,7 @@ export function BanksPage() {
     <>
       <PageHeader
         title="Bank soal"
-        subtitle="Kumpulan soal per mapel. Akses diatur per bank: pembaca, penyunting, pemilik."
+        subtitle="Kumpulan soal per subjek. Akses diatur per bank: pembaca, penyunting, pemilik."
         actions={
           <Button icon={<Plus className="h-4 w-4" />} onClick={() => setCreating(true)}>
             Bank baru
@@ -36,7 +36,7 @@ export function BanksPage() {
       <div className="mb-4 flex flex-wrap gap-2">
         <SearchInput value={filters.q} onChange={(v) => setFilter('q', v)} />
         <div className="w-56">
-          <SubjectSelect value={filters.subject_id} onChange={(v) => setFilter('subject_id', v)} allowEmpty="Semua mapel" />
+          <SubjectSelect value={filters.subject_id} onChange={(v) => setFilter('subject_id', v)} allowEmpty="Semua subjek" />
         </div>
       </div>
       {list.isLoading ? (
@@ -99,12 +99,12 @@ function BankForm({ bank, onClose }: { bank: Bank | null; onClose: () => void })
     >
       <div className="space-y-4">
         {!bank && (
-          <Field label="Mapel" error={save.fields.subject_id} hint={<Link to="/subjects" className="text-blue-600 hover:underline">Kelola mapel</Link>}>
+          <Field label="Subjek" error={save.fields.subject_id} hint={<Link to="/subjects" className="text-blue-600 hover:underline">Kelola subjek</Link>}>
             <SubjectSelect value={f.subject_id} onChange={(v) => setF({ ...f, subject_id: v })} invalid={!!save.fields.subject_id} />
           </Field>
         )}
         <Field label="Nama bank" error={save.fields.name}>
-          <Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="Matematika kelas X — PTS Ganjil" />
+          <Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="Matematika Dasar — Ujian Tengah" />
         </Field>
         <Field label="Deskripsi" error={save.fields.description}>
           <Textarea value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} />
@@ -374,7 +374,7 @@ function BankMembers({ bank, isOwner }: { bank: Bank; isOwner: boolean }) {
       {isOwner && (
         <Card title="Tambah anggota">
           <div className="space-y-2">
-            <UserPicker selected={picked} onChange={setPicked} placeholder="Cari guru…" />
+            <UserPicker selected={picked} onChange={setPicked} placeholder="Cari penyusun soal…" />
             {picked.length > 0 && (
               <div className="flex gap-2">
                 <Select className="w-auto" value={access} onChange={(e) => setAccess(e.target.value as Access)}>

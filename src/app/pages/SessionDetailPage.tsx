@@ -221,7 +221,7 @@ function Proctors({ session, manager, onSession }: { session: Session; manager: 
     <div className="space-y-4">
       {manager && (
         <Card title="Tugaskan pengawas">
-          <UserPicker selected={picked} onChange={setPicked} placeholder="Cari guru / pengawas…" />
+          <UserPicker selected={picked} onChange={setPicked} placeholder="Cari pengawas…" />
           {picked.length > 0 && (
             <Button className="mt-2" loading={save.isPending} onClick={() => save.mutate([...new Set([...ids, ...picked.map((u) => u.id)])])}>
               Tambahkan {picked.length}
@@ -387,7 +387,7 @@ function AddParticipants({ session, onClose }: { session: Session; onClose: () =
       }
     >
       <div className="space-y-5">
-        <Field label="Dari kelas / grup" hint="Semua anggota grup ditambahkan (wali kelas tidak).">
+        <Field label="Dari grup" hint="Semua anggota grup ditambahkan (pembina/ketua tidak).">
           <GroupPicker selected={groups} onChange={setGroups} />
         </Field>
         <Field label="Perorangan">

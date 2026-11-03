@@ -33,7 +33,7 @@ function Login() {
   const toSetup = useCallback(() => navigate('/setup', { replace: true }), [navigate]);
   return (
     <LoginPage
-      heading="Panel staf: guru, pengawas, dan admin"
+      heading="Panel staf: penyusun soal, pengawas, penilai, dan admin"
       badge={
         <Badge tone="blue">
           <Briefcase className="h-3.5 w-3.5" /> Staf

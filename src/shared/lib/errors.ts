@@ -23,7 +23,7 @@ const messages: Record<string, string> = {
   'tenant must keep at least one active admin': 'Harus ada minimal satu admin aktif.',
   'credentials expired or already downloaded': 'Daftar akun sudah pernah diunduh atau kedaluwarsa.',
   'group still has subgroups': 'Grup masih punya subgrup.',
-  'subject still has item banks': 'Mapel masih dipakai bank soal.',
+  'subject still has item banks': 'Subjek masih dipakai bank soal.',
   'competency is used by items': 'Kompetensi masih dipakai soal.',
   'competency still has children': 'Kompetensi masih punya turunan.',
   'item bank still has items': 'Bank masih berisi soal.',
