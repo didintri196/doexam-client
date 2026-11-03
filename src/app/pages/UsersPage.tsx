@@ -86,7 +86,7 @@ export function UsersPage() {
                   <td className={td}>
                     <div className="flex flex-wrap gap-1">
                       {u.roles.map((r) => (
-                        <Badge key={r} tone={r === 'admin' ? 'purple' : r === 'participant' ? 'slate' : 'blue'}>
+                        <Badge key={r} tone={r === 'admin' ? 'blue' : 'slate'}>
                           {roleName(r)}
                         </Badge>
                       ))}
@@ -263,7 +263,7 @@ export function PasswordModal({ user, password, onClose }: { user: string; passw
           Berikan password ini kepada <span className="font-mono font-semibold">{user}</span>. Password hanya ditampilkan <strong>sekali</strong>.
         </p>
         <div className="flex items-center justify-between gap-2 rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
-          <span className="font-mono text-lg font-bold tracking-wider">{password}</span>
+          <span className="font-mono text-lg font-semibold tracking-wider">{password}</span>
           <IconButton
             label="Salin"
             onClick={() => {

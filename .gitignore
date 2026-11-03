@@ -4,3 +4,7 @@ dist/
 .env
 .vite/
 test-results/
+
+# impeccable working files
+.impeccable/hook.cache.json
+.impeccable/review/

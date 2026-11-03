@@ -31,7 +31,9 @@ src/
    - Error 400 ditampilkan per field (`fieldErrors`).
    - Mutasi di panel memakai `useAction`.
 9. **Gaya**:
-   - Tailwind dengan komponen dari `shared/ui` (gaya prototipe DoExam: slate/biru, `rounded-xl`, mode gelap via kelas `.dark`).
+   - Tailwind dengan komponen dari `shared/ui`. Token di `shared/styles.css`: permukaan slate, font Inter, teks kerja 13px (`text-xs`), mode gelap via kelas `.dark`.
+   - Aksen = `primary_color` institusi (`shared/lib/brand.ts`); seluruh skala `blue-*` diturunkan dari situ. Teks di atas aksen pakai `text-accent-fg`, bukan `text-white`.
+   - Arah visual & keputusan desain: `PRODUCT.md`, `DESIGN.md`, `.impeccable/`.
    - Teks UI berbahasa Indonesia, identifier berbahasa Inggris.
 10. **Izin**: menu dan tombol mengikuti `permissions` (`useCan`), tapi server tetap memvalidasi semuanya.
 

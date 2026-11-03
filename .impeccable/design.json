@@ -1,0 +1,576 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-03T19:51:15.381086+00:00",
+  "title": "Design System: DoExam",
+  "extensions": {
+    "colorMeta": {
+      "accent": {
+        "role": "primary",
+        "displayName": "Aksen Institusi",
+        "canonical": "var(--accent) (default #2563eb, set by applyBrand from tenant primary_color)",
+        "tonalRamp": [
+          "#020f33",
+          "#092460",
+          "#11388c",
+          "#1b4dba",
+          "#2563eb",
+          "#6f9cf6",
+          "#c9dcfe",
+          "#f1f6ff"
+        ]
+      },
+      "accent-hover": {
+        "role": "primary",
+        "displayName": "Aksen Gelap (hover)",
+        "canonical": "color-mix(in oklab, var(--accent) 84%, black)",
+        "tonalRamp": [
+          "#020f33",
+          "#092460",
+          "#11388c",
+          "#1b4dba",
+          "#2563eb",
+          "#6f9cf6",
+          "#c9dcfe",
+          "#f1f6ff"
+        ]
+      },
+      "accent-wash": {
+        "role": "primary",
+        "displayName": "Wash Aksen",
+        "canonical": "color-mix(in oklab, var(--accent) 6%, white)",
+        "tonalRamp": [
+          "#020f33",
+          "#092460",
+          "#11388c",
+          "#1b4dba",
+          "#2563eb",
+          "#6f9cf6",
+          "#c9dcfe",
+          "#f1f6ff"
+        ]
+      },
+      "accent-fg": {
+        "role": "primary",
+        "displayName": "Teks di Atas Aksen",
+        "canonical": "var(--accent-fg)",
+        "tonalRamp": [
+          "#ffffff"
+        ]
+      },
+      "accent-fg-light-tenant": {
+        "role": "primary",
+        "displayName": "Teks di Atas Aksen Terang",
+        "canonical": "#0f172a when white < 4.5:1 on accent",
+        "tonalRamp": [
+          "#0f172a"
+        ]
+      },
+      "saved-emerald": {
+        "role": "secondary",
+        "displayName": "Emerald Tersimpan",
+        "canonical": "#059669",
+        "tonalRamp": [
+          "#022c22",
+          "#064e3b",
+          "#065f46",
+          "#047857",
+          "#059669",
+          "#34d399",
+          "#a7f3d0",
+          "#ecfdf5"
+        ]
+      },
+      "saved-emerald-dot": {
+        "role": "secondary",
+        "displayName": "Titik Tersimpan",
+        "canonical": "#10b981",
+        "tonalRamp": [
+          "#022c22",
+          "#064e3b",
+          "#065f46",
+          "#047857",
+          "#059669",
+          "#34d399",
+          "#a7f3d0",
+          "#ecfdf5"
+        ]
+      },
+      "saved-emerald-wash": {
+        "role": "secondary",
+        "displayName": "Wash Tersimpan",
+        "canonical": "#ecfdf5",
+        "tonalRamp": [
+          "#022c22",
+          "#064e3b",
+          "#065f46",
+          "#047857",
+          "#059669",
+          "#34d399",
+          "#a7f3d0",
+          "#ecfdf5"
+        ]
+      },
+      "doubt-amber": {
+        "role": "secondary",
+        "displayName": "Amber Ragu",
+        "canonical": "#fcd34d",
+        "tonalRamp": [
+          "#451a03",
+          "#78350f",
+          "#92400e",
+          "#b45309",
+          "#f59e0b",
+          "#fcd34d",
+          "#fde68a",
+          "#fffbeb"
+        ]
+      },
+      "doubt-amber-ring": {
+        "role": "secondary",
+        "displayName": "Garis Ragu",
+        "canonical": "#f59e0b",
+        "tonalRamp": [
+          "#451a03",
+          "#78350f",
+          "#92400e",
+          "#b45309",
+          "#f59e0b",
+          "#fcd34d",
+          "#fde68a",
+          "#fffbeb"
+        ]
+      },
+      "doubt-amber-wash": {
+        "role": "secondary",
+        "displayName": "Wash Ragu",
+        "canonical": "#fffbeb",
+        "tonalRamp": [
+          "#451a03",
+          "#78350f",
+          "#92400e",
+          "#b45309",
+          "#f59e0b",
+          "#fcd34d",
+          "#fde68a",
+          "#fffbeb"
+        ]
+      },
+      "critical-rose": {
+        "role": "secondary",
+        "displayName": "Rose Kritis",
+        "canonical": "#e11d48",
+        "tonalRamp": [
+          "#4c0519",
+          "#881337",
+          "#9f1239",
+          "#be123c",
+          "#e11d48",
+          "#fb7185",
+          "#fecdd3",
+          "#fff1f2"
+        ]
+      },
+      "critical-rose-wash": {
+        "role": "secondary",
+        "displayName": "Wash Kritis",
+        "canonical": "#fff1f2",
+        "tonalRamp": [
+          "#4c0519",
+          "#881337",
+          "#9f1239",
+          "#be123c",
+          "#e11d48",
+          "#fb7185",
+          "#fecdd3",
+          "#fff1f2"
+        ]
+      },
+      "canvas-slate": {
+        "role": "neutral",
+        "displayName": "Kanvas Slate",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0",
+          "#f8fafc"
+        ]
+      },
+      "surface-white": {
+        "role": "neutral",
+        "displayName": "Permukaan Putih",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0",
+          "#f8fafc"
+        ]
+      },
+      "hairline-slate": {
+        "role": "neutral",
+        "displayName": "Garis Rambut",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0",
+          "#f8fafc"
+        ]
+      },
+      "control-stroke-slate": {
+        "role": "neutral",
+        "displayName": "Garis Kontrol",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0",
+          "#f8fafc"
+        ]
+      },
+      "muted-ink-slate": {
+        "role": "neutral",
+        "displayName": "Tinta Redup",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0",
+          "#f8fafc"
+        ]
+      },
+      "body-ink-slate": {
+        "role": "neutral",
+        "displayName": "Tinta Isi",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0",
+          "#f8fafc"
+        ]
+      },
+      "ink-slate": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0",
+          "#f8fafc"
+        ]
+      },
+      "dark-canvas-slate": {
+        "role": "neutral",
+        "displayName": "Kanvas Gelap",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0",
+          "#f8fafc"
+        ]
+      },
+      "dark-surface-slate": {
+        "role": "neutral",
+        "displayName": "Permukaan Gelap",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0",
+          "#f8fafc"
+        ]
+      },
+      "dark-hairline-slate": {
+        "role": "neutral",
+        "displayName": "Garis Rambut Gelap",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0",
+          "#f8fafc"
+        ]
+      },
+      "hc-black": {
+        "role": "neutral",
+        "displayName": "Kontras Tinggi Hitam",
+        "canonical": "#000000",
+        "tonalRamp": [
+          "#000000"
+        ]
+      },
+      "hc-yellow": {
+        "role": "neutral",
+        "displayName": "Kontras Tinggi Kuning",
+        "canonical": "#fde047",
+        "tonalRamp": [
+          "#fde047"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Angka statistik kartu Stat."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Judul halaman panel dan login."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Judul kartu, modal, header ruang ujian."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Ukuran kerja panel 13px (text-xs dipetakan ulang)."
+      },
+      "exam-reading": {
+        "displayName": "Exam Reading",
+        "purpose": "Stem dan opsi soal; A / A+ / A++ = 16 / 18 / 20px."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Badge, label grup sidebar, legenda, footer."
+      },
+      "timer": {
+        "displayName": "Timer",
+        "purpose": "Sisa waktu di header ruang ujian."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "Hanya kode, token ruang, username, LaTeX."
+      }
+    },
+    "shadows": [
+      {
+        "name": "xs",
+        "value": "0 1px 2px 0 rgb(15 23 42 / 0.05)",
+        "purpose": "Kartu, tabel, tombol, input diam."
+      },
+      {
+        "name": "sm",
+        "value": "0 1px 2px 0 rgb(15 23 42 / 0.06), 0 1px 3px 0 rgb(15 23 42 / 0.04)",
+        "purpose": "Kartu login."
+      },
+      {
+        "name": "lg",
+        "value": "0 8px 24px -6px rgb(15 23 42 / 0.12), 0 2px 6px -2px rgb(15 23 42 / 0.06)",
+        "purpose": "Menu pop-up akun."
+      },
+      {
+        "name": "xl",
+        "value": "0 16px 40px -12px rgb(15 23 42 / 0.18), 0 4px 10px -4px rgb(15 23 42 / 0.06)",
+        "purpose": "Toast."
+      },
+      {
+        "name": "2xl",
+        "value": "0 24px 56px -16px rgb(15 23 42 / 0.28)",
+        "purpose": "Modal, overlay ujian, laci HP."
+      }
+    ],
+    "motion": [
+      {
+        "name": "colors",
+        "value": "150ms cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "transition-colors pada tombol, link, opsi, tile."
+      },
+      {
+        "name": "token-countdown",
+        "value": "width 1000ms linear",
+        "purpose": "Bilah hitung mundur token di proyektor."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "0.01ms",
+        "purpose": "prefers-reduced-motion mematikan animasi dan transisi."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Aksi utama, termasuk Kumpulkan ujian; isi aksen tenant.",
+      "html": "<button class=\"ds-btn-primary\">Simpan</button>",
+      "css": ".ds-btn-primary{font-family:'Inter Variable',system-ui,sans-serif;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border:0;border-radius:6px;background:var(--accent,#2563eb);color:var(--accent-fg,#fff);font-size:13px;font-weight:500;box-shadow:0 1px 2px 0 rgb(15 23 42 / .05);cursor:pointer;transition:background-color .15s}.ds-btn-primary:hover{background:color-mix(in oklab,var(--accent,#2563eb) 84%,black)}.ds-btn-primary:focus-visible{outline:2px solid var(--accent,#2563eb);outline-offset:2px}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Aksi pendamping: Batal, Sebelumnya, Layar proyektor.",
+      "html": "<button class=\"ds-btn-secondary\">Batal</button>",
+      "css": ".ds-btn-secondary{font-family:'Inter Variable',system-ui,sans-serif;height:32px;padding:0 12px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#1e293b;font-size:13px;font-weight:500;box-shadow:0 1px 2px 0 rgb(15 23 42 / .05);cursor:pointer;transition:background-color .15s}.ds-btn-secondary:hover{background:#f8fafc}.ds-btn-secondary:focus-visible{outline:2px solid var(--accent,#2563eb);outline-offset:2px}"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Field 32px dengan fokus aksen.",
+      "html": "<input class=\"ds-input\" placeholder=\"Nama pengguna\">",
+      "css": ".ds-input{font-family:'Inter Variable',system-ui,sans-serif;height:32px;width:240px;padding:0 10px;border:1px solid #cbd5e1;border-radius:6px;background:#fff;color:#0f172a;font-size:13px;box-shadow:0 1px 2px 0 rgb(15 23 42 / .05);transition:border-color .15s,box-shadow .15s}.ds-input::placeholder{color:#94a3b8}.ds-input:focus{outline:none;border-color:color-mix(in oklab,var(--accent,#2563eb) 86%,white);box-shadow:0 0 0 3px color-mix(in oklab,var(--accent,#2563eb) 20%,transparent)}"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Panel putih bergaris dengan header 48px.",
+      "html": "<section class=\"ds-card\"><header class=\"ds-card-h\">Peserta</header><div class=\"ds-card-b\">32 peserta terdaftar.</div></section>",
+      "css": ".ds-card{font-family:'Inter Variable',system-ui,sans-serif;width:320px;border:1px solid #e2e8f0;border-radius:12px;background:#fff;box-shadow:0 1px 2px 0 rgb(15 23 42 / .05)}.ds-card-h{min-height:48px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid #e2e8f0;font-size:14px;font-weight:600;color:#0f172a}.ds-card-b{padding:16px;font-size:13px;color:#334155}"
+    },
+    {
+      "name": "Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Label status 11px dengan ring inset.",
+      "html": "<span class=\"ds-badge ds-badge-green\">Dikumpulkan</span> <span class=\"ds-badge ds-badge-amber\">Dikunci</span>",
+      "css": ".ds-badge{font-family:'Inter Variable',system-ui,sans-serif;display:inline-flex;padding:2px 6px;border-radius:5px;font-size:11px;line-height:16px;font-weight:500}.ds-badge-green{background:#ecfdf5;color:#047857;box-shadow:inset 0 0 0 1px rgb(5 150 105 / .2)}.ds-badge-amber{background:#fffbeb;color:#92400e;box-shadow:inset 0 0 0 1px rgb(217 119 6 / .25)}"
+    },
+    {
+      "name": "Sidebar Link",
+      "kind": "nav",
+      "refersTo": "sidebar-link",
+      "description": "Link sidebar panel 32px; aktif = slate-100 dengan ikon aksen.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-a ds-on\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"9\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"5\"/><rect x=\"14\" y=\"12\" width=\"7\" height=\"9\"/><rect x=\"3\" y=\"16\" width=\"7\" height=\"5\"/></svg>Ringkasan</a><a class=\"ds-nav-a\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 2 2 7l10 5 10-5-10-5z\"/><path d=\"m2 17 10 5 10-5\"/><path d=\"m2 12 10 5 10-5\"/></svg>Ujian</a></nav>",
+      "css": ".ds-nav{font-family:'Inter Variable',system-ui,sans-serif;width:216px;display:flex;flex-direction:column;gap:2px}.ds-nav-a{display:flex;align-items:center;gap:10px;height:32px;padding:0 10px;border-radius:6px;font-size:13px;font-weight:500;color:#475569;cursor:pointer;transition:background-color .15s}.ds-nav-a svg{color:#94a3b8}.ds-nav-a:hover{background:#f8fafc;color:#0f172a}.ds-nav-a.ds-on{background:#f1f5f9;color:#0f172a}.ds-nav-a.ds-on svg{color:var(--accent,#2563eb)}"
+    },
+    {
+      "name": "Navigator Soal",
+      "kind": "custom",
+      "refersTo": "nav-cell-answered",
+      "description": "Tile status soal; terbaca tanpa warna lewat isi, garis, tanda sudut.",
+      "html": "<div class=\"ds-navg\"><button class=\"ds-cell ds-ans\">1</button><button class=\"ds-cell ds-flag\">2</button><button class=\"ds-cell\">3</button><button class=\"ds-cell ds-cur\">4</button><button class=\"ds-cell ds-ans\">5</button></div>",
+      "css": ".ds-navg{font-family:'Inter Variable',system-ui,sans-serif;display:grid;grid-template-columns:repeat(5,52px);gap:6px}.ds-cell{position:relative;height:36px;border:0;border-radius:6px;font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;background:#fff;color:#334155;box-shadow:inset 0 0 0 1px #cbd5e1;cursor:pointer;transition:background-color .15s}.ds-cell:hover{box-shadow:inset 0 0 0 1px #94a3b8}.ds-ans{background:var(--accent,#2563eb);color:var(--accent-fg,#fff);box-shadow:none}.ds-ans:hover{background:color-mix(in oklab,var(--accent,#2563eb) 84%,black);box-shadow:none}.ds-flag{background:#fcd34d;color:#451a03;box-shadow:inset 0 0 0 1px #f59e0b}.ds-flag::after{content:'';position:absolute;top:0;right:0;border-left:7px solid transparent;border-top:7px solid #b45309}.ds-cur{outline:2px solid #0f172a;outline-offset:2px}"
+    },
+    {
+      "name": "Pill Simpan",
+      "kind": "custom",
+      "refersTo": "save-pill",
+      "description": "Status simpan yang selalu membawa bukti (jam sinkron / antrean).",
+      "html": "<button class=\"ds-save\"><span class=\"ds-dot\"></span>Tersimpan <span class=\"ds-at\">02.47</span></button>",
+      "css": ".ds-save{font-family:'Inter Variable',system-ui,sans-serif;display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border:0;border-radius:9999px;background:#ecfdf5;color:#065f46;box-shadow:inset 0 0 0 1px #a7f3d0;font-size:13px;font-weight:500;cursor:pointer}.ds-dot{width:8px;height:8px;border-radius:9999px;background:#10b981}.ds-at{font-variant-numeric:tabular-nums;opacity:.7}.ds-save:focus-visible{outline:2px solid var(--accent,#2563eb);outline-offset:2px}"
+    },
+    {
+      "name": "Opsi Jawaban",
+      "kind": "custom",
+      "refersTo": "answer-option-selected",
+      "description": "Baris opsi dengan bulatan huruf; terpilih = garis dan wash aksen.",
+      "html": "<button class=\"ds-opt\"><span class=\"ds-l\">A</span>x = 1, nilai minimum −1</button><button class=\"ds-opt ds-sel\"><span class=\"ds-l\">B</span>x = 2, nilai minimum −3</button>",
+      "css": ".ds-opt{font-family:'Inter Variable',system-ui,sans-serif;display:flex;align-items:flex-start;gap:14px;width:420px;margin-bottom:10px;padding:12px 16px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#1e293b;font-size:16px;line-height:1.65;text-align:left;cursor:pointer;transition:background-color .15s,border-color .15s}.ds-opt:hover{border-color:#cbd5e1;background:#f8fafc}.ds-l{flex-shrink:0;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:9999px;box-shadow:inset 0 0 0 1px #cbd5e1;font-size:13px;font-weight:600;color:#475569}.ds-sel{border-color:var(--accent,#2563eb);box-shadow:inset 0 0 0 1px var(--accent,#2563eb);background:color-mix(in oklab,var(--accent,#2563eb) 6%,white);color:#0f172a}.ds-sel .ds-l{background:var(--accent,#2563eb);color:var(--accent-fg,#fff);box-shadow:none}.ds-opt:focus-visible{outline:2px solid var(--accent,#2563eb);outline-offset:2px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Ruang Ujian Milik Institusi",
+    "overview": "Standar kategori yang dieksekusi pada tingkat Linear dan Stripe Dashboard: kanvas slate, permukaan putih bergaris rambut, dan satu aksen yang bukan milik DoExam tetapi milik institusi (`primary_color` tenant). DoExam berdiri di belakang; nama, logo, dan warna sekolah atau perusahaan yang tampil di depan. Sistem ini sengaja polos: tidak ada gaya tematik, tidak ada dekorasi yang bersaing dengan soal.\n\nDua kepadatan hidup di satu sistem. Ruang ujian lega dan tenang: teks soal 16px, opsi berupa baris bergaris dengan bulatan huruf, navigator nomor yang statusnya terbaca dari isi dan garis, bukan hanya warna. Panel staf padat tapi tetap terbaca: teks kerja 13px, tabel angka tabular, sidebar 240px ala Linear. Keduanya memakai komponen yang sama dari `src/shared/ui`.\n\nKepercayaan dibangun dengan bukti, bukan klaim: status simpan selalu disertai jam sinkron terakhir atau jumlah antrean. Mode gelap wajib dan setara; mode kontras tinggi (hitam dan kuning) tersedia di ruang ujian.",
+    "keyCharacteristics": [
+      "Satu aksen milik tenant, ditambah tiga hue status (emerald, amber, rose) di atas slate.",
+      "Seluruh skala `blue-*` diturunkan dari `--accent`, sehingga utilitas biru mana pun mengikuti warna tenant.",
+      "Permukaan datar bergaris 1px, bayangan sangat halus dan berjarak.",
+      "Inter Variable untuk semua teks termasuk angka (tabular-nums); monospace hanya untuk kode, token, dan LaTeX.",
+      "Status terbaca tanpa warna: isi vs garis, tanda sudut, titik."
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "Palet adalah satu aksen tenant ditambah tiga hue status (emerald, amber, rose) di atas slate. Tidak ada hue keempat. Kunci `purple` pada tipe `Badge` adalah sisa yang tidak dipakai halaman mana pun dan bukan bagian sistem.",
+        "section": "colors"
+      },
+      {
+        "name": "The Green Means Saved Rule",
+        "body": "Hijau hanya untuk \"tersimpan di server\" dan sukses. Tile navigator yang dijawab dan tombol \"Kumpulkan ujian\" memakai aksen, karena hijau akan terbaca \"aman/selesai\" padahal soal masih kosong, dan ruangan membawa identitas institusi. *(Amandemen terhadap direction contract `.impeccable/surfaces/src.md`, yang semula menulis \"hijau tersimpan/dijawab\"; diwajibkan reviewer finish.)*",
+        "section": "colors"
+      },
+      {
+        "name": "The Derived Blue Rule",
+        "body": "Jangan menulis hex biru. Semua `blue-*` adalah turunan aksen; teks di atas isi aksen selalu `text-accent-fg`, tidak pernah `text-white`.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Inter Rule",
+        "body": "Angka (timer, hitungan, tabel, nomor soal, statistik) memakai Inter dengan `tabular-nums`. Monospace hanya untuk kode, token ruang, username, kode kompetensi, dan LaTeX.",
+        "section": "typography"
+      },
+      {
+        "name": "The Thirteen Rule",
+        "body": "Ukuran kerja panel 13px; ukuran baca ujian 16px. Teks 12px tidak dipakai; 11px hanya untuk label meta.",
+        "section": "typography"
+      },
+      {
+        "name": "The Institution Foot Rule",
+        "body": "Di HP (<640px) header ujian menyembunyikan logo tenant agar judul dan hitungan soal tetap terbaca; lockup institusi pindah ke kaki kolom navigator, di bawah tombol kumpulkan.",
+        "section": "layout"
+      },
+      {
+        "name": "The Hairline First Rule",
+        "body": "Setiap permukaan punya garis 1px; bayangan tidak pernah menggantikan garis.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do pakai utilitas `blue-*` atau `var(--accent)` untuk semua aksen, dan `text-accent-fg` untuk teks di atas isi aksen.",
+      "Do pakai aksen untuk tile yang dijawab dan untuk tombol \"Kumpulkan ujian\".",
+      "Do sertakan bukti (jam sinkron atau jumlah antrean) setiap kali menampilkan status simpan.",
+      "Do bedakan status navigator dengan isi vs garis dan tanda, sehingga terbaca tanpa warna.",
+      "Do pakai Inter dengan `tabular-nums` untuk angka; monospace hanya untuk kode, token, dan LaTeX.",
+      "Do tampilkan logo, nama, dan tagline tenant di header dan login kedua entry; footer `© DoExam · <versi>` di panel, daftar ujian/hasil, dan login, tidak di ruang ujian.",
+      "Do jaga setiap permukaan setara di mode gelap (kanvas slate-950, permukaan slate-900)."
+    ],
+    "donts": [
+      "Don't pakai hijau untuk \"dijawab\" atau untuk tombol submit; hijau hanya tersimpan dan sukses.",
+      "Don't menambah hue keempat (termasuk nada `purple` di `Badge`).",
+      "Don't menulis hex biru atau `text-white` di atas aksen; warna tenant terang akan rusak.",
+      "Don't pakai teks 12px atau monospace untuk angka biasa.",
+      "Don't mengganti garis 1px dengan bayangan besar atau membesarkan radius di atas 12px."
+    ]
+  }
+}

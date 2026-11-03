@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><title>LJK</title>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;800&family=Martian+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+body{width:1440px;height:900px;overflow:hidden;background:#fff;color:#141414;font-family:'Public Sans',sans-serif}
+.top{height:72px;display:flex;align-items:center;gap:22px;padding:0 32px;border-bottom:2px solid #e2557a}
+.box{border:1.5px solid #e2557a;padding:6px 10px;font-size:11px;color:#e2557a;text-transform:uppercase;letter-spacing:.08em}
+.box b{display:block;color:#141414;font-family:'Martian Mono';font-size:15px;letter-spacing:.04em}
+.inst{font-weight:800;font-size:17px}.inst small{display:block;font-weight:400;font-size:12px;color:#4a4a4a}
+.sp{flex:1}
+.timer{font-family:'Martian Mono';font-size:28px;font-weight:700}
+.saved{font-size:13px;color:#4a4a4a}
+main{display:grid;grid-template-columns:28px 300px 1fr;height:828px}
+.marks{display:flex;flex-direction:column;justify-content:space-around;align-items:center;background:#fff}
+.marks i{width:16px;height:7px;background:#141414;display:block}
+aside{border-right:1.5px solid #e2557a;padding:22px 20px;background:#fbe3ea55}
+.h{font-size:11px;color:#e2557a;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;font-weight:600}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}
+.row{display:flex;align-items:center;gap:6px;font-family:'Martian Mono';font-size:11px}
+.row .n{width:22px;text-align:right;color:#e2557a}
+.b{width:17px;height:17px;border:1.3px solid #e2557a;border-radius:50%;display:grid;place-items:center;font-size:8px;color:#e2557a}
+.b.on{background:#141414;border-color:#141414;color:#141414}
+.row.cur .n{color:#141414;font-weight:700}.row.cur{background:#fbe3ea;outline:1.5px solid #141414}
+.row.flag .n::after{content:'?';color:#141414;margin-left:2px}
+.q{padding:40px 72px;position:relative}
+.qn{font-family:'Martian Mono';font-size:14px;color:#e2557a;margin-bottom:10px}
+.qn b{color:#141414;font-size:30px;margin-right:12px}
+.stem{font-size:20px;line-height:1.6;max-width:780px;margin-bottom:28px}
+.opt{display:flex;gap:18px;align-items:center;max-width:780px;padding:13px 0;border-bottom:1px solid #f1c3d0;font-size:18px}
+.opt .k{width:38px;height:38px;border:1.6px solid #e2557a;border-radius:50%;display:grid;place-items:center;font-family:'Martian Mono';color:#e2557a;font-weight:700}
+.opt.sel .k{background:#141414;border-color:#141414;color:#fff}
+.bar{position:absolute;left:72px;right:72px;bottom:30px;display:flex;gap:12px}
+.btn{padding:12px 22px;font-size:15px;font-weight:600;border:1.5px solid #141414;background:#fff}
+.btn.p{background:#141414;color:#fff}
+</style></head><body>
+<div class="top">
+  <div class="inst">SMA Negeri 3 Yogyakarta<small>PTS Ganjil 2026 · Matematika Wajib XI</small></div>
+  <div class="box">No. peserta<b>11-0234-118</b></div>
+  <div class="box">Ruang<b>LAB 2</b></div>
+  <div class="sp"></div>
+  <div class="saved">● Tersimpan 10.42.18</div>
+  <div class="timer">01:12:45</div>
+</div>
+<main>
+<div class="marks"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<aside>
+  <div class="h">Lembar jawaban · 18/40 terisi</div>
+  <div class="cols">
+    <div class="row"><span class="n">1</span><span class="b">A</span><span class="b on">B</span><span class="b">C</span><span class="b">D</span><span class="b">E</span></div>
+    <div class="row"><span class="n">21</span><span class="b">A</span><span class="b">B</span><span class="b">C</span><span class="b">D</span><span class="b">E</span></div>
+    <div class="row"><span class="n">2</span><span class="b on">A</span><span class="b">B</span><span class="b">C</span><span class="b">D</span><span class="b">E</span></div>
+    <div class="row"><span class="n">22</span><span class="b">A</span><span class="b">B</span><span class="b">C</span><span class="b">D</span><span class="b">E</span></div>
+    <div class="row"><span class="n">3</span><span class="b">A</span><span class="b">B</span><span class="b">C</span><span class="b on">D</span><span class="b">E</span></div>
+    <div class="row"><span class="n">23</span><span class="b">A</span><span class="b">B</span><span class="b">C</span><span class="b">D</span><span class="b">E</span></div>
+    <div class="row flag"><span class="n">4</span><span class="b">A</span><span class="b">B</span><span class="b on">C</span><span class="b">D</span><span class="b">E</span></div>
+    <div class="row"><span class="n">24</span><span class="b">A</span><span class="b">B</span><span class="b">C</span><span class="b">D</span><span class="b">E</span></div>
+    <div class="row"><span class="n">5</span><span class="b">A</span><span class="b">B</span><span class="b">C</span><span class="b">D</span><span class="b on">E</span></div>
+    <div class="row"><span class="n">25</span><span class="b">A</span><span class="b">B</span><span class="b">C</span><span class="b">D</span><span class="b">E</span></div>
+    <div class="row"><span class="n">17</span><span class="b">A</span><span class="b on">B</span><span class="b">C</span><span class="b">D</span><span class="b">E</span></div>
+    <div class="row"><span class="n">37</span><span class="b">A</span><span class="b">B</span><span class="b">C</span><span class="b">D</span><span class="b">E</span></div>
+    <div class="row"><span class="n">18</span><span class="b">A</span><span class="b">B</span><span class="b">C</span><span class="b on">D</span><span class="b">E</span></div>
+    <div class="row"><span class="n">38</span><span class="b">A</span><span class="b">B</span><span class="b">C</span><span class="b">D</span><span class="b">E</span></div>
+    <div class="row cur"><span class="n">19</span><span class="b">A</span><span class="b on">B</span><span class="b">C</span><span class="b">D</span><span class="b">E</span></div>
+    <div class="row"><span class="n">39</span><span class="b">A</span><span class="b">B</span><span class="b">C</span><span class="b">D</span><span class="b">E</span></div>
+    <div class="row"><span class="n">20</span><span class="b">A</span><span class="b">B</span><span class="b">C</span><span class="b">D</span><span class="b">E</span></div>
+    <div class="row"><span class="n">40</span><span class="b">A</span><span class="b">B</span><span class="b">C</span><span class="b">D</span><span class="b">E</span></div>
+  </div>
+</aside>
+<section class="q">
+  <div class="qn"><b>19</b>Pilihan ganda · 2 poin</div>
+  <p class="stem">Diketahui fungsi f(x) = 2x² − 8x + 5. Nilai minimum fungsi tersebut dicapai pada x = …, dan nilai minimumnya adalah …</p>
+  <div class="opt"><span class="k">A</span>x = 1, nilai minimum −1</div>
+  <div class="opt sel"><span class="k">B</span>x = 2, nilai minimum −3</div>
+  <div class="opt"><span class="k">C</span>x = 2, nilai minimum 3</div>
+  <div class="opt"><span class="k">D</span>x = 4, nilai minimum 5</div>
+  <div class="opt"><span class="k">E</span>x = −2, nilai minimum 29</div>
+  <div class="bar"><span class="btn">← Sebelumnya</span><span class="btn">Ragu-ragu (F)</span><span class="sp" style="flex:1"></span><span class="btn p">Berikutnya →</span></div>
+</section>
+</main>
+</body></html>
+

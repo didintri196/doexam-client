@@ -49,9 +49,9 @@ export function SetupPage() {
           {done ? (
             <div className="space-y-3 text-center">
               <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-500" />
-              <h1 className="text-lg font-extrabold">Setup selesai</h1>
+              <h1 className="text-lg font-semibold">Setup selesai</h1>
               <p className="text-xs text-slate-500">Masuk dengan akun admin yang baru dibuat.</p>
-              <Link to="/login" className="inline-block rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">
+              <Link to="/login" className="inline-block rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-accent-fg hover:bg-blue-700">
                 Ke halaman login
               </Link>
             </div>
@@ -59,7 +59,7 @@ export function SetupPage() {
             <>
               <div className="space-y-1 text-center">
                 <Rocket className="mx-auto h-8 w-8 text-blue-600" />
-                <h1 className="text-lg font-extrabold">Setup DoExam</h1>
+                <h1 className="text-lg font-semibold">Setup DoExam</h1>
                 <p className="text-xs text-slate-500">Isi data institusi dan akun admin pertama. Langkah ini hanya sekali.</p>
               </div>
               <form onSubmit={submit} className="space-y-4">

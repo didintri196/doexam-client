@@ -82,7 +82,7 @@ export function UserPicker({
               <span>
                 <span className="font-semibold">{u.full_name}</span> <span className="font-mono text-slate-500">{u.username}</span>
               </span>
-              <span className="text-[10px] text-slate-400">{u.roles.join(', ')}</span>
+              <span className="text-[11px] text-slate-400">{u.roles.join(', ')}</span>
             </button>
           ))}
         </div>
@@ -124,14 +124,14 @@ export function GroupPicker({ selected, onChange }: { selected: Group[]; onChang
             className="flex w-full items-center justify-between gap-2 border-b border-slate-100 px-3 py-2 text-left text-xs last:border-0 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-800 dark:hover:bg-slate-800"
           >
             <span className="font-semibold">{g.name}</span>
-            <span className="text-[10px] text-slate-400">{g.member_count} anggota</span>
+            <span className="text-[11px] text-slate-400">{g.member_count} anggota</span>
           </button>
         ))}
       </div>
       {selected.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {selected.map((g) => (
-            <Badge key={g.id} tone="purple">
+            <Badge key={g.id} tone="blue">
               {g.name}
               <button type="button" aria-label="Hapus" onClick={() => onChange(selected.filter((x) => x.id !== g.id))}>
                 <X className="h-3 w-3" />

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><title>Atlas Sekolah</title>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&family=Atkinson+Hyperlegible+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+body{width:1440px;height:900px;overflow:hidden;background:#f6f8f5;color:#1d2a2f;font-family:'Atkinson Hyperlegible Next',sans-serif}
+.top{height:64px;display:flex;align-items:center;gap:20px;padding:0 28px;background:#2b7fae;color:#fff}
+.logo{width:36px;height:36px;border-radius:8px;background:#fff;color:#2b7fae;display:grid;place-items:center;font-weight:700}
+.inst{font-weight:700;font-size:16px}.inst small{display:block;font-weight:400;font-size:12px;opacity:.85}
+.exam{margin-left:24px;padding-left:24px;border-left:1px solid #ffffff55;font-size:14px}
+.sp{flex:1}
+.saved{font-size:13px;display:flex;align-items:center;gap:8px;background:#ffffff1f;padding:7px 12px;border-radius:6px}
+.dot{width:9px;height:9px;border-radius:50%;background:#9be29a}
+.timer{font-family:'Atkinson Hyperlegible Mono';font-size:26px;font-weight:700;letter-spacing:.02em}
+.legend{height:40px;display:flex;align-items:center;gap:22px;padding:0 28px;border-bottom:1px solid #d5ddd7;font-size:12px;background:#fff}
+.lg{display:flex;align-items:center;gap:7px}.sw{width:22px;height:12px;border:1px solid #1d2a2f}
+.scale{display:flex;margin-left:auto;align-items:center;gap:8px}.scale i{width:44px;height:10px;display:block}
+main{display:grid;grid-template-columns:340px 1fr;height:796px}
+aside{border-right:1px solid #d5ddd7;padding:20px 22px;background:#fbfcfa}
+.h{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6b70;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:20px repeat(5,48px);gap:4px;font-family:'Atkinson Hyperlegible Mono';font-size:12px}
+.grid .c{height:40px;border:1px solid #1d2a2f;display:grid;place-items:center;font-weight:700;background:#fff}
+.grid .lab{display:grid;place-items:center;color:#5a6b70;font-size:11px}
+.a{background:#5e9e5a!important;color:#fff;border-color:#3f7a3c!important}
+.f{background:#d9a441!important;color:#1d2a2f}
+.cur{outline:3px solid #2b7fae;outline-offset:1px}
+.e{background:#fff}
+.sum{margin-top:22px;display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #d5ddd7;background:#fff}
+.sum div{padding:10px;border-right:1px solid #d5ddd7}.sum div:last-child{border:0}
+.sum b{display:block;font-size:22px}.sum span{font-size:11px;color:#5a6b70}
+.q{padding:36px 64px;position:relative}
+.coord{font-family:'Atkinson Hyperlegible Mono';font-size:13px;color:#2b7fae;font-weight:700}
+.qn{display:flex;align-items:baseline;gap:14px;margin-bottom:18px}
+.qn h2{font-size:28px}
+.stem{font-size:19px;line-height:1.6;max-width:760px;margin-bottom:26px}
+.opt{display:flex;gap:16px;align-items:center;max-width:760px;padding:14px 16px;border:1px solid #c9d3cd;background:#fff;margin-bottom:10px;font-size:17px}
+.opt .k{width:34px;height:34px;border:1.5px solid #1d2a2f;display:grid;place-items:center;font-weight:700;font-family:'Atkinson Hyperlegible Mono'}
+.opt.sel{border:2px solid #2b7fae;background:#eef6fa}.opt.sel .k{background:#2b7fae;color:#fff;border-color:#2b7fae}
+.bar{position:absolute;left:64px;right:64px;bottom:28px;display:flex;gap:12px;align-items:center}
+.btn{padding:12px 20px;font-size:15px;font-weight:700;border:1.5px solid #1d2a2f;background:#fff}
+.btn.p{background:#1d2a2f;color:#fff}.btn.fl{border-color:#d9a441;background:#fbf1dc}
+.edge{position:absolute;top:0;bottom:0;right:0;width:22px;border-left:1px solid #d5ddd7;display:flex;flex-direction:column;justify-content:space-around;align-items:center;font-family:'Atkinson Hyperlegible Mono';font-size:10px;color:#8a989c}
+</style></head><body>
+<div class="top">
+  <div class="logo">3</div>
+  <div class="inst">SMA Negeri 3 Yogyakarta<small>Penilaian Tengah Semester Ganjil 2026</small></div>
+  <div class="exam">Matematika Wajib · Kelas XI · Ruang Lab 2</div>
+  <div class="sp"></div>
+  <div class="saved"><span class="dot"></span>Tersimpan 10.42.18 · 0 antre</div>
+  <div class="timer">01:12:45</div>
+</div>
+<div class="legend">
+  <span class="lg"><span class="sw" style="background:#5e9e5a"></span>Dijawab</span>
+  <span class="lg"><span class="sw" style="background:#d9a441"></span>Ragu-ragu</span>
+  <span class="lg"><span class="sw" style="background:#fff"></span>Kosong</span>
+  <span class="lg"><span class="sw" style="background:#fff;outline:3px solid #2b7fae"></span>Sedang dibuka</span>
+  <span class="scale">Progres <i style="background:#e4efe0"></i><i style="background:#b9d6ae"></i><i style="background:#8cc084"></i><i style="background:#5e9e5a"></i> 18 / 40</span>
+</div>
+<main>
+<aside>
+  <div class="h">Indeks soal</div>
+  <div class="grid">
+    <span></span><span class="lab">A</span><span class="lab">B</span><span class="lab">C</span><span class="lab">D</span><span class="lab">E</span>
+    <span class="lab">1</span><span class="c a">1</span><span class="c a">2</span><span class="c a">3</span><span class="c f">4</span><span class="c a">5</span>
+    <span class="lab">2</span><span class="c a">6</span><span class="c a">7</span><span class="c a">8</span><span class="c a">9</span><span class="c a">10</span>
+    <span class="lab">3</span><span class="c a">11</span><span class="c f">12</span><span class="c a">13</span><span class="c a">14</span><span class="c a">15</span>
+    <span class="lab">4</span><span class="c a">16</span><span class="c a">17</span><span class="c a">18</span><span class="c cur">19</span><span class="c e">20</span>
+    <span class="lab">5</span><span class="c e">21</span><span class="c e">22</span><span class="c e">23</span><span class="c e">24</span><span class="c e">25</span>
+    <span class="lab">6</span><span class="c e">26</span><span class="c e">27</span><span class="c e">28</span><span class="c e">29</span><span class="c e">30</span>
+    <span class="lab">7</span><span class="c e">31</span><span class="c e">32</span><span class="c e">33</span><span class="c e">34</span><span class="c e">35</span>
+    <span class="lab">8</span><span class="c e">36</span><span class="c e">37</span><span class="c e">38</span><span class="c e">39</span><span class="c e">40</span>
+  </div>
+  <div class="sum"><div><b>16</b><span>Dijawab</span></div><div><b>2</b><span>Ragu</span></div><div><b>22</b><span>Kosong</span></div></div>
+</aside>
+<section class="q">
+  <div class="qn"><span class="coord">D4</span><h2>Soal 19</h2><span style="font-size:13px;color:#5a6b70">Pilihan ganda · 2 poin</span></div>
+  <p class="stem">Diketahui fungsi f(x) = 2x² − 8x + 5. Nilai minimum fungsi tersebut dicapai pada x = …, dan nilai minimumnya adalah …</p>
+  <div class="opt"><span class="k">A</span>x = 1, nilai minimum −1</div>
+  <div class="opt sel"><span class="k">B</span>x = 2, nilai minimum −3</div>
+  <div class="opt"><span class="k">C</span>x = 2, nilai minimum 3</div>
+  <div class="opt"><span class="k">D</span>x = 4, nilai minimum 5</div>
+  <div class="opt"><span class="k">E</span>x = −2, nilai minimum 29</div>
+  <div class="bar"><span class="btn">← Sebelumnya</span><span class="btn fl">Tandai ragu (F)</span><span class="sp"></span><span class="btn p">Berikutnya →</span></div>
+  <div class="edge"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+</section>
+</main>
+</body></html>
+

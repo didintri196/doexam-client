@@ -74,7 +74,7 @@ export function ExamsPage() {
                     <Link to={`/exams/${e.id}`} className="font-semibold text-slate-900 hover:text-blue-600 dark:text-white">
                       {e.title}
                     </Link>
-                    {e.mode === 'random_blueprint' && <Badge className="ml-2" tone="purple">Blueprint acak</Badge>}
+                    {e.mode === 'random_blueprint' && <Badge className="ml-2" tone="blue">Blueprint acak</Badge>}
                   </td>
                   <td className={td}>{subjectName(e.subject_id)}</td>
                   <td className={td}>{e.duration_minutes ? `${e.duration_minutes} menit` : 'per bagian'}</td>
