@@ -44,6 +44,8 @@ Atau keduanya sekaligus (server DoExam sudah berjalan di port 8080):
 docker compose up --build
 ```
 
+Versi di footer (`© DoExam · vX`) diambil dari build arg `APP_VERSION`, mis. `--build-arg APP_VERSION=$(git describe --tags --always)` atau `APP_VERSION=1.0.0 docker compose up --build`. Tanpa itu dipakai `version` di `package.json`.
+
 | Image | Port contoh | `/` dialihkan ke | Catatan |
 |-------|-------------|------------------|---------|
 | `Dockerfile.exam` | 8081 | `/exam/` | CSP paling ketat, service worker `/exam/sw.js` tanpa cache, aset `immutable` |

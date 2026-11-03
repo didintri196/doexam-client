@@ -18,7 +18,7 @@ export const setupApi = {
 
 export const tenantApi = {
   get: () => api.get<T.Tenant>('/tenant'),
-  update: (body: Partial<{ name: string; timezone: string; locale: string; primary_color: string; letterhead: string }>) =>
+  update: (body: Partial<{ name: string; timezone: string; locale: string; primary_color: string; tagline: string; letterhead: string }>) =>
     api.patch<T.Tenant>('/tenant', body),
   setLogo: (file: File) => {
     const f = new FormData();

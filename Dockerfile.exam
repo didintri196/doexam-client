@@ -7,6 +7,9 @@ WORKDIR /src
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY . .
+# shown in the footer, e.g. --build-arg APP_VERSION=$(git describe --tags --always)
+ARG APP_VERSION=
+ENV APP_VERSION=${APP_VERSION}
 RUN npm run typecheck && npm run check:boundaries && ENTRY=exam npx vite build
 RUN node scripts/check-size.mjs
 

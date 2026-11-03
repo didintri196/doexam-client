@@ -19,7 +19,7 @@ import {
 import { useState, type ReactNode } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router';
 import { useAuth } from '@/shared/auth/auth';
-import { Brand, usePublicTenant } from '@/shared/auth/pages';
+import { AppFooter, BrandTitle, usePublicTenant } from '@/shared/auth/pages';
 import { cx, IconButton, ThemeToggle } from '@/shared/ui';
 import { Perm, useCan } from './perm';
 
@@ -79,10 +79,11 @@ export function Layout() {
         <aside className="no-print hidden w-60 shrink-0 border-r border-slate-200 bg-white p-4 md:block dark:border-slate-800 dark:bg-slate-900">
           <SideNav groups={groups} />
         </aside>
-        <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-7xl">
+        <main className="flex min-w-0 flex-1 flex-col px-4 py-6 sm:px-6 lg:px-8">
+          <div className="mx-auto w-full max-w-7xl flex-1">
             <Outlet />
           </div>
+          <AppFooter className="mt-8" />
         </main>
       </div>
       {mobile && (
@@ -141,12 +142,8 @@ function Header({ onMenu }: { onMenu: () => void }) {
           <IconButton label="Menu" className="md:hidden" onClick={onMenu}>
             <Menu className="h-4 w-4" />
           </IconButton>
-          <button type="button" onClick={() => navigate('/')} className="flex items-center gap-2.5 text-left">
-            <Brand tenant={tenant} />
-            <div>
-              <p className="text-base font-bold leading-none tracking-tight text-slate-900 dark:text-white">DoExam</p>
-              <p className="text-[11px] leading-tight text-slate-500 dark:text-slate-400">{tenant?.name ?? me?.tenant.name}</p>
-            </div>
+          <button type="button" onClick={() => navigate('/')} className="min-w-0 text-left">
+            <BrandTitle tenant={tenant} fallbackName={me?.tenant.name} />
           </button>
         </div>
         <div className="flex items-center gap-2">

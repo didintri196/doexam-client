@@ -20,6 +20,7 @@ export interface LoginResult { token: string; expires_at: ISODate; user: Me }
 export interface PublicTenant {
   slug: string;
   name: string;
+  tagline: string;
   preset: string;
   locale: string;
   primary_color: string | null;
@@ -29,6 +30,7 @@ export interface TenantSettings {
   timezone: string;
   locale: string;
   primary_color: string | null;
+  tagline: string;
   letterhead: string;
   logo_url: string | null;
 }

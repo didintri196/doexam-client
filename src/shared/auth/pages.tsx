@@ -31,6 +31,37 @@ export function Brand({ tenant, size = 'md' }: { tenant?: PublicTenant | null; s
   return <img src="/favicon.svg" alt="" className={`${box} shadow-sm`} />;
 }
 
+/** BrandTitle is the header block: tenant logo, name and tagline. */
+export function BrandTitle({ tenant, fallbackName }: { tenant?: PublicTenant | null; fallbackName?: string }) {
+  const name = tenant?.name ?? fallbackName ?? 'DoExam';
+  return (
+    <div className="flex min-w-0 items-center gap-2.5">
+      <Brand tenant={tenant} />
+      <div className="min-w-0">
+        <p className="truncate text-base font-bold leading-tight tracking-tight text-slate-900 dark:text-white">{name}</p>
+        {tenant?.tagline && <p className="truncate text-[11px] leading-tight text-slate-500 dark:text-slate-400">{tenant.tagline}</p>}
+      </div>
+    </div>
+  );
+}
+
+const REPO_URL = 'https://github.com/didintri196/doexam-server';
+// a release ("1.2.0") reads as v1.2.0; an untagged build shows its commit as is
+const VERSION = /^\d/.test(__APP_VERSION__) ? `v${__APP_VERSION__}` : __APP_VERSION__;
+
+/** AppFooter credits the open source project and shows the client version. */
+export function AppFooter({ className }: { className?: string }) {
+  return (
+    <p className={`no-print text-center text-[11px] text-slate-400 dark:text-slate-500 ${className ?? ''}`}>
+      ©{' '}
+      <a href={REPO_URL} target="_blank" rel="noreferrer" className="font-semibold hover:text-blue-600 hover:underline">
+        DoExam
+      </a>{' '}
+      · {VERSION}
+    </p>
+  );
+}
+
 export function AuthShell({ children, footer }: { children: ReactNode; footer?: ReactNode }) {
   return (
     <div className="relative flex min-h-screen flex-col justify-center bg-slate-50 px-4 py-12 dark:bg-slate-950">
@@ -39,6 +70,7 @@ export function AuthShell({ children, footer }: { children: ReactNode; footer?: 
       </div>
       {children}
       {footer && <div className="mt-6 text-center text-xs text-slate-500">{footer}</div>}
+      <AppFooter className="mt-8" />
     </div>
   );
 }
@@ -100,6 +132,7 @@ export function LoginPage({
           <Brand tenant={tenant} size="lg" />
         </div>
         <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">{tenant?.name ?? 'DoExam'}</h1>
+        {tenant?.tagline && <p className="text-sm text-slate-600 dark:text-slate-300">{tenant.tagline}</p>}
         <p className="text-xs text-slate-500">{heading}</p>
       </div>
 

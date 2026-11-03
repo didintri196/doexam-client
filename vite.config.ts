@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
@@ -14,8 +15,12 @@ if (only && !entries[only]) {
   throw new Error(`ENTRY must be exam or panel, got "${only}"`);
 }
 
+// Shown in the footer. Docker builds pass APP_VERSION (e.g. `git describe --tags`); otherwise package.json.
+const version = (process.env.APP_VERSION || JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf8')).version).replace(/^v/, '');
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  define: { __APP_VERSION__: JSON.stringify(version) },
   resolve: { alias: { '@': resolve(__dirname, 'src') } },
   build: {
     outDir: only ? `dist/${only}` : 'dist/all',
