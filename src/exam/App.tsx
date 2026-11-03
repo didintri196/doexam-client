@@ -30,7 +30,7 @@ export function App() {
                 footer={
                   <>
                     Staf atau pengawas? Masuk lewat{' '}
-                    <a href="/app/" className="font-semibold text-blue-600 hover:underline">
+                    <a href="/app/" className="font-medium text-blue-700 hover:underline dark:text-blue-300">
                       panel staf
                     </a>
                     .

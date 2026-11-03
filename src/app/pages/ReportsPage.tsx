@@ -27,7 +27,7 @@ export function ReportPage() {
         title={exam.data.title}
         subtitle="Laporan"
         back={
-          <Link to="/reports" className="mb-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline">
+          <Link to="/reports" className="mb-2 inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
             <ArrowLeft className="h-3.5 w-3.5" /> Pilih ujian
           </Link>
         }
@@ -125,7 +125,7 @@ function Recap({ examId, sessionId }: { examId: string; sessionId: string }) {
                     </td>
                     <td className={td}>{row.session_name}</td>
                     <td className={td}>{labels.attemptStatus[row.status] ?? row.status}</td>
-                    <td className={`${td} font-mono font-semibold`}>{formatNumber(row.score)}</td>
+                    <td className={`${td} tabular-nums font-semibold`}>{formatNumber(row.score)}</td>
                     <td className={td}>{row.passed === null ? '—' : row.passed ? <Badge tone="green">Lulus</Badge> : <Badge tone="red">Belum</Badge>}</td>
                     <td className={td}>{formatDateTime(row.submitted_at)}</td>
                   </tr>
@@ -182,9 +182,9 @@ function AnalysisView({ examId, sessionId }: { examId: string; sessionId: string
         <div className="flex h-40 items-end gap-2">
           {e.distribution.map((n, i) => (
             <div key={i} className="flex flex-1 flex-col items-center gap-1">
-              <span className="text-[10px] text-slate-500">{n || ''}</span>
+              <span className="text-[11px] text-slate-500">{n || ''}</span>
               <div className="w-full rounded-t-md bg-blue-500" style={{ height: `${(n / maxBin) * 100}%`, minHeight: n ? 4 : 0 }} />
-              <span className="text-[10px] text-slate-500">{i * 10}</span>
+              <span className="text-[11px] text-slate-500">{i * 10}</span>
             </div>
           ))}
         </div>
@@ -214,10 +214,10 @@ function AnalysisView({ examId, sessionId }: { examId: string; sessionId: string
                   {it.omitted > 0 && <span className="text-slate-400"> ({it.omitted} kosong)</span>}
                 </td>
                 <td className={td}>
-                  <span className="font-mono">{formatNumber(it.p_value)}</span> {it.difficulty_level && <Badge tone={diffTone[it.difficulty_level]}>{labels.difficulty[it.difficulty_level]}</Badge>}
+                  <span className="tabular-nums">{formatNumber(it.p_value)}</span> {it.difficulty_level && <Badge tone={diffTone[it.difficulty_level]}>{labels.difficulty[it.difficulty_level]}</Badge>}
                 </td>
                 <td className={td}>
-                  <span className="font-mono">{formatNumber(it.discrimination)}</span>{' '}
+                  <span className="tabular-nums">{formatNumber(it.discrimination)}</span>{' '}
                   {it.discrimination_level && <Badge tone={discTone[it.discrimination_level]}>{discLabel[it.discrimination_level]}</Badge>}
                 </td>
                 <td className={td}>{it.recommendation && <Badge tone={recTone[it.recommendation]}>{recLabel[it.recommendation]}</Badge>}</td>
@@ -245,11 +245,11 @@ function Distractors({ item }: { item: ItemStat }) {
       <p className="font-semibold">Sebaran pilihan</p>
       {opts.map(([id, o]) => (
         <div key={id} className="flex items-center gap-3">
-          <span className={cx('w-10 font-mono font-bold', o.is_key && 'text-emerald-600')}>{id}</span>
+          <span className={cx('w-10 font-mono font-semibold', o.is_key && 'text-emerald-600')}>{id}</span>
           <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
             <div className={cx('h-full', o.is_key ? 'bg-emerald-500' : 'bg-slate-400')} style={{ width: `${o.pct * 100}%` }} />
           </div>
-          <span className="w-24 text-right font-mono">
+          <span className="w-24 text-right tabular-nums">
             {o.n} ({formatPercent(o.pct)})
           </span>
           <span className="w-20 text-right font-mono text-slate-500">pbis {formatNumber(o.pbis)}</span>
@@ -295,7 +295,7 @@ export function AttemptReportPage() {
   return (
     <div className="space-y-5">
       <div className="no-print flex items-center justify-between">
-        <button type="button" onClick={() => history.back()} className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline">
+        <button type="button" onClick={() => history.back()} className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
           <ArrowLeft className="h-3.5 w-3.5" /> Kembali
         </button>
         <Button icon={<Printer className="h-4 w-4" />} onClick={() => window.print()}>
@@ -306,11 +306,11 @@ export function AttemptReportPage() {
         <div className="flex items-start gap-4 border-b border-slate-200 pb-4 dark:border-slate-800">
           {tenant.data?.settings.logo_url && <img src={tenant.data.settings.logo_url} alt="" className="h-14 w-14 object-contain" />}
           <div>
-            <p className="text-base font-extrabold">{tenant.data?.name}</p>
+            <p className="text-base font-semibold">{tenant.data?.name}</p>
             {tenant.data?.settings.letterhead && <p className="whitespace-pre-line text-[11px] text-slate-500">{tenant.data.settings.letterhead}</p>}
           </div>
         </div>
-        <h1 className="mt-4 text-lg font-extrabold">Laporan hasil ujian</h1>
+        <h1 className="mt-4 text-lg font-semibold">Laporan hasil ujian</h1>
         <div className="mt-3 grid gap-x-8 gap-y-1 text-xs sm:grid-cols-2">
           <Info k="Nama" v={r.full_name} />
           <Info k="Username / NIS" v={`${r.username}${r.external_id ? ` / ${r.external_id}` : ''}`} />
@@ -332,7 +332,7 @@ export function AttemptReportPage() {
         )}
         {r.sections.length > 1 && (
           <>
-            <h2 className="mt-6 text-sm font-bold">Per bagian</h2>
+            <h2 className="mt-6 text-sm font-semibold">Per bagian</h2>
             <table className="mt-2 w-full text-left text-xs">
               <tbody>
                 {r.sections.map((s) => (
@@ -350,7 +350,7 @@ export function AttemptReportPage() {
         )}
         {r.competencies.length > 0 && (
           <>
-            <h2 className="mt-6 text-sm font-bold">Penguasaan kompetensi</h2>
+            <h2 className="mt-6 text-sm font-semibold">Penguasaan kompetensi</h2>
             <div className="mt-2 space-y-1.5">
               {r.competencies.map((c) => (
                 <div key={c.competency_id} className="flex items-center gap-3 text-xs">
@@ -366,7 +366,7 @@ export function AttemptReportPage() {
             </div>
           </>
         )}
-        <h2 className="mt-6 text-sm font-bold">Rincian soal</h2>
+        <h2 className="mt-6 text-sm font-semibold">Rincian soal</h2>
         <table className="mt-2 w-full text-left text-xs">
           <thead>
             <tr>

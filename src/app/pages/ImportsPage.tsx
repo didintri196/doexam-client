@@ -145,7 +145,7 @@ export function ImportsPage() {
         </Card>
       </div>
 
-      <h2 className="mb-3 mt-8 text-sm font-bold">Riwayat impor</h2>
+      <h2 className="mb-3 mt-8 text-sm font-semibold">Riwayat impor</h2>
       {history.isLoading ? (
         <Loading />
       ) : !history.data?.items.length ? (

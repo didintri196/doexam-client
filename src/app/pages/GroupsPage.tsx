@@ -73,7 +73,7 @@ export function GroupsPage() {
                   <td className={td}>{nameOf(g.parent_id)}</td>
                   <td className={td}>{g.period ?? '—'}</td>
                   <td className={td}>
-                    <button type="button" className="font-semibold text-blue-600 hover:underline" onClick={() => setMembers(g)}>
+                    <button type="button" className="font-medium text-blue-700 hover:underline dark:text-blue-300" onClick={() => setMembers(g)}>
                       {g.member_count} anggota
                     </button>
                   </td>
@@ -225,7 +225,7 @@ function MembersModal({ group, onClose }: { group: Group; onClose: () => void })
                       <p className="font-semibold">{m.full_name}</p>
                       <p className="font-mono text-[11px] text-slate-500">{m.username}</p>
                     </td>
-                    <td className={td}>{m.member_role === 'leader' ? <Badge tone="purple">Wali</Badge> : <Badge>Anggota</Badge>}</td>
+                    <td className={td}>{m.member_role === 'leader' ? <Badge tone="blue">Wali</Badge> : <Badge>Anggota</Badge>}</td>
                     <td className={`${td} text-right`}>
                       <IconButton label="Keluarkan" onClick={() => remove.mutate(m.user_id)}>
                         <UserMinus className="h-3.5 w-3.5 text-rose-600" />

@@ -43,7 +43,7 @@ export function ExamDetailPage() {
         subtitle={
           <span className="flex flex-wrap items-center gap-2">
             <Badge tone={examTone[e.status]}>{labels.examStatus[e.status]}</Badge>
-            {e.mode === 'random_blueprint' && <Badge tone="purple">Blueprint acak</Badge>}
+            {e.mode === 'random_blueprint' && <Badge tone="blue">Blueprint acak</Badge>}
             <span>
               {e.item_count} soal per peserta · {e.total_minutes ? `${e.total_minutes} menit` : 'tanpa batas waktu'}
               {e.total_points !== null && ` · ${e.total_points} poin`}
@@ -51,7 +51,7 @@ export function ExamDetailPage() {
           </span>
         }
         back={
-          <Link to="/exams" className="mb-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline">
+          <Link to="/exams" className="mb-2 inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
             <ArrowLeft className="h-3.5 w-3.5" /> Ujian
           </Link>
         }
@@ -323,7 +323,7 @@ function SectionCard({
           {s.title}
           <Badge>{s.item_count} soal</Badge>
           {s.duration_minutes && <Badge tone="blue">{s.duration_minutes} menit</Badge>}
-          {s.selection === 'random' && <Badge tone="purple">Acak dari aturan</Badge>}
+          {s.selection === 'random' && <Badge tone="blue">Acak dari aturan</Badge>}
           {!s.allow_revisit && <Badge tone="amber">Tidak bisa dibuka lagi</Badge>}
         </span>
       }
@@ -467,7 +467,7 @@ function RuleTable({ rules, editable, onEdit, onRemove }: { exam: Exam; rules: R
                   {r.difficulty && <Badge>{labels.difficulty[r.difficulty]}</Badge>}
                   {r.competency_id && <Badge tone="blue">KD</Badge>}
                   {r.tags_any.map((t) => (
-                    <Badge key={t} tone="purple">
+                    <Badge key={t} tone="blue">
                       #{t}
                     </Badge>
                   ))}

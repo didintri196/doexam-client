@@ -35,7 +35,7 @@ function Login() {
     <LoginPage
       heading="Panel staf: guru, pengawas, dan admin"
       badge={
-        <Badge tone="purple">
+        <Badge tone="blue">
           <Briefcase className="h-3.5 w-3.5" /> Staf
         </Badge>
       }
@@ -43,7 +43,7 @@ function Login() {
       footer={
         <>
           Peserta ujian? Masuk lewat{' '}
-          <a href="/exam/" className="font-semibold text-blue-600 hover:underline">
+          <a href="/exam/" className="font-medium text-blue-700 hover:underline dark:text-blue-300">
             halaman ujian
           </a>
           .

@@ -9,11 +9,11 @@ const zones = ['Asia/Jakarta', 'Asia/Makassar', 'Asia/Jayapura', 'Asia/Singapore
 
 export function SettingsPage() {
   const tenant = useQuery({ queryKey: ['tenant'], queryFn: tenantApi.get });
-  const [f, setF] = useState({ name: '', timezone: '', locale: '', primary_color: '', letterhead: '' });
+  const [f, setF] = useState({ name: '', timezone: '', locale: '', primary_color: '', tagline: '', letterhead: '' });
   const fileRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const t = tenant.data;
-    if (t) setF({ name: t.name, timezone: t.settings.timezone, locale: t.settings.locale, primary_color: t.settings.primary_color ?? '', letterhead: t.settings.letterhead });
+    if (t) setF({ name: t.name, timezone: t.settings.timezone, locale: t.settings.locale, primary_color: t.settings.primary_color ?? '', tagline: t.settings.tagline, letterhead: t.settings.letterhead });
   }, [tenant.data]);
   const inv = [['tenant'], ['public-tenant']];
   const save = useAction(() => tenantApi.update(f), { success: 'Pengaturan disimpan', invalidate: inv, toastErrors: false });
@@ -31,6 +31,9 @@ export function SettingsPage() {
           <div className="space-y-4">
             <Field label="Nama institusi" error={fe.name}>
               <Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
+            </Field>
+            <Field label="Sub judul" error={fe.tagline} hint="Tampil di bawah nama institusi pada header dan halaman login. Kosongkan bila tidak perlu. Maks. 100 karakter.">
+              <Input value={f.tagline} onChange={(e) => setF({ ...f, tagline: e.target.value })} maxLength={100} placeholder="Sistem Ujian Online" />
             </Field>
             <div className="grid gap-4 sm:grid-cols-3">
               <Field label="Zona waktu" error={fe.timezone}>

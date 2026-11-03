@@ -188,7 +188,7 @@ export function ItemEditorPage() {
         title={id ? `Soal ${item.data?.code ?? ''}` : 'Soal baru'}
         subtitle={bank.data.name}
         back={
-          <Link to={`/banks/${bankId}`} className="mb-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline">
+          <Link to={`/banks/${bankId}`} className="mb-2 inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
             <ArrowLeft className="h-3.5 w-3.5" /> {bank.data.name}
           </Link>
         }
@@ -238,7 +238,7 @@ export function ItemEditorPage() {
                       onClick={() => setF((x) => ({ ...x, type: t, correct: t === 'mcq_single' ? x.correct.slice(0, 1) : x.correct }))}
                       className={cx(
                         'rounded-lg border px-3 py-1.5 text-xs font-semibold',
-                        f.type === t ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800',
+                        f.type === t ? 'border-blue-600 bg-blue-600 text-accent-fg' : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800',
                       )}
                     >
                       {labels.itemType[t]}
@@ -272,7 +272,7 @@ export function ItemEditorPage() {
                         onClick={() => toggleCorrect(o.id)}
                         title="Tandai sebagai jawaban benar"
                         className={cx(
-                          'mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-xs font-bold',
+                          'mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-xs font-semibold',
                           f.correct.includes(o.id) ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-300 text-slate-500 dark:border-slate-700',
                         )}
                       >
@@ -320,7 +320,7 @@ export function ItemEditorPage() {
                         key={String(v)}
                         type="button"
                         onClick={() => set('tf', v)}
-                        className={cx('rounded-xl border py-3 text-sm font-bold', f.tf === v ? (v ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-rose-600 bg-rose-600 text-white') : 'border-slate-200 dark:border-slate-700')}
+                        className={cx('rounded-xl border py-3 text-sm font-semibold', f.tf === v ? (v ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-rose-600 bg-rose-600 text-white') : 'border-slate-200 dark:border-slate-700')}
                       >
                         {v ? 'Benar' : 'Salah'}
                       </button>
@@ -459,7 +459,7 @@ export function ItemEditorPage() {
                 <ol className="space-y-1.5">
                   {f.options.map((o, i) => (
                     <li key={o.id} className={cx('flex gap-2 rounded-lg border p-2 text-xs', f.correct.includes(o.id) ? 'border-emerald-300 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/30' : 'border-slate-200 dark:border-slate-700')}>
-                      <span className="font-bold">{String.fromCharCode(65 + i)}.</span>
+                      <span className="font-semibold">{String.fromCharCode(65 + i)}.</span>
                       <RichContent html={o.body} />
                     </li>
                   ))}

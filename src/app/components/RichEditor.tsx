@@ -165,7 +165,7 @@ export function RichEditor({
       )}
       {preview && value && /data-math/.test(value) && (
         <div className="rounded-xl border border-dashed border-slate-300 p-2.5 text-sm dark:border-slate-700">
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Pratinjau</p>
+          <p className="mb-1 text-xs font-medium text-slate-500">Pratinjau</p>
           <RichContent html={value} />
         </div>
       )}

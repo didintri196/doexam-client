@@ -23,7 +23,7 @@ export function ResultPage() {
       <PageHeader
         title="Hasil ujian"
         back={
-          <Link to="/" className="mb-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline">
+          <Link to="/" className="mb-2 inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
             <ArrowLeft className="h-3.5 w-3.5" /> Ujian saya
           </Link>
         }
@@ -35,18 +35,20 @@ export function ResultPage() {
       ) : r ? (
         <div className="space-y-5">
           <Card>
-            <div className="flex flex-col items-center gap-2 py-6 text-center">
-              <CheckCircle2 className="h-12 w-12 text-emerald-500" />
-              <p className="text-lg font-extrabold text-slate-900 dark:text-white">Jawaban Anda sudah dikumpulkan</p>
+            <div className="flex flex-col items-center gap-2 py-8 text-center">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-50 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-950/50 dark:ring-emerald-900">
+                <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              </span>
+              <p className="mt-2 text-base font-semibold text-slate-900 dark:text-white">Jawaban Anda sudah dikumpulkan</p>
               {!r.visible ? (
-                <p className="max-w-md text-xs text-slate-500">Nilai belum ditampilkan. Hasil akan muncul di sini setelah dirilis oleh guru atau panitia.</p>
+                <p className="max-w-md text-xs text-slate-500 dark:text-slate-400">Nilai belum ditampilkan. Hasil akan muncul di sini setelah dirilis oleh guru atau panitia.</p>
               ) : (
                 <>
-                  <div className="mt-2 flex items-end gap-1">
-                    <span className="text-5xl font-extrabold tracking-tight text-blue-600">{formatNumber(r.final_score)}</span>
-                    <span className="pb-1.5 text-sm text-slate-400">/ 100</span>
+                  <div className="mt-3 flex items-baseline gap-1.5 tabular-nums">
+                    <span className="text-5xl font-semibold tracking-tight text-slate-900 dark:text-white">{formatNumber(r.final_score)}</span>
+                    <span className="text-sm text-slate-500">/ 100</span>
                   </div>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
                     Skor mentah {formatNumber(r.raw_score)} dari {formatNumber(r.max_score)} poin
                   </p>
                   {r.passed !== undefined && (
@@ -81,14 +83,14 @@ export function ResultPage() {
                     </span>
                     <div className="min-w-0 flex-1 text-xs">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-semibold text-slate-800 dark:text-slate-100">Soal {it.position}</span>
-                        <span className={cx('font-mono', it.is_correct ? 'text-emerald-600' : 'text-slate-500')}>
+                        <span className="font-medium text-slate-900 dark:text-slate-100">Soal {it.position}</span>
+                        <span className={cx('tabular-nums', it.is_correct ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500')}>
                           {it.score === null ? 'menunggu' : formatNumber(it.score)} / {formatNumber(it.max_points)}
                         </span>
                       </div>
                       {it.explanation && (
-                        <div className="mt-2 rounded-lg bg-slate-50 p-2.5 text-slate-600 dark:bg-slate-800/60 dark:text-slate-300">
-                          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Pembahasan</p>
+                        <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-slate-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
+                          <p className="mb-1 text-xs font-medium text-slate-900 dark:text-white">Pembahasan</p>
                           <RichContent html={it.explanation} />
                         </div>
                       )}

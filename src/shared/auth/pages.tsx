@@ -5,6 +5,7 @@ import { Navigate, useLocation, useNavigate } from 'react-router';
 import { authApi } from '@/shared/api/auth';
 import { ApiError } from '@/shared/api/client';
 import type { PublicTenant } from '@/shared/api/types';
+import { applyBrand } from '@/shared/lib/brand';
 import { errorMessage, fieldErrors } from '@/shared/lib/errors';
 import { Alert, Button, Field, Input, ThemeToggle } from '@/shared/ui';
 import { useAuth } from './auth';
@@ -15,30 +16,67 @@ import { useAuth } from './auth';
  * installation serves several institutions.
  */
 export function usePublicTenant(slug?: string) {
-  return useQuery<PublicTenant, ApiError>({
+  const q = useQuery<PublicTenant, ApiError>({
     queryKey: ['public-tenant', slug ?? ''],
     queryFn: () => authApi.publicTenant(slug),
     retry: (n, err) => err.isNetwork && n < 2,
     staleTime: 5 * 60_000,
   });
+  const color = q.data?.primary_color;
+  useEffect(() => applyBrand(color), [color]);
+  return q;
 }
 
 export function Brand({ tenant, size = 'md' }: { tenant?: PublicTenant | null; size?: 'md' | 'lg' }) {
-  const box = size === 'lg' ? 'h-16 w-16 rounded-2xl' : 'h-8 w-8 rounded-lg';
+  const box = size === 'lg' ? 'h-12 w-12 rounded-xl' : 'h-8 w-8 rounded-lg';
   if (tenant?.logo_url) {
-    return <img src={tenant.logo_url} alt="" className={`${box} border border-slate-200 bg-white object-contain shadow-sm dark:border-slate-700`} />;
+    return <img src={tenant.logo_url} alt="" className={`${box} shrink-0 border border-slate-200 bg-white object-contain p-0.5 dark:border-slate-700`} />;
   }
-  return <img src="/favicon.svg" alt="" className={`${box} shadow-sm`} />;
+  return <img src="/favicon.svg" alt="" className={`${box} shrink-0`} />;
+}
+
+/** BrandTitle is the header block: tenant logo, name and tagline. */
+export function BrandTitle({ tenant, fallbackName }: { tenant?: PublicTenant | null; fallbackName?: string }) {
+  const name = tenant?.name ?? fallbackName ?? 'DoExam';
+  return (
+    <div className="flex min-w-0 items-center gap-2.5">
+      <Brand tenant={tenant} />
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold leading-5 text-slate-900 dark:text-white">{name}</p>
+        {tenant?.tagline && <p className="truncate text-[11px] leading-4 text-slate-500 dark:text-slate-400">{tenant.tagline}</p>}
+      </div>
+    </div>
+  );
+}
+
+const REPO_URL = 'https://github.com/didintri196/doexam-server';
+// a release ("1.2.0") reads as v1.2.0; an untagged build shows its commit as is
+const VERSION = /^\d/.test(__APP_VERSION__) ? `v${__APP_VERSION__}` : __APP_VERSION__;
+
+/** AppFooter credits the open source project and shows the client version. */
+export function AppFooter({ className }: { className?: string }) {
+  return (
+    <p className={`no-print text-center text-[11px] tabular-nums text-slate-500 ${className ?? ''}`}>
+      ©{' '}
+      <a href={REPO_URL} target="_blank" rel="noreferrer" className="font-medium text-slate-600 hover:text-slate-900 hover:underline dark:text-slate-400 dark:hover:text-white">
+        DoExam
+      </a>{' '}
+      · {VERSION}
+    </p>
+  );
 }
 
 export function AuthShell({ children, footer }: { children: ReactNode; footer?: ReactNode }) {
   return (
-    <div className="relative flex min-h-screen flex-col justify-center bg-slate-50 px-4 py-12 dark:bg-slate-950">
+    <div className="relative flex min-h-screen flex-col bg-slate-50 px-4 dark:bg-slate-950">
       <div className="absolute right-4 top-4">
         <ThemeToggle />
       </div>
-      {children}
-      {footer && <div className="mt-6 text-center text-xs text-slate-500">{footer}</div>}
+      <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-16">
+        {children}
+        {footer && <div className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">{footer}</div>}
+      </div>
+      <AppFooter className="pb-6" />
     </div>
   );
 }
@@ -95,17 +133,18 @@ export function LoginPage({
 
   return (
     <AuthShell footer={footer}>
-      <div className="space-y-3 text-center sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <Brand tenant={tenant} size="lg" />
+      <div className="flex flex-col items-center text-center">
+        <Brand tenant={tenant} size="lg" />
+        <h1 className="mt-5 text-balance text-xl font-semibold tracking-tight text-slate-900 dark:text-white">{tenant?.name ?? 'DoExam'}</h1>
+        {tenant?.tagline && <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{tenant.tagline}</p>}
+        <div className="mt-4 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+          {badge}
+          <span>{heading}</span>
         </div>
-        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">{tenant?.name ?? 'DoExam'}</h1>
-        <p className="text-xs text-slate-500">{heading}</p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="space-y-5 rounded-3xl border border-slate-200 bg-white px-6 py-8 shadow-xl sm:px-10 dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex justify-center">{badge}</div>
+      <div className="mt-8">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           {setupRequired ? (
             <Alert tone="amber">Aplikasi belum di-setup. Minta admin menyelesaikan setup di panel staf.</Alert>
           ) : (
@@ -113,16 +152,16 @@ export function LoginPage({
               {needTenant && (
                 <Field label="Kode institusi" error={fields.tenant} hint="Instalasi ini melayani beberapa institusi.">
                   <div className="relative">
-                    <School className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                    <Input className="pl-9 font-mono" value={slug} onChange={(e) => setSlug(e.target.value)} autoComplete="organization" />
+                    <School className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <Input className="h-9 pl-9 font-mono" value={slug} onChange={(e) => setSlug(e.target.value)} autoComplete="organization" />
                   </div>
                 </Field>
               )}
               <Field label="Username" error={fields.username}>
                 <div className="relative">
-                  <User className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                  <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <Input
-                    className="pl-9 font-mono"
+                    className="h-9 pl-9"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     autoComplete="username"
@@ -133,9 +172,9 @@ export function LoginPage({
               </Field>
               <Field label="Password" error={fields.password}>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                  <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <Input
-                    className="pl-9"
+                    className="h-9 pl-9"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -145,8 +184,8 @@ export function LoginPage({
                 </div>
               </Field>
               {error && <Alert>{error}</Alert>}
-              <Button type="submit" size="lg" className="w-full" loading={busy} icon={!busy && <ArrowRight className="h-4 w-4" />}>
-                Masuk
+              <Button type="submit" size="lg" className="mt-2 w-full" loading={busy}>
+                Masuk {!busy && <ArrowRight className="h-4 w-4" />}
               </Button>
             </form>
           )}
@@ -189,13 +228,15 @@ export function ChangePasswordPage() {
 
   return (
     <AuthShell>
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="space-y-5 rounded-3xl border border-slate-200 bg-white px-6 py-8 shadow-xl sm:px-10 dark:border-slate-800 dark:bg-slate-900">
-          <div className="space-y-1 text-center">
-            <KeyRound className="mx-auto h-8 w-8 text-blue-600" />
-            <h1 className="text-lg font-extrabold text-slate-900 dark:text-white">Ganti password</h1>
-            {me?.must_change_password && <p className="text-xs text-slate-500">Demi keamanan, ganti password sementara Anda sebelum melanjutkan.</p>}
-          </div>
+      <div>
+        <div className="mb-8 flex flex-col items-center text-center">
+          <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+            <KeyRound className="h-5 w-5" />
+          </span>
+          <h1 className="mt-5 text-xl font-semibold tracking-tight text-slate-900 dark:text-white">Ganti password</h1>
+          {me?.must_change_password && <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">Demi keamanan, ganti password sementara Anda sebelum melanjutkan.</p>}
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <form onSubmit={submit} className="space-y-4">
             <Field label="Password saat ini" error={fields.current_password}>
               <Input type="password" value={current} onChange={(e) => setCurrent(e.target.value)} autoComplete="current-password" required />
