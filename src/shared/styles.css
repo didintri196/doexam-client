@@ -1,0 +1,50 @@
+@import "tailwindcss";
+@import "@fontsource-variable/plus-jakarta-sans";
+@import "katex/dist/katex.min.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'JetBrains Mono', Menlo, Consolas, monospace;
+}
+
+:root { color-scheme: light; }
+:root.dark { color-scheme: dark; }
+
+body { font-family: var(--font-sans); }
+
+/* Rendered item content (stem, options, stimulus): sanitized HTML from the server. */
+.rich { line-height: 1.65; overflow-wrap: anywhere; }
+.rich p { margin: 0 0 .6em; }
+.rich p:last-child { margin-bottom: 0; }
+.rich ul { list-style: disc; padding-left: 1.4em; margin: .4em 0; }
+.rich ol { list-style: decimal; padding-left: 1.4em; margin: .4em 0; }
+.rich table { border-collapse: collapse; margin: .6em 0; }
+.rich th, .rich td { border: 1px solid rgb(203 213 225); padding: .3em .6em; }
+.rich blockquote { border-left: 3px solid rgb(148 163 184); padding-left: .8em; color: rgb(71 85 105); }
+.rich pre, .rich code { font-family: var(--font-mono); font-size: .92em; }
+.rich img { max-width: 100%; height: auto; }
+.rich .align-center { text-align: center; }
+.rich .align-right { text-align: right; }
+.rich .align-justify { text-align: justify; }
+
+/* Editable rich text in the item editor. */
+.rich-editor:empty::before { content: attr(data-placeholder); color: rgb(148 163 184); }
+.rich-editor:focus { outline: none; }
+
+/* High-contrast exam mode (accessibility). */
+.hc, .hc * { background-color: #000 !important; color: #fde047 !important; border-color: #fde047 !important; }
+.hc .katex * { background: transparent !important; }
+
+@media print {
+  body { background: white !important; color: black !important; }
+  .no-print { display: none !important; }
+}
+
+/* formulas inside the editor show their LaTeX as a chip; the preview typesets them */
+.rich-editor [data-math], .rich-editor [data-math-block] {
+  font-family: var(--font-mono); font-size: .85em; background: rgb(219 234 254); color: rgb(30 64 175);
+  border-radius: .35rem; padding: 0 .3rem; white-space: nowrap;
+}
+.dark .rich-editor [data-math], .dark .rich-editor [data-math-block] { background: rgb(30 58 138 / .5); color: rgb(191 219 254); }

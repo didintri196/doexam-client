@@ -1,0 +1,30 @@
+# Exam client and staff panel as two static nginx containers in front of the DoExam server.
+# Start the server first (apps/server: docker compose up), then here: docker compose up --build
+#   exam client  → http://localhost:8081/exam/
+#   staff panel  → http://localhost:8082/app/
+name: doexam-client
+
+services:
+  exam:
+    build:
+      context: .
+      dockerfile: Dockerfile.exam
+    ports:
+      - "8081:8080"
+    environment:
+      API_UPSTREAM: ${API_UPSTREAM:-http://host.docker.internal:8080}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  panel:
+    build:
+      context: .
+      dockerfile: Dockerfile.panel
+    ports:
+      - "8082:8080"
+    environment:
+      API_UPSTREAM: ${API_UPSTREAM:-http://host.docker.internal:8080}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

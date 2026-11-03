@@ -1,0 +1,21 @@
+# DoExam Panel staf: static build served by nginx (CSR, no Node at runtime).
+#   docker build -f Dockerfile.panel -t doexam-panel .
+#   docker run -p 8082:8080 -e API_UPSTREAM=http://host.docker.internal:8080 doexam-panel
+
+FROM node:22-alpine AS build
+WORKDIR /src
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY . .
+RUN npm run typecheck && npm run check:boundaries && ENTRY=panel npx vite build
+# public/exam (service worker, manifest) belongs to the exam client only
+RUN rm -rf dist/panel/exam
+
+FROM nginxinc/nginx-unprivileged:1.27-alpine
+# where nginx forwards /api (the DoExam server)
+ENV API_UPSTREAM=http://server:8080
+COPY docker/nginx/security-headers.conf /etc/nginx/snippets/
+COPY docker/nginx/panel.conf.template /etc/nginx/templates/default.conf.template
+COPY --from=build /src/dist/panel /usr/share/nginx/html
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://127.0.0.1:8080/healthz >/dev/null || exit 1
