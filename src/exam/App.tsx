@@ -5,7 +5,7 @@ import { AuthProvider, RequireAuth } from '@/shared/auth/auth';
 import { ChangePasswordPage, LoginPage } from '@/shared/auth/pages';
 import { isParticipant } from '@/shared/lib/perm';
 import { Badge } from '@/shared/ui';
-import { HistoryPage, SessionsPage } from './pages/SessionsPage';
+import { SessionsPage } from './pages/SessionsPage';
 import { ResultPage } from './pages/ResultPage';
 import { TakePage } from './pages/TakePage';
 
@@ -41,7 +41,6 @@ export function App() {
           />
           <Route path="/change-password" element={<RequireAuth><ChangePasswordPage /></RequireAuth>} />
           <Route path="/" element={<RequireAuth><SessionsPage /></RequireAuth>} />
-          <Route path="/history" element={<RequireAuth><HistoryPage /></RequireAuth>} />
           <Route path="/attempt/:id" element={<RequireAuth><TakePage /></RequireAuth>} />
           <Route path="/result/:id" element={<RequireAuth><ResultPage /></RequireAuth>} />
           <Route path="*" element={<Navigate to="/" replace />} />

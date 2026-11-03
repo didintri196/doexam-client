@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, CalendarClock, Clock, DoorOpen, History, KeyRound, MapPin, PlayCircle, RefreshCw } from 'lucide-react';
+import { ArrowRight, CalendarClock, Clock, DoorOpen, KeyRound, MapPin, PlayCircle, RefreshCw } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router';
-import type { MyAttempt, MySession } from '@/shared/api/types';
+import type { MySession } from '@/shared/api/types';
 import { useAuth } from '@/shared/auth/auth';
 import { errorMessage, fieldErrors } from '@/shared/lib/errors';
 import { formatDateTime, formatTime, labels } from '@/shared/lib/format';
@@ -178,51 +178,5 @@ function StartModal({ session, onClose }: { session: MySession; onClose: () => v
         {error && !fields.token && <Alert>{error}</Alert>}
       </form>
     </Modal>
-  );
-}
-
-const attemptTone = { in_progress: 'blue', locked: 'amber', submitted: 'slate', graded: 'green', void: 'red' } as const;
-
-export function HistoryPage() {
-  const navigate = useNavigate();
-  const attempts = useQuery({ queryKey: ['my-attempts'], queryFn: examApi.myAttempts });
-  const list = [...(attempts.data ?? [])].sort((a, b) => Date.parse(b.started_at) - Date.parse(a.started_at));
-  const open = (a: MyAttempt) => navigate(a.status === 'in_progress' || a.status === 'locked' ? `/attempt/${a.id}` : `/result/${a.id}`);
-  return (
-    <Shell>
-      <PageHeader title="Riwayat ujian" subtitle="Ujian yang pernah Anda kerjakan." />
-      {attempts.isLoading ? (
-        <Loading />
-      ) : attempts.error ? (
-        <Alert>{errorMessage(attempts.error)}</Alert>
-      ) : list.length === 0 ? (
-        <Card>
-          <EmptyState icon={<History className="h-10 w-10" />} title="Belum ada riwayat" />
-        </Card>
-      ) : (
-        <div className="space-y-2">
-          {list.map((a) => (
-            <button
-              key={a.id}
-              type="button"
-              onClick={() => open(a)}
-              className="flex w-full items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-left transition-colors hover:border-blue-300 dark:border-slate-800 dark:bg-slate-900"
-            >
-              <div className="min-w-0">
-                <p className="truncate text-sm font-bold text-slate-900 dark:text-white">{a.exam_title}</p>
-                <p className="text-[11px] text-slate-500">
-                  Percobaan ke-{a.attempt_no} · mulai {formatDateTime(a.started_at)}
-                  {a.submitted_at && ` · selesai ${formatTime(a.submitted_at)}`}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge tone={attemptTone[a.status]}>{labels.attemptStatus[a.status]}</Badge>
-                <ArrowRight className="h-4 w-4 text-slate-400" />
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
-    </Shell>
   );
 }

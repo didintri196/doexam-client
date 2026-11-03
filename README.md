@@ -8,7 +8,7 @@ Rencana & keputusan: `DOCS/PLAN/09-FRONTEND.md` di repo utama DoExam. Aturan cod
 
 | Entry | Untuk | Fitur |
 |-------|-------|-------|
-| `/exam/` | Peserta | Login, daftar ujian, token ruang, ruang ujian 5 tipe soal (PG, PG kompleks, B/S, isian, esai) dengan rumus KaTeX, ragu-ragu, navigasi keyboard, timer jam server, mode bagian berurutan, **tetap jalan saat jaringan putus** (antrean IndexedDB + service worker), layar penuh & catatan pindah tab, ukuran huruf & kontras tinggi, hasil & pembahasan, riwayat |
+| `/exam/` | Peserta | Login, daftar ujian, token ruang, ruang ujian 5 tipe soal (PG, PG kompleks, B/S, isian, esai) dengan rumus KaTeX, ragu-ragu, navigasi keyboard, timer jam server, mode bagian berurutan, **tetap jalan saat jaringan putus** (antrean IndexedDB + service worker), layar penuh & catatan pindah tab, ukuran huruf & kontras tinggi, hasil (rincian & pembahasan bila diaktifkan). Tanpa menu: halaman ini hanya untuk mengikuti ujian |
 | `/app/` | Staf | Setup pertama, ringkasan hari ini, sesi (jadwal, token, proyektor, peserta per kelas, pengawas, buka/jeda/tutup), monitor proktor (kunci, tambah waktu, reset perangkat, kumpulkan paksa), bank soal & stimulus & editor soal (rumus LaTeX, versi), mapel & kompetensi, penyusun ujian (bagian, soal, aturan blueprint, periksa, terbit), koreksi esai dengan rubrik, anulir/ganti kunci, rekap nilai + ekspor Excel, analisis butir, laporan individu yang bisa dicetak, pengguna, kelas/grup, impor Excel, pengaturan institusi & logo |
 
 Menu panel muncul sesuai izin akun. Akun peserta tidak bisa masuk panel, dan akun staf tidak bisa masuk halaman ujian.
