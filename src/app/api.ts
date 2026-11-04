@@ -79,12 +79,15 @@ export const groupApi = {
 };
 
 export const importApi = {
-  template: (kind: T.ImportKind) => api.openFile(`/public/templates/template-impor-${kind}.xlsx`),
+  /** template opens a public template file, e.g. template-peserta.xlsx. */
+  template: (name: string) => api.openFile(`/public/templates/${name}`),
   list: (q: Q) => api.page<T.ImportJob>('/imports', q),
   get: (id: string) => api.get<T.ImportJob>(`/imports/${id}`),
-  upload: (kind: T.ImportKind, file: File) => {
+  upload: (kind: T.ImportKind, file: File, target: { audience?: T.ImportAudience; group_id?: string } = {}) => {
     const f = new FormData();
     f.append('kind', kind);
+    if (target.audience) f.append('audience', target.audience);
+    if (target.group_id) f.append('group_id', target.group_id);
     f.append('file', file);
     return api.post<T.ImportJob>('/imports', f);
   },

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { Copy, KeyRound, Pencil, Plus, Trash2, UserCog, Users } from 'lucide-react';
+import { Copy, FileSpreadsheet, KeyRound, Pencil, Plus, Trash2, UserCog, Users } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router';
 import type { Role, User, UserStatus } from '@/shared/api/types';
 import { formatDateTime } from '@/shared/lib/format';
 import { isParticipant, isStaff } from '@/shared/lib/perm';
@@ -61,9 +62,16 @@ export function UsersPage({ kind }: { kind: UserKind }) {
         title={text.title}
         subtitle={text.subtitle}
         actions={
-          <Button icon={<Plus className="h-4 w-4" />} onClick={() => setEditing('new')}>
-            {text.add}
-          </Button>
+          <>
+            <Link to={kind === 'staff' ? '/users/staff/import' : '/users/participants/import'}>
+              <Button variant="secondary" icon={<FileSpreadsheet className="h-4 w-4" />}>
+                Impor Excel
+              </Button>
+            </Link>
+            <Button icon={<Plus className="h-4 w-4" />} onClick={() => setEditing('new')}>
+              {text.add}
+            </Button>
+          </>
         }
       />
       <div className="mb-4 flex flex-wrap gap-2">

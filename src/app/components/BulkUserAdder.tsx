@@ -39,6 +39,7 @@ export function BulkUserAdder({
   activeOnly = false,
   extra,
   action,
+  importLink = '/users/participants/import',
 }: {
   selected: PickedUser[];
   onChange: (users: PickedUser[]) => void;
@@ -48,6 +49,8 @@ export function BulkUserAdder({
   extra?: { label: string; content: ReactNode };
   /** Rendered under the selection while it is not empty (e.g. role + "Tambahkan"). */
   action?: ReactNode;
+  /** Where "create accounts for the ones not found" leads (a group's own import page). */
+  importLink?: string;
 }) {
   const [tab, setTab] = useState<Source | 'extra'>('paste');
   const [report, setReport] = useState<Report | null>(null);
@@ -88,7 +91,7 @@ export function BulkUserAdder({
           {tab === 'paste' && <PasteSource onResult={applyResult} />}
           {tab === 'file' && <FileSource onResult={applyResult} />}
           {tab === 'search' && <SearchSource selected={selected} onChange={onChange} role={role} activeOnly={activeOnly} />}
-          {report && <ReportView report={report} onDismiss={() => setReport(null)} />}
+          {report && <ReportView report={report} importLink={importLink} onDismiss={() => setReport(null)} />}
           <Selection
             selected={selected}
             onChange={(users) => {
@@ -291,7 +294,7 @@ function SearchSource({
   );
 }
 
-function ReportView({ report: r, onDismiss }: { report: Report; onDismiss: () => void }) {
+function ReportView({ report: r, importLink, onDismiss }: { report: Report; importLink: string; onDismiss: () => void }) {
   const can = useCan();
   const problems = r.notFound.length + r.ambiguous.length + r.suspended;
   return (
@@ -316,10 +319,10 @@ function ReportView({ report: r, onDismiss }: { report: Report; onDismiss: () =>
             {r.notFound.length > 0 && can(Perm.UserManage) && (
               <p>
                 Belum punya akun?{' '}
-                <Link to="/imports" className="font-semibold underline underline-offset-2">
+                <Link to={importLink} className="font-semibold underline underline-offset-2">
                   Buat lewat Impor Excel
                 </Link>
-                , isi kolom <span className="font-mono">groups</span> agar langsung masuk grup.
+                {importLink.startsWith('/groups/') ? '; akun baru langsung masuk grup ini.' : '.'}
               </p>
             )}
             {r.ambiguous.length > 0 && <IdentifierList label="Cocok dengan lebih dari satu orang, pakai username" items={r.ambiguous} />}
