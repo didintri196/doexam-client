@@ -48,6 +48,16 @@ export const userApi = {
   },
 };
 
+export const mediaApi = {
+  upload: (file: Blob, name: string) => {
+    const f = new FormData();
+    f.append('file', file, name);
+    return api.post<T.MediaFile>('/media', f);
+  },
+  /** Signed links for media ids found in content (unknown ids are left out). */
+  links: (ids: string[]) => api.post<T.MediaRefs>('/media/links', { ids }),
+};
+
 export const groupApi = {
   list: (q: Q) => api.page<T.Group>('/groups', q),
   get: (id: string) => api.get<T.Group>(`/groups/${id}`),

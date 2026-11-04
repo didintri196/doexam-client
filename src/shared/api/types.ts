@@ -368,6 +368,12 @@ export interface SectionView {
   item_count: number;
   items: ItemView[] | null;
 }
+// ── media ──────────────────────────────────────────────────────
+/** What a renderer needs for one data-media-id (signed URL, type, image size). */
+export interface MediaRef { url: string; mime: string; w?: number; h?: number }
+export type MediaRefs = Record<string, MediaRef>;
+export interface MediaFile { id: ID; mime_type: string; size_bytes: number; width: number | null; height: number | null; url: string }
+
 export interface AttemptView {
   id: ID;
   exam_title: string;
@@ -381,6 +387,8 @@ export interface AttemptView {
   deadline_at: ISODate;
   server_time: ISODate;
   sections: SectionView[];
+  /** Signed links for every data-media-id in the delivered items. */
+  media: MediaRefs;
 }
 export type EventType = 'RESPONSE_SAVED' | 'FLAG_SET' | 'ITEM_VIEWED' | 'FOCUS_LOST' | 'FOCUS_RETURNED' | 'FULLSCREEN_EXIT';
 export interface ClientEvent {
@@ -409,6 +417,7 @@ export interface AttemptResult {
   passed?: boolean;
   pending_manual: number;
   items?: { position: number; score: number | null; max_points: number; is_correct: boolean | null; explanation?: string }[];
+  media?: MediaRefs;
 }
 export interface MyAttempt {
   id: ID;

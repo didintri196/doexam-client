@@ -1,9 +1,13 @@
 import DOMPurify from 'dompurify';
-import { useLayoutEffect, useMemo, useRef } from 'react';
+import { X } from 'lucide-react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { cx } from '@/shared/ui';
+import { hydrateMedia, useMedia } from './media';
 
 // Same allowlist as the server (apps/server/pkg/richtext). The server already sanitized
-// the HTML; this second pass is defense in depth (09-FRONTEND §5.5).
+// the HTML; this second pass is defense in depth (09-FRONTEND §5.5). `src` is not allowed:
+// media are referenced by data-media-id and resolved to signed links after sanitizing.
 const ALLOWED_TAGS = [
   'p', 'br', 'strong', 'em', 'u', 's', 'sub', 'sup', 'ul', 'ol', 'li', 'blockquote',
   'table', 'thead', 'tbody', 'tr', 'th', 'td', 'span', 'div', 'pre', 'code', 'img', 'audio', 'video', 'source',
@@ -42,15 +46,85 @@ export function renderMath(root: HTMLElement) {
 /** RichContent renders sanitized item HTML (stem, options, stimulus, explanation). */
 export function RichContent({ html, className, inline }: { html: string | null | undefined; className?: string; inline?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
+  const media = useMedia();
   const clean = useMemo(() => sanitize(html ?? ''), [html]);
+  const [zoom, setZoom] = useState<{ src: string; alt: string } | null>(null);
+
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     el.innerHTML = clean;
     renderMath(el);
   }, [clean]);
+
+  // Links can arrive after the first paint (panel), so hydrate on every new version.
+  const version = media.version();
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const missing = hydrateMedia(el, media);
+    if (missing.length) media.request(missing);
+  }, [clean, media, version]);
+
+  const onClick = (e: MouseEvent) => {
+    const t = e.target;
+    if (t instanceof HTMLImageElement && t.src && t.closest('.rich-zoomable')) {
+      e.preventDefault();
+      e.stopPropagation(); // an image inside an option must not select the option
+      setZoom({ src: t.src, alt: t.alt });
+    }
+  };
+
   const Tag = inline ? 'span' : 'div';
-  return <Tag ref={ref} className={cx('rich', className)} />;
+  return (
+    <>
+      <Tag ref={ref} onClick={onClick} className={cx('rich rich-zoomable', className)} />
+      {zoom && <ImageZoom src={zoom.src} alt={zoom.alt} onClose={() => setZoom(null)} />}
+    </>
+  );
+}
+
+/** ImageZoom shows one picture over the page; click or Escape closes it. */
+function ImageZoom({ src, alt, onClose }: { src: string; alt: string; onClose: () => void }) {
+  const close = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    close.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, [onClose]);
+  // Portal + stopPropagation: the picture may sit inside an answer option (a button);
+  // closing the zoom must not select that option.
+  const stop = (e: MouseEvent) => {
+    e.stopPropagation();
+    onClose();
+  };
+  return createPortal(
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={alt || 'Gambar diperbesar'}
+      onClick={stop}
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/85 p-4 sm:p-10"
+    >
+      <img src={src} alt={alt} className="max-h-full max-w-full rounded-md bg-white object-contain shadow-2xl" />
+      <button
+        ref={close}
+        type="button"
+        onClick={stop}
+        aria-label="Tutup gambar"
+        className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+      >
+        <X className="h-5 w-5" />
+      </button>
+    </div>,
+    document.body,
+  );
 }
 
 /** plainText strips tags for previews and labels. */

@@ -7,6 +7,7 @@ import {
   CloudOff,
   Eye,
   FileText,
+  ImageDown,
   Flag,
   Lock,
   Maximize2,
@@ -18,12 +19,14 @@ import {
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Navigate, useLocation, useNavigate, useParams } from 'react-router';
 import type { AttemptView, ItemView, Response } from '@/shared/api/types';
+import { StaticMedia } from '@/shared/item/media';
 import { RichContent } from '@/shared/item/RichContent';
 import { errorMessage } from '@/shared/lib/errors';
 import { formatClock, labels } from '@/shared/lib/format';
 import { Brand, BrandTitle, usePublicTenant } from '@/shared/auth/pages';
 import { Alert, Badge, Button, cx, IconButton, Loading, Modal, useToast } from '@/shared/ui';
 import { activeSection, isAnswered, useAttemptEngine, type AttemptEngine, type FlatItem, type Snapshot } from '../engine';
+import type { MediaProgress } from '../mediaCache';
 
 type FontScale = 'normal' | 'large' | 'xl';
 const fontClass: Record<FontScale, string> = { normal: 'text-base', large: 'text-lg', xl: 'text-xl' };
@@ -143,6 +146,7 @@ function ExamRoom({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
   const hc = prefs.contrast;
 
   return (
+    <StaticMedia refs={view.media}>
     <div className={cx('flex min-h-screen flex-col', hc ? 'hc' : 'bg-slate-50 dark:bg-slate-950')}>
       {/* header */}
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
@@ -177,6 +181,8 @@ function ExamRoom({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
           </div>
         )}
       </header>
+
+      <MediaStatus progress={s.media} />
 
       {s.notice && (
         <div className="mx-auto mt-4 w-full max-w-7xl px-4 sm:px-6">
@@ -374,6 +380,7 @@ function ExamRoom({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
         </Overlay>
       )}
     </div>
+    </StaticMedia>
   );
 }
 
@@ -464,6 +471,35 @@ function Timer({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
     >
       <Clock className={cx('hidden h-4 w-4 sm:block', critical ? 'text-rose-500' : 'text-slate-400')} />
       <span className="text-lg font-semibold tracking-tight">{formatClock(left)}</span>
+    </div>
+  );
+}
+
+/**
+ * MediaStatus reports the download of the pictures while it runs, and stays only when some
+ * could not be downloaded (they still load whenever the network is there).
+ */
+function MediaStatus({ progress: p }: { progress?: MediaProgress }) {
+  if (!p || !p.total) return null;
+  const busy = p.ready + p.failed < p.total;
+  if (!busy && !p.failed) return null;
+  return (
+    <div className="mx-auto mt-4 w-full max-w-7xl px-4 sm:px-6" aria-live="polite">
+      {busy ? (
+        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+          <ImageDown className="h-4 w-4 shrink-0 text-slate-400" />
+          <span className="tabular-nums">
+            Menyiapkan gambar soal {p.ready + p.failed} dari {p.total}
+          </span>
+          <span className="h-1 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+            <span className="block h-full rounded-full bg-blue-600 transition-[width]" style={{ width: `${((p.ready + p.failed) / p.total) * 100}%` }} />
+          </span>
+        </div>
+      ) : (
+        <Alert tone="amber">
+          {p.failed} gambar soal belum terunduh. Gambar itu tetap tampil selama koneksi ada; jawaban Anda tidak terpengaruh.
+        </Alert>
+      )}
     </div>
   );
 }

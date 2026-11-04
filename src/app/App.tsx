@@ -1,5 +1,6 @@
 import { Briefcase } from 'lucide-react';
 import { useCallback } from 'react';
+import { MediaProvider } from './components/MediaProvider';
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router';
 import type { Me } from '@/shared/api/types';
 import { AuthProvider, RequireAuth } from '@/shared/auth/auth';
@@ -62,7 +63,7 @@ export function App() {
           <Route path="/setup" element={<SetupPage />} />
           <Route path="/change-password" element={<RequireAuth><ChangePasswordPage /></RequireAuth>} />
           <Route path="/sessions/:id/board" element={<RequireAuth><TokenBoardPage /></RequireAuth>} />
-          <Route element={<RequireAuth><Layout /></RequireAuth>}>
+          <Route element={<RequireAuth><MediaProvider><Layout /></MediaProvider></RequireAuth>}>
             <Route index element={<DashboardPage />} />
             <Route path="sessions" element={<SessionsPage />} />
             <Route path="sessions/:id" element={<SessionDetailPage />} />

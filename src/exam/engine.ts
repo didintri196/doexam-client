@@ -3,6 +3,7 @@ import { ApiError } from '@/shared/api/client';
 import type { AttemptStatus, AttemptView, EventType, ItemView, Response, SectionView } from '@/shared/api/types';
 import { examApi } from './api';
 import { store, type LocalAttempt, type OutboxEvent } from './db';
+import { clearMediaCache, prefetchMedia, type MediaProgress } from './mediaCache';
 
 // AttemptEngine runs one attempt in the browser (09-FRONTEND §5.2–5.3):
 // - every action becomes an event in the IndexedDB outbox and updates the UI at once;
@@ -44,6 +45,8 @@ export interface Snapshot {
   expired: boolean;
   notice?: Notice;
   focusLost: number;
+  /** Download of the attempt's pictures for offline use. */
+  media?: MediaProgress;
 }
 
 const rejectMessages: Record<string, string> = {
@@ -117,6 +120,7 @@ export class AttemptEngine {
   private inFlight: Promise<void> | null = null;
   private disposed = false;
   private expiring = false;
+  private prefetched = new Set<string>();
 
   constructor(public readonly attemptId: string) {}
 
@@ -221,8 +225,27 @@ export class AttemptEngine {
       offsetMs,
       pending: pending.length,
     });
-    if (closed(view.status)) void store.clearAttempt(this.attemptId);
-    else this.save();
+    if (closed(view.status)) {
+      void store.clearAttempt(this.attemptId);
+      void clearMediaCache();
+    } else {
+      this.save();
+      if (!fromLocal) this.prefetch(view);
+    }
+  }
+
+  /** prefetch downloads the pictures of the delivered items that are not cached yet. */
+  private prefetch(view: AttemptView) {
+    const fresh = Object.entries(view.media ?? {}).filter(([id]) => !this.prefetched.has(id));
+    if (!fresh.length) return;
+    fresh.forEach(([id]) => this.prefetched.add(id));
+    void prefetchMedia(
+      fresh.map(([, ref]) => ref.url),
+      (media) => !this.disposed && this.set({ media }),
+    ).then((done) => {
+      // failed downloads are retried with the next view (section change, reload)
+      if (done.failed) fresh.forEach(([id]) => this.prefetched.delete(id));
+    });
   }
 
   private save() {
@@ -407,6 +430,7 @@ export class AttemptEngine {
     clearInterval(this.clock);
     clearInterval(this.heartbeat);
     await store.clearAttempt(this.attemptId).catch(() => {});
+    await clearMediaCache();
     this.set({ phase: 'done' });
   }
 
