@@ -1,13 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowRight, CalendarClock, Clock, DoorOpen, KeyRound, MapPin, PlayCircle, RefreshCw } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router';
-import type { MySession } from '@/shared/api/types';
+import type { MyAnnouncements, MySession } from '@/shared/api/types';
 import { useAuth } from '@/shared/auth/auth';
 import { errorMessage, fieldErrors } from '@/shared/lib/errors';
 import { formatDateTime, formatTime, labels } from '@/shared/lib/format';
 import { Alert, Badge, Button, Card, EmptyState, Field, Input, Loading, Modal, PageHeader } from '@/shared/ui';
 import { examApi } from '../api';
+import { AnnouncementInbox, AnnouncementLayer } from '../Announcements';
 import { Shell } from '../Shell';
 
 const statusTone = { scheduled: 'slate', open: 'green', paused: 'amber', closed: 'slate', cancelled: 'red' } as const;
@@ -21,6 +22,7 @@ export function SessionsPage() {
 
   const running = (attempts.data ?? []).filter((a) => a.status === 'in_progress' || a.status === 'locked');
   const list = [...(sessions.data ?? [])].sort((a, b) => Date.parse(a.starts_at) - Date.parse(b.starts_at));
+  const announcements = useSessionAnnouncements(list);
 
   return (
     <Shell>
@@ -28,11 +30,15 @@ export function SessionsPage() {
         title={`Halo, ${me?.full_name ?? 'Peserta'}`}
         subtitle="Ujian yang dijadwalkan untuk Anda. Tombol mulai aktif setelah pengawas membuka sesi."
         actions={
-          <Button variant="secondary" icon={<RefreshCw className="h-3.5 w-3.5" />} onClick={() => void sessions.refetch()} loading={sessions.isFetching}>
-            Muat ulang
-          </Button>
+          <div className="flex items-center gap-2">
+            <AnnouncementInbox items={announcements.items} onConfirm={announcements.confirm} />
+            <Button variant="secondary" icon={<RefreshCw className="h-3.5 w-3.5" />} onClick={() => void sessions.refetch()} loading={sessions.isFetching}>
+              Muat ulang
+            </Button>
+          </div>
         }
       />
+      <AnnouncementLayer items={announcements.items} onConfirm={announcements.confirm} className="mb-5 !px-0" />
 
       {running.length > 0 && (
         <div className="mb-5 space-y-2">
@@ -113,6 +119,39 @@ export function SessionsPage() {
       {starting && <StartModal session={starting} onClose={() => setStarting(null)} />}
     </Shell>
   );
+}
+
+const announceKey = (sessionId: string) => ['my-announcements', sessionId];
+
+/**
+ * useSessionAnnouncements polls announcements of the sessions that have not ended yet
+ * (every 30 s while the page is open). Before an attempt exists, confirmations go
+ * straight to the server; inside the exam they travel through the attempt outbox.
+ */
+function useSessionAnnouncements(sessions: MySession[]) {
+  const qc = useQueryClient();
+  const live = sessions.filter((s) => s.status === 'scheduled' || s.status === 'open' || s.status === 'paused');
+  const results = useQueries({
+    queries: live.map((s) => ({
+      queryKey: announceKey(s.session_id),
+      queryFn: () => examApi.announcements(s.session_id),
+      refetchInterval: 30_000,
+    })),
+  });
+  const items = results
+    .flatMap((r) => r.data?.announcements ?? [])
+    .sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+  const confirm = (id: string) => {
+    const a = items.find((x) => x.id === id);
+    if (!a) return;
+    const at = new Date().toISOString();
+    qc.setQueryData<MyAnnouncements>(announceKey(a.session_id), (old) =>
+      old ? { ...old, announcements: old.announcements.map((x) => (x.id === id ? { ...x, read_at: at } : x)) } : old,
+    );
+    // a failed confirmation shows the announcement again on the next poll
+    void examApi.readAnnouncement(id).catch(() => void qc.invalidateQueries({ queryKey: announceKey(a.session_id) }));
+  };
+  return { items, confirm };
 }
 
 function StartModal({ session, onClose }: { session: MySession; onClose: () => void }) {

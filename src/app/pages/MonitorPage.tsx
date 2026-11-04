@@ -1,11 +1,12 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, ArrowLeft, AudioLines, Clock, FileBarChart, Lock, MoreHorizontal, MonitorSmartphone, Send, Tv2, Unlock } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, AudioLines, Clock, FileBarChart, Lock, Megaphone, MoreHorizontal, MonitorSmartphone, Send, Tv2, Unlock, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import type { MonitorRow, Session } from '@/shared/api/types';
 import { formatClock, labels } from '@/shared/lib/format';
 import { Alert, Badge, Button, ConfirmDialog, cx, Field, Input, Loading, Modal, PageHeader, Table, td, th } from '@/shared/ui';
 import { attemptApi, sessionApi } from '../api';
+import { AnnounceDialog, AnnouncementHistory, useAnnouncements } from '../components/Announcements';
 import { useAction } from '../components/hooks';
 import { SearchInput } from '../components/pickers';
 import { Perm, useCan } from '../perm';
@@ -22,6 +23,10 @@ export function MonitorPage() {
   const monitor = useQuery({ queryKey: ['monitor', id], queryFn: () => sessionApi.monitor(id), refetchInterval: 5000 });
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState('');
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [announce, setAnnounce] = useState<'all' | 'selected' | null>(null);
+  const announcements = useAnnouncements(id);
+  const unreadImportant = useMemo(() => new Set(announcements.data?.unread_important ?? []), [announcements.data]);
   const m = monitor.data;
   const serverNow = m ? Date.parse(m.server_time) : Date.now();
 
@@ -41,6 +46,16 @@ export function MonitorPage() {
   if (session.isLoading || !session.data) return <Loading />;
   const s = session.data;
   const c = m?.counts ?? {};
+  const canAnnounce = s.status === 'scheduled' || s.status === 'open' || s.status === 'paused';
+  const toggle = (userId: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(userId)) next.delete(userId);
+      else next.add(userId);
+      return next;
+    });
+  const allShown = rows.length > 0 && rows.every((r) => selected.has(r.user_id));
+  const selectedRows = (m?.rows ?? []).filter((r) => selected.has(r.user_id));
 
   return (
     <>
@@ -67,6 +82,11 @@ export function MonitorPage() {
         actions={
           <>
             <MiniToken session={s} />
+            {canAnnounce && (
+              <Button variant="secondary" icon={<Megaphone className="h-4 w-4" />} onClick={() => setAnnounce('all')}>
+                Kirim pengumuman
+              </Button>
+            )}
             {s.token_required && (
               <a href={`/app/sessions/${id}/board`} target="_blank" rel="noreferrer">
                 <Button variant="secondary" icon={<Tv2 className="h-4 w-4" />}>
@@ -111,9 +131,31 @@ export function MonitorPage() {
         <SearchInput value={q} onChange={setQ} placeholder="Cari nama, username, kursi…" />
       </div>
       {monitor.error && <Alert className="mb-4">Gagal memuat monitor. Mencoba lagi…</Alert>}
+      {selected.size > 0 && (
+        <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-xs text-blue-950 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-100">
+          <span className="font-medium tabular-nums">{selected.size} peserta dipilih</span>
+          {canAnnounce && (
+            <Button size="sm" icon={<Megaphone className="h-3.5 w-3.5" />} onClick={() => setAnnounce('selected')}>
+              Kirim pengumuman ke {selected.size} peserta
+            </Button>
+          )}
+          <Button size="sm" variant="ghost" icon={<X className="h-3.5 w-3.5" />} onClick={() => setSelected(new Set())} className="ml-auto">
+            Batal pilih
+          </Button>
+        </div>
+      )}
       <Table>
         <thead>
           <tr>
+            <th className={`${th} w-10`}>
+              <input
+                type="checkbox"
+                aria-label="Pilih semua peserta yang tampil"
+                className="h-4 w-4 rounded border-slate-300"
+                checked={allShown}
+                onChange={() => setSelected(allShown ? new Set() : new Set(rows.map((r) => r.user_id)))}
+              />
+            </th>
             <th className={th}>Kursi</th>
             <th className={th}>Peserta</th>
             <th className={th}>Status</th>
@@ -126,11 +168,28 @@ export function MonitorPage() {
         </thead>
         <tbody>
           {rows.map((r) => (
-            <Row key={r.user_id} row={r} serverNow={serverNow} sessionId={id} />
+            <Row
+              key={r.user_id}
+              row={r}
+              serverNow={serverNow}
+              sessionId={id}
+              selected={selected.has(r.user_id)}
+              onToggle={() => toggle(r.user_id)}
+              unreadImportant={unreadImportant.has(r.user_id)}
+            />
           ))}
         </tbody>
       </Table>
       {rows.length === 0 && m && <p className="mt-4 text-center text-xs text-slate-500">Tidak ada peserta yang cocok.</p>}
+      <AnnouncementHistory sessionId={id} />
+      {announce && (
+        <AnnounceDialog
+          sessionId={id}
+          to={announce === 'selected' ? selectedRows : undefined}
+          onClose={() => setAnnounce(null)}
+          onSent={() => announce === 'selected' && setSelected(new Set())}
+        />
+      )}
     </>
   );
 }
@@ -161,7 +220,21 @@ function MiniToken({ session }: { session: Session }) {
 
 type ActionKind = 'extend' | 'lock' | 'unlock' | 'reset' | 'plays' | 'submit';
 
-function Row({ row: r, serverNow, sessionId }: { row: MonitorRow; serverNow: number; sessionId: string }) {
+function Row({
+  row: r,
+  serverNow,
+  sessionId,
+  selected,
+  onToggle,
+  unreadImportant,
+}: {
+  row: MonitorRow;
+  serverNow: number;
+  sessionId: string;
+  selected: boolean;
+  onToggle: () => void;
+  unreadImportant: boolean;
+}) {
   const can = useCan();
   const qc = useQueryClient();
   const [menu, setMenu] = useState(false);
@@ -206,10 +279,20 @@ function Row({ row: r, serverNow, sessionId }: { row: MonitorRow; serverNow: num
     submit: 'Jawaban peserta dikumpulkan sekarang dan dinilai. Tidak bisa dibatalkan.',
   };
   return (
-    <tr className={cx(idle || r.violations > 2 ? 'bg-rose-50/70 dark:bg-rose-950/25' : '')}>
+    <tr className={cx(selected ? 'bg-blue-50/60 dark:bg-blue-950/25' : idle || r.violations > 2 ? 'bg-rose-50/70 dark:bg-rose-950/25' : '')}>
+      <td className={td}>
+        <input type="checkbox" aria-label={`Pilih ${r.full_name}`} className="h-4 w-4 rounded border-slate-300" checked={selected} onChange={onToggle} />
+      </td>
       <td className={`${td} tabular-nums text-slate-500`}>{r.seat ?? '—'}</td>
       <td className={td}>
-        <p className="font-medium text-slate-900 dark:text-white">{r.full_name}</p>
+        <p className="flex items-center gap-1.5 font-medium text-slate-900 dark:text-white">
+          {r.full_name}
+          {unreadImportant && (
+            <span title="Belum mengonfirmasi pengumuman penting lebih dari 1 menit" className="inline-flex items-center gap-1 rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+              <Megaphone className="h-3 w-3" /> Belum baca
+            </span>
+          )}
+        </p>
         <p className="text-[11px] text-slate-500 dark:text-slate-400">{r.username}</p>
       </td>
       <td className={td}>
