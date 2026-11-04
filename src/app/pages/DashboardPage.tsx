@@ -30,7 +30,7 @@ export function DashboardPage() {
     { to: '/exams', label: 'Ujian', desc: 'Susun bagian, soal, dan terbitkan', icon: <Layers className="h-5 w-5" />, ok: can(Perm.ExamRead, Perm.ExamWrite) },
     { to: '/grading', label: 'Koreksi', desc: 'Nilai esai & regrade', icon: <CheckSquare className="h-5 w-5" />, ok: can(Perm.GradeWrite, Perm.ExamWrite, Perm.TenantManage) },
     { to: '/reports', label: 'Laporan', desc: 'Rekap nilai & analisis butir', icon: <BarChart3 className="h-5 w-5" />, ok: can(Perm.ReportRead, Perm.TenantManage) },
-    { to: '/users', label: 'Pengguna', desc: 'Akun, peran, reset password', icon: <Users className="h-5 w-5" />, ok: can(Perm.UserManage) },
+    { to: '/users/participants', label: 'Peserta', desc: 'Akun peserta, reset password', icon: <Users className="h-5 w-5" />, ok: can(Perm.UserManage) },
   ];
 
   const shortcuts = links.filter((l) => l.ok);

@@ -3,6 +3,7 @@ import {
   BookOpenCheck,
   CalendarClock,
   CheckSquare,
+  ChevronDown,
   ChevronsUpDown,
   FileQuestion,
   FileSpreadsheet,
@@ -12,12 +13,13 @@ import {
   LogOut,
   Menu,
   Settings,
+  UserCog,
   Users,
   UsersRound,
   X,
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { useAuth } from '@/shared/auth/auth';
 import { AppFooter, BrandTitle, usePublicTenant } from '@/shared/auth/pages';
 import { cx, IconButton, ThemeToggle } from '@/shared/ui';
@@ -28,6 +30,8 @@ interface NavItem {
   label: string;
   icon: ReactNode;
   perms: string[]; // any of
+  /** Sub-items make a collapsible entry; `to` then only identifies it. */
+  children?: NavItem[];
 }
 interface NavGroup {
   label: string;
@@ -59,8 +63,17 @@ const NAV: NavGroup[] = [
   {
     label: 'Administrasi',
     items: [
-      { to: '/users', label: 'Pengguna', icon: <Users className={i} />, perms: [Perm.UserManage] },
-      { to: '/groups', label: 'Grup', icon: <UsersRound className={i} />, perms: [Perm.GroupManage] },
+      {
+        to: 'user-management',
+        label: 'Manajemen pengguna',
+        icon: <Users className={i} />,
+        perms: [],
+        children: [
+          { to: '/users/staff', label: 'Staf', icon: <UserCog className={i} />, perms: [Perm.UserManage] },
+          { to: '/users/participants', label: 'Peserta', icon: <Users className={i} />, perms: [Perm.UserManage] },
+          { to: '/groups', label: 'Grup peserta', icon: <UsersRound className={i} />, perms: [Perm.GroupManage] },
+        ],
+      },
       { to: '/imports', label: 'Impor Excel', icon: <FileSpreadsheet className={i} />, perms: [Perm.UserManage, Perm.GroupManage] },
       { to: '/settings', label: 'Pengaturan institusi', icon: <Settings className={i} />, perms: [Perm.TenantManage] },
     ],
@@ -69,7 +82,13 @@ const NAV: NavGroup[] = [
 
 export function Layout() {
   const can = useCan();
-  const groups = NAV.map((g) => ({ ...g, items: g.items.filter((it) => it.perms.length === 0 || can(...it.perms)) })).filter((g) => g.items.length);
+  const allowed = (it: NavItem) => it.perms.length === 0 || can(...it.perms);
+  const groups = NAV.map((g) => ({
+    ...g,
+    items: g.items
+      .map((it) => (it.children ? { ...it, children: it.children.filter(allowed) } : it))
+      .filter((it) => (it.children ? it.children.length > 0 : allowed(it))),
+  })).filter((g) => g.items.length);
   const [mobile, setMobile] = useState(false);
 
   return (
@@ -139,18 +158,72 @@ function Sidebar({ groups, onNavigate, onClose }: { groups: NavGroup[]; onNaviga
           <div key={g.label}>
             <p className="mb-1 px-2.5 text-[11px] font-medium text-slate-400 dark:text-slate-500">{g.label}</p>
             <div className="space-y-0.5">
-              {g.items.map((it) => (
-                <NavLink key={it.to} to={it.to} end={it.to === '/'} className={linkClass} onClick={onNavigate}>
-                  {it.icon}
-                  <span className="truncate">{it.label}</span>
-                </NavLink>
-              ))}
+              {g.items.map((it) =>
+                it.children ? (
+                  <NavDropdown key={it.to} item={it} onNavigate={onNavigate} />
+                ) : (
+                  <NavLink key={it.to} to={it.to} end={it.to === '/'} className={linkClass} onClick={onNavigate}>
+                    {it.icon}
+                    <span className="truncate">{it.label}</span>
+                  </NavLink>
+                ),
+              )}
             </div>
           </div>
         ))}
       </nav>
       <UserMenu />
     </>
+  );
+}
+
+const openKey = (id: string) => `doexam.nav.${id}`;
+
+/** NavDropdown is a collapsible sidebar entry; it opens by itself on one of its pages. */
+function NavDropdown({ item, onNavigate }: { item: NavItem; onNavigate?: () => void }) {
+  const { pathname } = useLocation();
+  const active = item.children!.some((c) => pathname === c.to || pathname.startsWith(`${c.to}/`));
+  const [open, setOpen] = useState(() => {
+    try {
+      return localStorage.getItem(openKey(item.to)) !== '0';
+    } catch {
+      return true;
+    }
+  });
+  const shown = open || active;
+  const toggle = () => {
+    const next = !shown;
+    setOpen(next);
+    try {
+      localStorage.setItem(openKey(item.to), next ? '1' : '0');
+    } catch {
+      /* per-browser convenience only */
+    }
+  };
+  const id = `nav-${item.to}`;
+  return (
+    <div>
+      <button
+        type="button"
+        aria-expanded={shown}
+        aria-controls={id}
+        onClick={toggle}
+        className={cx(linkClass({ isActive: false }), 'w-full', active && 'text-slate-900 dark:text-white')}
+      >
+        {item.icon}
+        <span className="flex-1 truncate text-left">{item.label}</span>
+        <ChevronDown className={cx('transition-transform', !shown && '-rotate-90')} />
+      </button>
+      {shown && (
+        <div id={id} className="mt-0.5 space-y-0.5 pl-4">
+          {item.children!.map((c) => (
+            <NavLink key={c.to} to={c.to} className={(s) => cx(linkClass(s), 'border-l border-slate-200 pl-3.5 rounded-l-none dark:border-slate-800')} onClick={onNavigate}>
+              <span className="truncate">{c.label}</span>
+            </NavLink>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

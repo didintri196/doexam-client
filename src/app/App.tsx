@@ -84,7 +84,9 @@ export function App() {
             <Route path="reports" element={<ReportsIndexPage />} />
             <Route path="reports/attempts/:id" element={<AttemptReportPage />} />
             <Route path="reports/:examId" element={<ReportPage />} />
-            <Route path="users" element={<UsersPage />} />
+            <Route path="users" element={<Navigate to="/users/participants" replace />} />
+            <Route path="users/staff" element={<UsersPage key="staff" kind="staff" />} />
+            <Route path="users/participants" element={<UsersPage key="participant" kind="participant" />} />
             <Route path="groups" element={<GroupsPage />} />
             <Route path="imports" element={<ImportsPage />} />
             <Route path="settings" element={<SettingsPage />} />
