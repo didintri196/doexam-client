@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, KeyRound, Lock, School, User } from 'lucide-react';
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { ArrowRight, Eye, EyeOff, KeyRound, Lock, School, User } from 'lucide-react';
+import { useEffect, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router';
 import { authApi } from '@/shared/api/auth';
 import { ApiError } from '@/shared/api/client';
 import type { PublicTenant } from '@/shared/api/types';
 import { applyBrand } from '@/shared/lib/brand';
 import { errorMessage, fieldErrors } from '@/shared/lib/errors';
-import { Alert, Button, Field, Input, ThemeToggle } from '@/shared/ui';
+import { Alert, Button, cx, Field, Input, ThemeToggle } from '@/shared/ui';
 import { useAuth } from './auth';
 
 /**
@@ -81,14 +81,22 @@ export function AuthShell({ children, footer }: { children: ReactNode; footer?: 
   );
 }
 
+export type LoginHighlight = { icon: ReactNode; title: string; text: string };
+
+/**
+ * LoginPage: the institution on an accent panel (left on wide screens, a header band on
+ * phones) and the sign-in form beside it. `highlights` are short notes for whoever signs in.
+ */
 export function LoginPage({
   heading,
-  badge,
+  subheading,
+  highlights = [],
   footer,
   onSetupRequired,
 }: {
   heading: string;
-  badge: ReactNode;
+  subheading?: string;
+  highlights?: LoginHighlight[];
   footer?: ReactNode;
   onSetupRequired?: () => void;
 }) {
@@ -99,9 +107,12 @@ export function LoginPage({
   // ?u= prefills the username (QR code on the participant card)
   const [username, setUsername] = useState(() => new URLSearchParams(window.location.search).get('u') ?? '');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [capsLock, setCapsLock] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fields, setFields] = useState<Record<string, string>>({});
+  const prefilled = useState(() => username !== '')[0];
 
   const pub = usePublicTenant(slug.trim() || undefined);
   const setupRequired = pub.error?.status === 404 && pub.error.message === 'setup not completed';
@@ -132,67 +143,133 @@ export function LoginPage({
     }
   };
 
-  return (
-    <AuthShell footer={footer}>
-      <div className="flex flex-col items-center text-center">
-        <Brand tenant={tenant} size="lg" />
-        <h1 className="mt-5 text-balance text-xl font-semibold tracking-tight text-slate-900 dark:text-white">{tenant?.name ?? 'DoExam'}</h1>
-        {tenant?.tagline && <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{tenant.tagline}</p>}
-        <div className="mt-4 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-          {badge}
-          <span>{heading}</span>
-        </div>
-      </div>
+  const name = tenant?.name ?? 'DoExam';
+  const capsCheck = (e: KeyboardEvent<HTMLInputElement>) => setCapsLock(e.getModifierState('CapsLock'));
 
-      <div className="mt-8">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          {setupRequired ? (
-            <Alert tone="amber">Aplikasi belum di-setup. Minta admin menyelesaikan setup di panel staf.</Alert>
-          ) : (
-            <form onSubmit={submit} className="space-y-4">
-              {needTenant && (
-                <Field label="Kode institusi" error={fields.tenant} hint="Instalasi ini melayani beberapa institusi.">
-                  <div className="relative">
-                    <School className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                    <Input className="h-9 pl-9 font-mono" value={slug} onChange={(e) => setSlug(e.target.value)} autoComplete="organization" />
+  return (
+    <div className="relative flex min-h-screen flex-col bg-slate-50 lg:flex-row dark:bg-slate-950">
+      {/* sits on the accent band on phones, in the form column's corner on wide screens */}
+      <div className="absolute right-4 top-[30px] z-10 lg:top-4">
+        <ThemeToggle />
+      </div>
+      <aside className="relative isolate overflow-hidden bg-blue-600 text-accent-fg lg:flex lg:w-[44%] lg:max-w-xl lg:flex-col">
+        {/* faint dot grid in the text colour, so it works on light and dark tenant colours */}
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 opacity-[0.09] [background-image:radial-gradient(currentColor_1px,transparent_1px)] [background-size:18px_18px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]"
+        />
+        <div aria-hidden className="absolute -bottom-40 -right-40 -z-10 h-96 w-96 rounded-full bg-blue-700 opacity-60 blur-3xl" />
+
+        {/* hidden until the institution loads, so its name never flashes "DoExam" first */}
+        <div className={cx('flex items-center gap-3 px-6 py-6 transition-opacity lg:px-12 lg:pt-12', pub.isPending && 'opacity-0')}>
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white p-1 shadow-sm lg:h-14 lg:w-14 lg:rounded-2xl lg:p-1.5">
+            <img src={tenant?.logo_url ?? '/favicon.svg'} alt="" className="h-full w-full object-contain" />
+          </span>
+          <div className="min-w-0 lg:hidden">
+            <p className="truncate text-sm font-semibold leading-5">{name}</p>
+            {tenant?.tagline && <p className="truncate text-[11px] leading-4 opacity-80">{tenant.tagline}</p>}
+          </div>
+        </div>
+
+        <div className="hidden flex-1 flex-col justify-center px-12 pb-12 lg:flex">
+          <div className={cx('transition-opacity', pub.isPending && 'opacity-0')}>
+            <h1 className="text-balance text-[2rem] font-semibold leading-tight tracking-tight">{name}</h1>
+            {tenant?.tagline && <p className="mt-2 text-base opacity-85">{tenant.tagline}</p>}
+          </div>
+          {highlights.length > 0 && (
+            <ul className="mt-10 space-y-5">
+              {highlights.map((h) => (
+                <li key={h.title} className="flex gap-3.5">
+                  <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15 ring-1 ring-current/15 [&_svg]:h-4 [&_svg]:w-4">
+                    {h.icon}
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold">{h.title}</p>
+                    <p className="mt-0.5 text-xs leading-5 opacity-80">{h.text}</p>
                   </div>
-                </Field>
-              )}
-              <Field label="Username" error={fields.username}>
-                <div className="relative">
-                  <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <Input
-                    className="h-9 pl-9"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    autoComplete="username"
-                    autoFocus
-                    required
-                  />
-                </div>
-              </Field>
-              <Field label="Password" error={fields.password}>
-                <div className="relative">
-                  <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <Input
-                    className="h-9 pl-9"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    autoComplete="current-password"
-                    required
-                  />
-                </div>
-              </Field>
-              {error && <Alert>{error}</Alert>}
-              <Button type="submit" size="lg" className="mt-2 w-full" loading={busy}>
-                Masuk {!busy && <ArrowRight className="h-4 w-4" />}
-              </Button>
-            </form>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
-      </div>
-    </AuthShell>
+      </aside>
+
+      <main className="flex flex-1 flex-col px-4 sm:px-6">
+        <div className="mx-auto flex w-full max-w-sm flex-1 flex-col pb-12 pt-10 lg:justify-center lg:py-16">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">{heading}</h2>
+          {subheading && <p className="mt-1.5 text-xs leading-5 text-slate-600 dark:text-slate-400">{subheading}</p>}
+
+          <div className="mt-8">
+            {setupRequired ? (
+              <Alert tone="amber">Aplikasi belum di-setup. Minta admin menyelesaikan setup di panel staf.</Alert>
+            ) : (
+              <form onSubmit={submit} className="space-y-4">
+                {needTenant && (
+                  <Field label="Kode institusi" error={fields.tenant} hint="Instalasi ini melayani beberapa institusi.">
+                    <div className="relative">
+                      <School className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <Input className="h-10 pl-9 font-mono text-sm" value={slug} onChange={(e) => setSlug(e.target.value)} autoComplete="organization" />
+                    </div>
+                  </Field>
+                )}
+                <Field label="Username" error={fields.username}>
+                  <div className="relative">
+                    <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <Input
+                      className="h-10 pl-9 text-sm"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      autoComplete="username"
+                      autoCapitalize="none"
+                      spellCheck={false}
+                      autoFocus={!prefilled}
+                      invalid={!!fields.username}
+                      required
+                    />
+                  </div>
+                </Field>
+                <Field
+                  label="Password"
+                  error={fields.password}
+                  hint={capsLock ? <span className="font-medium text-amber-700 dark:text-amber-400">Caps Lock menyala.</span> : undefined}
+                >
+                  <div className="relative">
+                    <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <Input
+                      className="h-10 pl-9 pr-10 text-sm"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      onKeyUp={capsCheck}
+                      onKeyDown={capsCheck}
+                      autoComplete="current-password"
+                      autoFocus={prefilled}
+                      invalid={!!fields.password}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
+                      aria-pressed={showPassword}
+                      className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-blue-500/30 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </Field>
+                {error && <Alert>{error}</Alert>}
+                <Button type="submit" size="lg" className="mt-2 w-full" loading={busy}>
+                  Masuk {!busy && <ArrowRight className="h-4 w-4" />}
+                </Button>
+              </form>
+            )}
+          </div>
+          {footer && <div className="mt-8 text-xs text-slate-500 dark:text-slate-400">{footer}</div>}
+        </div>
+        <AppFooter className="pb-6" />
+      </main>
+    </div>
   );
 }
 
