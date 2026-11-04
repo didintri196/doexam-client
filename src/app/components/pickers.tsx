@@ -112,7 +112,7 @@ export function GroupPicker({ selected, onChange }: { selected: Group[]; onChang
     <div className="space-y-2">
       <div className="relative">
         <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-        <Input className="pl-9" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cari kelas / grup…" />
+        <Input className="pl-9" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cari grup…" />
       </div>
       <div className="max-h-48 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700">
         {res.data?.items.map((g) => (

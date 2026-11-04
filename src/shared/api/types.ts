@@ -54,6 +54,17 @@ export interface User {
 export interface UserGroupRef { id: ID; name: string; kind: string; period: string | null; member_role: string }
 export interface UserDetail extends User { groups: UserGroupRef[] }
 export interface UserCreated { user: User; temporary_password?: string }
+/** One user found by POST /users/resolve (e-mail is not echoed). */
+export interface ResolvedUser {
+  id: ID;
+  username: string;
+  full_name: string;
+  external_id: string | null;
+  status: UserStatus;
+  input: string;
+  matched_by: 'username' | 'external_id' | 'email';
+}
+export interface ResolveResult { found: ResolvedUser[]; not_found: string[]; ambiguous: string[] }
 
 export type GroupKind = 'level' | 'class' | 'department' | 'team' | 'batch' | 'other';
 export interface Group {
@@ -74,6 +85,8 @@ export interface GroupMember {
   member_role: 'member' | 'leader';
   joined_at: ISODate;
 }
+export interface AddMembersResult { requested: number; added: number }
+export interface RemoveMembersResult { removed: number }
 
 // ── imports ────────────────────────────────────────────────────
 export type ImportKind = 'users' | 'groups';

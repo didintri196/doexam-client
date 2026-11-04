@@ -38,6 +38,14 @@ export const userApi = {
     api.patch<T.User>(`/users/${id}`, body),
   remove: (id: string) => api.del(`/users/${id}`),
   resetPassword: (id: string) => api.post<{ temporary_password: string }>(`/users/${id}/reset-password`),
+  /** Maps usernames, ID peserta or e-mails (case-insensitive) to users. Max 5000. */
+  resolve: (identifiers: string[]) => api.post<T.ResolveResult>('/users/resolve', { identifiers }),
+  /** Same as resolve, from an .xlsx/.csv (column username/external_id/email, else the first). */
+  resolveFile: (file: File) => {
+    const f = new FormData();
+    f.append('file', file);
+    return api.post<T.ResolveResult>('/users/resolve-file', f);
+  },
 };
 
 export const groupApi = {
@@ -48,9 +56,10 @@ export const groupApi = {
     api.patch<T.Group>(`/groups/${id}`, body),
   remove: (id: string) => api.del(`/groups/${id}`),
   members: (id: string, q: Q) => api.page<T.GroupMember>(`/groups/${id}/members`, q),
-  addMembers: (id: string, user_ids: string[], member_role: 'member' | 'leader' = 'member') =>
-    api.post(`/groups/${id}/members`, { user_ids, member_role }),
+  addMembers: (id: string, body: { user_ids?: string[]; from_group_id?: string; member_role?: 'member' | 'leader' }) =>
+    api.post<T.AddMembersResult>(`/groups/${id}/members`, body),
   removeMember: (id: string, userId: string) => api.del(`/groups/${id}/members/${userId}`),
+  removeMembers: (id: string, user_ids: string[]) => api.post<T.RemoveMembersResult>(`/groups/${id}/members/remove`, { user_ids }),
 };
 
 export const importApi = {

@@ -80,6 +80,15 @@ const fieldMessages: Record<string, string> = {
   required: 'wajib diisi',
   'already in use': 'sudah dipakai',
   'invalid or expired token': 'token salah atau kedaluwarsa',
+  'max 5 MB': 'maksimal 5 MB',
+  'use .xlsx or .csv': 'gunakan file .xlsx atau .csv',
+  'file is empty': 'file kosong',
+  'cannot read file': 'file tidak bisa dibaca',
+  'max 5000 rows': 'maksimal 5000 baris',
+  '1-5000 identifiers': 'isi 1–5000 username, ID peserta, atau email',
+  'must be another group': 'pilih grup lain',
+  'group not found': 'grup tidak ditemukan',
+  'max 5000 users per request': 'maksimal 5000 orang sekali tambah',
 };
 
 export function translate(msg: string): string {
@@ -100,6 +109,7 @@ export function errorMessage(err: unknown): string {
 
 export function fieldError(msg: string | undefined): string | undefined {
   if (!msg) return undefined;
+  if (msg.startsWith('no identifiers in column ')) return `kolom ${msg.slice(25)} kosong`;
   return fieldMessages[msg] ?? msg;
 }
 
