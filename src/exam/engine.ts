@@ -1,6 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { ApiError } from '@/shared/api/client';
-import type { AttemptStatus, AttemptView, EventType, ItemView, Response, SectionView } from '@/shared/api/types';
+import type { AttemptStatus, AttemptView, EventType, ItemView, MyAnnouncement, Response, SectionView } from '@/shared/api/types';
 import { examApi } from './api';
 import { store, type LocalAttempt, type OutboxEvent } from './db';
 import { clearMediaCache, prefetchMedia, type MediaProgress } from './mediaCache';
@@ -50,6 +50,8 @@ export interface Snapshot {
   /** Audio plays used per media id, and extra plays granted by the proctor. */
   plays: Record<string, number>;
   extraPlays: number;
+  /** Announcements of the session for this participant (newest first). */
+  announcements: MyAnnouncement[];
 }
 
 const rejectMessages: Record<string, string> = {
@@ -113,6 +115,7 @@ export class AttemptEngine {
     focusLost: 0,
     plays: {},
     extraPlays: 0,
+    announcements: [],
   };
   private listeners = new Set<() => void>();
   private seq = 0;
@@ -126,6 +129,9 @@ export class AttemptEngine {
   private disposed = false;
   private expiring = false;
   private prefetched = new Set<string>();
+  private announcementCursor?: string;
+  private readLocal = new Set<string>();
+  private loadingAnnouncements = false;
 
   constructor(public readonly attemptId: string) {}
 
@@ -163,6 +169,11 @@ export class AttemptEngine {
       }
     }
     const pending = await store.pending(this.attemptId).catch(() => [] as OutboxEvent[]);
+    if (local) {
+      this.announcementCursor = local.announcement_cursor;
+      this.readLocal = new Set(local.read_announcements ?? []);
+      this.set({ announcements: local.announcements ?? [] });
+    }
     if (view) {
       this.applyView(view, local, pending);
     } else if (local) {
@@ -176,6 +187,7 @@ export class AttemptEngine {
     window.addEventListener('online', this.onOnline);
     window.addEventListener('offline', this.onOffline);
     if (pending.length) this.scheduleSync(0);
+    void this.refreshAnnouncements();
   }
 
   dispose() {
@@ -281,6 +293,9 @@ export class AttemptEngine {
         current: s.current,
         seq: this.seq,
         plays: s.plays,
+        announcements: s.announcements,
+        announcement_cursor: this.announcementCursor,
+        read_announcements: [...this.readLocal],
         saved_at: Date.now(),
       })
       .catch(() => {});
@@ -338,6 +353,43 @@ export class AttemptEngine {
 
   dismissNotice() {
     this.set({ notice: undefined });
+  }
+
+  /**
+   * confirmAnnouncement marks an announcement as read at once and sends the confirmation
+   * through the outbox (ANNOUNCEMENT_READ), so it survives a dropped network.
+   */
+  confirmAnnouncement(id: string) {
+    const a = this.snap.announcements.find((x) => x.id === id);
+    if (!a || a.read_at) return;
+    this.readLocal.add(id);
+    const at = new Date(Date.now() + this.snap.offsetMs).toISOString();
+    this.set({ announcements: this.snap.announcements.map((x) => (x.id === id ? { ...x, read_at: at } : x)) });
+    if (closed(this.snap.status)) void examApi.readAnnouncement(id).catch(() => {});
+    else void this.enqueue('ANNOUNCEMENT_READ', { announcement_id: id });
+    this.save();
+  }
+
+  /** refreshAnnouncements reloads the list (start, or when the heartbeat's cursor changed). */
+  private async refreshAnnouncements() {
+    const sessionId = this.snap.view?.session_id;
+    if (!sessionId || this.loadingAnnouncements || this.disposed) return;
+    this.loadingAnnouncements = true;
+    try {
+      const res = await examApi.announcements(sessionId);
+      const list = res.announcements.map((a) => {
+        if (a.read_at) this.readLocal.delete(a.id);
+        // confirmed here but not synced yet: keep it read
+        return !a.read_at && this.readLocal.has(a.id) ? { ...a, read_at: this.snap.announcements.find((x) => x.id === a.id)?.read_at ?? new Date().toISOString() } : a;
+      });
+      this.announcementCursor = res.cursor;
+      this.set({ announcements: list });
+      this.save();
+    } catch {
+      /* offline: keep the local list; the next heartbeat tries again */
+    } finally {
+      this.loadingAnnouncements = false;
+    }
   }
 
   private nextSeq() {
@@ -409,6 +461,7 @@ export class AttemptEngine {
           deadlineMs: this.snap.view ? Math.min(Date.parse(res.deadline_at), this.sectionDeadline()) : Date.parse(res.deadline_at),
           ...(msg ? { notice: { tone: 'amber' as const, message: msg } } : {}),
         });
+        if ((res.announcement_cursor ?? '') !== (this.announcementCursor ?? '')) void this.refreshAnnouncements();
         if (closed(res.status)) {
           await this.finish();
           return;
@@ -525,7 +578,7 @@ export class AttemptEngine {
 
 const idle: Snapshot = {
   phase: 'loading', items: [], responses: {}, flags: {}, furthest: 0, deadlineMs: 0, offsetMs: 0,
-  pending: 0, online: true, syncing: false, expired: false, focusLost: 0, plays: {}, extraPlays: 0,
+  pending: 0, online: true, syncing: false, expired: false, focusLost: 0, plays: {}, extraPlays: 0, announcements: [],
 };
 const noop = () => () => {};
 

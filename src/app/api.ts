@@ -194,6 +194,14 @@ export const sessionApi = {
     api.patch<T.Participant>(`/sessions/${id}/participants/${userId}`, body),
   removeParticipant: (id: string, userId: string) => api.del(`/sessions/${id}/participants/${userId}`),
   monitor: (id: string) => api.get<T.Monitor>(`/sessions/${id}/monitor`),
+  announce: (id: string, body: { body: string; priority: T.AnnouncementPriority; target: 'all' | 'selected'; user_ids?: string[] }) =>
+    api.post<{ id: string; recipients: number; skipped: number }>(`/sessions/${id}/announcements`, body),
+  announcements: (id: string) => api.get<T.AnnouncementList>(`/sessions/${id}/announcements`),
+  announcementRecipients: (id: string, aid: string) => api.get<T.AnnouncementRecipient[]>(`/sessions/${id}/announcements/${aid}/recipients`),
+  retractAnnouncement: (id: string, aid: string) => api.post(`/sessions/${id}/announcements/${aid}/retract`),
+  /** One announcement to every participant of every open or paused session. */
+  broadcastRunning: (body: string, priority: T.AnnouncementPriority) =>
+    api.post<{ sessions: number; recipients: number }>('/announcements', { running: true, body, priority }),
 };
 
 export const attemptApi = {

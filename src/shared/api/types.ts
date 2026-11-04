@@ -395,6 +395,7 @@ export interface MediaFile { id: ID; mime_type: string; size_bytes: number; widt
 
 export interface AttemptView {
   id: ID;
+  session_id: ID;
   exam_title: string;
   instructions: string | null;
   status: AttemptStatus;
@@ -412,7 +413,7 @@ export interface AttemptView {
   media_plays: Record<string, number>;
   extra_plays: number;
 }
-export type EventType = 'RESPONSE_SAVED' | 'FLAG_SET' | 'ITEM_VIEWED' | 'FOCUS_LOST' | 'FOCUS_RETURNED' | 'FULLSCREEN_EXIT' | 'MEDIA_PLAYED';
+export type EventType = 'RESPONSE_SAVED' | 'FLAG_SET' | 'ITEM_VIEWED' | 'FOCUS_LOST' | 'FOCUS_RETURNED' | 'FULLSCREEN_EXIT' | 'MEDIA_PLAYED' | 'ANNOUNCEMENT_READ';
 export interface ClientEvent {
   client_event_id: string;
   client_seq: number;
@@ -428,7 +429,37 @@ export interface SyncResult {
   status: AttemptStatus;
   deadline_at: ISODate;
   server_time: ISODate;
+  /** Changes when an announcement of the session is sent or retracted ("" = none). */
+  announcement_cursor: string;
 }
+
+// ── announcements (DOCS/PLAN/12-PENGUMUMAN-PESERTA.md) ───────────
+export type AnnouncementPriority = 'info' | 'important';
+/** An announcement as its recipient sees it; a retracted one has an empty body. */
+export interface MyAnnouncement {
+  id: ID;
+  session_id: ID;
+  body: string;
+  priority: AnnouncementPriority;
+  from: 'proctor' | 'committee';
+  read_at: ISODate | null;
+  retracted_at: ISODate | null;
+  created_at: ISODate;
+}
+export interface MyAnnouncements { cursor: string; announcements: MyAnnouncement[] }
+export interface Announcement {
+  id: ID;
+  body: string;
+  priority: AnnouncementPriority;
+  target: 'all' | 'selected';
+  sender: { user_id: ID; username: string; full_name: string };
+  recipients: number;
+  read: number;
+  retracted_at: ISODate | null;
+  created_at: ISODate;
+}
+export interface AnnouncementList { announcements: Announcement[]; unread_important: ID[] }
+export interface AnnouncementRecipient { user_id: ID; username: string; full_name: string; seat: string | null; read_at: ISODate | null }
 export interface AttemptResult {
   attempt_id: ID;
   status: AttemptStatus;

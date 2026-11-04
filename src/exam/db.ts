@@ -1,5 +1,5 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
-import type { AttemptView, ClientEvent, Response } from '@/shared/api/types';
+import type { AttemptView, ClientEvent, MyAnnouncement, Response } from '@/shared/api/types';
 
 // Local exam storage (IndexedDB): the outbox of events not yet accepted by the server and
 // the last known state of each attempt, so a refresh or a dropped network loses nothing.
@@ -16,6 +16,9 @@ export interface LocalAttempt {
   current?: string; // attempt item id on screen
   seq: number; // last client_seq used
   plays?: Record<string, number>; // audio plays used per media id
+  announcements?: MyAnnouncement[]; // last list from the server, local confirmations applied
+  announcement_cursor?: string;
+  read_announcements?: string[]; // confirmed here, not yet shown as read by the server
   saved_at: number;
 }
 

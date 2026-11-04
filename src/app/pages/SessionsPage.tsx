@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import { CalendarClock, MonitorPlay, Plus } from 'lucide-react';
+import { CalendarClock, Megaphone, MonitorPlay, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import type { Session, SessionStatus } from '@/shared/api/types';
 import { formatDateTime, formatTime, fromLocalInput, labels, toLocalInput } from '@/shared/lib/format';
 import { Badge, Button, Checkbox, EmptyState, Field, Input, Loading, Modal, PageHeader, Pagination, Select, Table, td, th } from '@/shared/ui';
 import { examApi, sessionApi } from '../api';
+import { AnnounceDialog } from '../components/Announcements';
 import { useAction, usePaging } from '../components/hooks';
 import { Perm, useCan } from '../perm';
 
@@ -22,6 +23,7 @@ export function SessionsPage() {
   const { page, setPage, filters, setFilter, query } = usePaging({ status: '' });
   const list = useQuery({ queryKey: ['sessions', query], queryFn: () => sessionApi.list(query), refetchInterval: 30_000 });
   const [creating, setCreating] = useState(false);
+  const [broadcasting, setBroadcasting] = useState(false);
   return (
     <>
       <PageHeader
@@ -29,12 +31,18 @@ export function SessionsPage() {
         subtitle={can(Perm.SessionManage) ? 'Jadwal pelaksanaan ujian per ruang/kelompok.' : 'Sesi yang ditugaskan kepada Anda.'}
         actions={
           can(Perm.SessionManage) && (
-            <Button icon={<Plus className="h-4 w-4" />} onClick={() => setCreating(true)}>
-              Sesi baru
-            </Button>
+            <>
+              <Button variant="secondary" icon={<Megaphone className="h-4 w-4" />} onClick={() => setBroadcasting(true)}>
+                Umumkan ke sesi berlangsung
+              </Button>
+              <Button icon={<Plus className="h-4 w-4" />} onClick={() => setCreating(true)}>
+                Sesi baru
+              </Button>
+            </>
           )
         }
       />
+      {broadcasting && <AnnounceDialog broadcast onClose={() => setBroadcasting(false)} />}
       <div className="mb-4">
         <Select className="w-auto" value={filters.status} onChange={(e) => setFilter('status', e.target.value)}>
           <option value="">Semua status</option>

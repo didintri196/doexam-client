@@ -28,6 +28,7 @@ import { Brand, BrandTitle, usePublicTenant } from '@/shared/auth/pages';
 import { Alert, Badge, Button, cx, IconButton, Loading, Modal, useToast } from '@/shared/ui';
 import { activeSection, isAnswered, useAttemptEngine, type AttemptEngine, type FlatItem, type Snapshot } from '../engine';
 import type { MediaProgress } from '../mediaCache';
+import { AnnouncementInbox, AnnouncementLayer } from '../Announcements';
 
 type FontScale = 'normal' | 'large' | 'xl';
 const fontClass: Record<FontScale, string> = { normal: 'text-base', large: 'text-lg', xl: 'text-xl' };
@@ -66,6 +67,7 @@ function ExamRoom({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
   const toast = useToast();
   const [prefs, setPrefs] = useState(loadPrefs);
   const [submitOpen, setSubmitOpen] = useState(false);
+  const announcementOpen = s.announcements.some((a) => a.priority === 'important' && !a.read_at && !a.retracted_at);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [fullscreen, setFullscreen] = useState(() => !!document.fullscreenElement);
   const { data: tenant } = usePublicTenant();
@@ -123,7 +125,7 @@ function ExamRoom({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement;
-      if (t.closest('input, textarea, [contenteditable]') || e.ctrlKey || e.metaKey || e.altKey || submitOpen) return;
+      if (t.closest('input, textarea, [contenteditable], [role=alertdialog]') || e.ctrlKey || e.metaKey || e.altKey || submitOpen || announcementOpen) return;
       if (e.key === 'ArrowRight') go(1);
       else if (e.key === 'ArrowLeft' && !forwardOnly) go(-1);
       else if ((e.key === 'f' || e.key === 'F') && item) engine.flag(item.id, !s.flags[item.id]);
@@ -135,7 +137,7 @@ function ExamRoom({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [engine, go, item, forwardOnly, s.flags, submitOpen]);
+  }, [engine, go, item, forwardOnly, s.flags, submitOpen, announcementOpen]);
 
   const toggleFullscreen = () => {
     if (document.fullscreenElement) void document.exitFullscreen().catch(() => {});
@@ -173,6 +175,7 @@ function ExamRoom({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
               </span>
             </p>
           </div>
+          <AnnouncementInbox items={s.announcements} onConfirm={(id) => engine.confirmAnnouncement(id)} />
           <SyncBadge engine={engine} s={s} />
           <Timer engine={engine} s={s} />
           <div className="hidden items-center gap-1.5 md:flex">
@@ -190,6 +193,7 @@ function ExamRoom({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
       </header>
 
       <MediaStatus progress={s.media} />
+      <AnnouncementLayer items={s.announcements} onConfirm={(id) => engine.confirmAnnouncement(id)} className="mt-4" />
 
       {s.notice && (
         <div className="mx-auto mt-4 w-full max-w-7xl px-4 sm:px-6">
