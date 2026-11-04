@@ -1,12 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Printer } from 'lucide-react';
+import { ArrowLeft, KeyRound, Printer } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import type { PrintParticipant, SessionPrint } from '@/shared/api/types';
 import { errorMessage } from '@/shared/lib/errors';
 import { formatDateTime, formatLongDate, formatNumber, formatTime } from '@/shared/lib/format';
-import { Alert, Button, Loading, Tabs } from '@/shared/ui';
+import { Alert, Button, Checkbox, ConfirmDialog, Loading, Tabs } from '@/shared/ui';
 import { sessionApi } from '../api';
+import { useAction } from '../components/hooks';
+import { Perm, useCan } from '../perm';
 
 export type PrintDoc = 'cards' | 'attendance' | 'minutes' | 'proctor';
 
@@ -42,6 +44,8 @@ export function SessionPrintPage() {
   const { id = '', doc = 'cards' } = useParams();
   const navigate = useNavigate();
   const data = useQuery({ queryKey: ['session', id, 'print'], queryFn: () => sessionApi.print(id) });
+  // card passwords live only in this page's memory: they are shown once by the server
+  const [passwords, setPasswords] = useState<Record<string, string>>({});
   const current = (printDocs.some((d) => d.value === doc) ? doc : 'cards') as PrintDoc;
   const label = printDocs.find((d) => d.value === current)!.label;
 
@@ -72,12 +76,15 @@ export function SessionPrintPage() {
             <Alert>{errorMessage(data.error)}</Alert>
           </div>
         ) : (
+          <>
+          {current === 'cards' && <CardPasswordPanel sessionId={id} count={data.data.participants.length} onDone={setPasswords} given={Object.keys(passwords).length} />}
           <div className="paper mx-auto shadow-lg">
-            {current === 'cards' && <Cards d={data.data} />}
+            {current === 'cards' && <Cards d={data.data} passwords={passwords} />}
             {current === 'attendance' && <Attendance d={data.data} />}
             {current === 'minutes' && <Minutes d={data.data} />}
             {current === 'proctor' && <ProctorSheet d={data.data} />}
           </div>
+          </>
         )}
       </div>
     </div>
@@ -136,7 +143,7 @@ function useQrCodes(participants: PrintParticipant[]): Record<string, string> {
   return codes;
 }
 
-function Cards({ d }: { d: SessionPrint }) {
+function Cards({ d, passwords }: { d: SessionPrint; passwords: Record<string, string> }) {
   const qr = useQrCodes(d.participants);
   if (!d.participants.length) return <Empty />;
   const s = d.session;
@@ -164,7 +171,11 @@ function Cards({ d }: { d: SessionPrint }) {
                 </>
               )}
               <dt className="text-slate-500">Password</dt>
-              <dd className="border-b border-dotted border-slate-400">&nbsp;</dd>
+              {passwords[p.user_id] ? (
+                <dd className="font-mono text-[12px] font-bold tracking-wider">{passwords[p.user_id]}</dd>
+              ) : (
+                <dd className="border-b border-dotted border-slate-400">&nbsp;</dd>
+              )}
               <dt className="text-slate-500">Ujian</dt>
               <dd className="line-clamp-2">{s.exam.title}</dd>
               <dt className="text-slate-500">Sesi</dt>
@@ -188,9 +199,62 @@ function Cards({ d }: { d: SessionPrint }) {
               <span className="text-[9px] leading-tight text-slate-500">Pindai untuk membuka halaman masuk</span>
             </div>
           </div>
-          <p className="mt-1 truncate text-[9px] text-slate-500">{window.location.host}/exam</p>
         </section>
       ))}
+    </div>
+  );
+}
+
+/**
+ * CardPasswordPanel (screen only) asks the server for new system passwords and puts them
+ * on the cards. Participants keep these passwords; the old ones stop working.
+ */
+function CardPasswordPanel({ sessionId, count, given, onDone }: { sessionId: string; count: number; given: number; onDone: (p: Record<string, string>) => void }) {
+  const can = useCan();
+  const [onlyNew, setOnlyNew] = useState(true);
+  const [confirm, setConfirm] = useState(false);
+  const [skipped, setSkipped] = useState<number | null>(null);
+  const run = useAction(() => sessionApi.cardPasswords(sessionId, onlyNew), {
+    success: (r) => `${formatNumber(r.passwords.length)} password dibuat`,
+    onSuccess: (r) => {
+      onDone(Object.fromEntries(r.passwords.map((x) => [x.user_id, x.password])));
+      setSkipped(r.skipped);
+      setConfirm(false);
+    },
+  });
+  if (!can(Perm.UserManage) || !count) return null;
+  return (
+    <div className="no-print mx-auto mb-4 max-w-[210mm] px-4 sm:px-0">
+      {given > 0 ? (
+        <Alert tone="amber">
+          <strong>{formatNumber(given)} password tercetak di kartu.</strong> Password hanya tampil sekarang: cetak atau simpan PDF sebelum menutup halaman ini.
+          {skipped ? ` ${formatNumber(skipped)} peserta dilewati (sudah pernah login atau akun nonaktif), kartunya berisi baris kosong.` : ''}
+        </Alert>
+      ) : (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
+          <div className="min-w-0 text-xs text-slate-600 dark:text-slate-300">
+            <p className="font-semibold text-slate-900 dark:text-white">Password di kartu</p>
+            <p>Sistem membuat password untuk setiap peserta dan mencetaknya di kartu. Peserta memakainya langsung, tanpa harus mengganti.</p>
+          </div>
+          <div className="flex shrink-0 items-center gap-4">
+            <Checkbox label="Hanya yang belum pernah login" checked={onlyNew} onChange={(e) => setOnlyNew(e.target.checked)} />
+            <Button icon={<KeyRound className="h-4 w-4" />} onClick={() => setConfirm(true)}>
+              Buat password
+            </Button>
+          </div>
+        </div>
+      )}
+      <ConfirmDialog
+        open={confirm}
+        title="Buat password baru untuk kartu?"
+        confirmLabel="Buat password"
+        loading={run.isPending}
+        onConfirm={() => run.mutate(undefined)}
+        onClose={() => setConfirm(false)}
+      >
+        {onlyNew ? 'Peserta yang belum pernah login' : 'Semua peserta aktif di sesi ini'} mendapat password baru dari sistem. Password lama mereka tidak berlaku lagi, dan
+        kartu yang sudah dibagikan sebelumnya perlu dicetak ulang. Password hanya tampil sekali.
+      </ConfirmDialog>
     </div>
   );
 }
