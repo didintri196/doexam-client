@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { Copy, KeyRound, Pencil, Plus, Trash2, Users } from 'lucide-react';
+import { Copy, KeyRound, Pencil, Plus, Trash2, UserCog, Users } from 'lucide-react';
 import { useState } from 'react';
 import type { Role, User, UserStatus } from '@/shared/api/types';
 import { formatDateTime } from '@/shared/lib/format';
+import { isParticipant, isStaff } from '@/shared/lib/perm';
 import { Alert, Badge, Button, Checkbox, ConfirmDialog, EmptyState, Field, IconButton, Input, Loading, Modal, PageHeader, Pagination, Select, Table, td, th, useToast } from '@/shared/ui';
 import { userApi } from '../api';
 import { useAction, usePaging } from '../components/hooks';
@@ -12,11 +13,35 @@ export function useRoles() {
   return useQuery({ queryKey: ['roles'], queryFn: userApi.roles, staleTime: 5 * 60_000 });
 }
 
-export function UsersPage() {
+export type UserKind = 'staff' | 'participant';
+
+const kinds = {
+  staff: {
+    title: 'Staf',
+    subtitle: 'Akun yang masuk ke panel: admin, penyusun soal, pengawas, dan penilai.',
+    add: 'Tambah staf',
+    empty: 'Belum ada staf',
+    search: 'Cari nama, username, email…',
+  },
+  participant: {
+    title: 'Peserta',
+    subtitle: 'Akun yang mengerjakan ujian di halaman ujian.',
+    add: 'Tambah peserta',
+    empty: 'Belum ada peserta',
+    search: 'Cari nama, username, ID peserta…',
+  },
+} as const;
+
+/** UsersPage lists staff or participants (a user with both kinds of role shows in both). */
+export function UsersPage({ kind }: { kind: UserKind }) {
+  const text = kinds[kind];
   const { page, setPage, filters, setFilter, query } = usePaging({ q: '', role: '', status: '' });
   const q = useDebounced(filters.q);
-  const list = useQuery({ queryKey: ['users', { ...query, q }], queryFn: () => userApi.list({ ...query, q }) });
-  const roles = useRoles();
+  const list = useQuery({ queryKey: ['users', kind, { ...query, q }], queryFn: () => userApi.list({ ...query, q, kind }) });
+  const allRoles = useRoles();
+  // only the roles that make a user this kind are offered as filter and default
+  const kindRoles = (allRoles.data ?? []).filter((r) => (kind === 'staff' ? isStaff(r.permissions) : isParticipant(r.permissions)));
+  const roles = allRoles;
   const roleName = (code: string) => roles.data?.find((r) => r.code === code)?.name ?? code;
   const [editing, setEditing] = useState<User | 'new' | null>(null);
   const [password, setPassword] = useState<{ user: string; password: string } | null>(null);
@@ -33,24 +58,26 @@ export function UsersPage() {
   return (
     <>
       <PageHeader
-        title="Pengguna"
-        subtitle="Akun peserta, penyusun soal, pengawas, penilai, dan admin."
+        title={text.title}
+        subtitle={text.subtitle}
         actions={
           <Button icon={<Plus className="h-4 w-4" />} onClick={() => setEditing('new')}>
-            Tambah pengguna
+            {text.add}
           </Button>
         }
       />
       <div className="mb-4 flex flex-wrap gap-2">
-        <SearchInput value={filters.q} onChange={(v) => setFilter('q', v)} placeholder="Cari nama, username, ID peserta…" />
-        <Select className="w-auto" value={filters.role} onChange={(e) => setFilter('role', e.target.value)}>
-          <option value="">Semua peran</option>
-          {roles.data?.map((r) => (
-            <option key={r.code} value={r.code}>
-              {r.name}
-            </option>
-          ))}
-        </Select>
+        <SearchInput value={filters.q} onChange={(v) => setFilter('q', v)} placeholder={text.search} />
+        {kindRoles.length > 1 && (
+          <Select className="w-auto" value={filters.role} onChange={(e) => setFilter('role', e.target.value)}>
+            <option value="">Semua peran</option>
+            {kindRoles.map((r) => (
+              <option key={r.code} value={r.code}>
+                {r.name}
+              </option>
+            ))}
+          </Select>
+        )}
         <Select className="w-auto" value={filters.status} onChange={(e) => setFilter('status', e.target.value)}>
           <option value="">Semua status</option>
           <option value="active">Aktif</option>
@@ -60,7 +87,7 @@ export function UsersPage() {
       {list.isLoading ? (
         <Loading />
       ) : !list.data?.items.length ? (
-        <EmptyState icon={<Users className="h-10 w-10" />} title="Belum ada pengguna" />
+        <EmptyState icon={kind === 'staff' ? <UserCog className="h-10 w-10" /> : <Users className="h-10 w-10" />} title={text.empty} />
       ) : (
         <>
           <Table>
@@ -126,6 +153,7 @@ export function UsersPage() {
         <UserForm
           user={editing === 'new' ? null : editing}
           roles={roles.data ?? []}
+          defaultRoles={kind === 'participant' ? ['participant'] : kindRoles.some((r) => r.code === 'proctor') ? ['proctor'] : []}
           onClose={() => setEditing(null)}
           onCreated={(username, pw) => pw && setPassword({ user: username, password: pw })}
         />
@@ -155,7 +183,19 @@ export function UsersPage() {
   );
 }
 
-function UserForm({ user, roles, onClose, onCreated }: { user: User | null; roles: Role[]; onClose: () => void; onCreated: (username: string, password?: string) => void }) {
+function UserForm({
+  user,
+  roles,
+  defaultRoles,
+  onClose,
+  onCreated,
+}: {
+  user: User | null;
+  roles: Role[];
+  defaultRoles: string[];
+  onClose: () => void;
+  onCreated: (username: string, password?: string) => void;
+}) {
   const [f, setF] = useState({
     username: user?.username ?? '',
     full_name: user?.full_name ?? '',
@@ -164,7 +204,7 @@ function UserForm({ user, roles, onClose, onCreated }: { user: User | null; role
     password: '',
     must_change: true,
     status: (user?.status ?? 'active') as UserStatus,
-    roles: user?.roles ?? ['participant'],
+    roles: user?.roles ?? defaultRoles,
   });
   const create = useAction(
     () =>
