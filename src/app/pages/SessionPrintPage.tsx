@@ -4,10 +4,11 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import type { PrintParticipant, SessionPrint } from '@/shared/api/types';
 import { errorMessage } from '@/shared/lib/errors';
-import { formatDateTime, formatLongDate, formatNumber, formatTime } from '@/shared/lib/format';
+import { formatLongDate, formatNumber, formatTime } from '@/shared/lib/format';
 import { Alert, Button, Checkbox, ConfirmDialog, Loading, Tabs } from '@/shared/ui';
 import { sessionApi } from '../api';
 import { useAction } from '../components/hooks';
+import { ParticipantCard } from '../components/ParticipantCard';
 import { Perm, useCan } from '../perm';
 
 export type PrintDoc = 'cards' | 'attendance' | 'minutes' | 'proctor';
@@ -144,66 +145,21 @@ function useQrCodes(participants: PrintParticipant[]): Record<string, string> {
 }
 
 function Cards({ d, passwords }: { d: SessionPrint; passwords: Record<string, string> }) {
-  const qr = useQrCodes(d.participants);
+  const card = d.institution.card;
+  const qr = useQrCodes(card.show_qr ? d.participants : noParticipants);
   if (!d.participants.length) return <Empty />;
   const s = d.session;
+  const session = { exam_title: s.exam.title, name: s.name, room: s.room, starts_at: s.starts_at, ends_at: s.ends_at };
   return (
     <div className="card-grid text-[11px] leading-snug">
       {d.participants.map((p) => (
-        <section key={p.user_id} className="card-cut flex flex-col">
-          <div className="flex items-center gap-2 border-b border-slate-300 pb-1.5">
-            {d.institution.logo_url && <img src={d.institution.logo_url} alt="" className="h-7 w-7 object-contain" />}
-            <div className="min-w-0">
-              <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-slate-600">{d.institution.name}</p>
-              <p className="text-[12px] font-bold">Kartu Peserta Ujian</p>
-            </div>
-          </div>
-          <div className="mt-2 flex flex-1 gap-3">
-            <dl className="grid min-w-0 flex-1 grid-cols-[22mm_1fr] content-start gap-x-2 gap-y-0.5">
-              <dt className="text-slate-500">Nama</dt>
-              <dd className="truncate font-semibold">{p.full_name}</dd>
-              <dt className="text-slate-500">Username</dt>
-              <dd className="truncate font-mono font-semibold">{p.username}</dd>
-              {p.external_id && (
-                <>
-                  <dt className="text-slate-500">ID peserta</dt>
-                  <dd className="truncate font-mono">{p.external_id}</dd>
-                </>
-              )}
-              <dt className="text-slate-500">Password</dt>
-              {passwords[p.user_id] ? (
-                <dd className="font-mono text-[12px] font-bold tracking-wider">{passwords[p.user_id]}</dd>
-              ) : (
-                <dd className="border-b border-dotted border-slate-400">&nbsp;</dd>
-              )}
-              <dt className="text-slate-500">Ujian</dt>
-              <dd className="line-clamp-2">{s.exam.title}</dd>
-              <dt className="text-slate-500">Sesi</dt>
-              <dd className="truncate">
-                {s.name}
-                {s.room && ` · ${s.room}`}
-              </dd>
-              {p.seat && (
-                <>
-                  <dt className="text-slate-500">Kursi</dt>
-                  <dd className="font-semibold tabular-nums">{p.seat}</dd>
-                </>
-              )}
-              <dt className="text-slate-500">Jadwal</dt>
-              <dd className="tabular-nums">
-                {formatDateTime(s.starts_at)}–{formatTime(s.ends_at)}
-              </dd>
-            </dl>
-            <div className="flex w-[22mm] shrink-0 flex-col items-center gap-1 text-center">
-              {qr[p.user_id] ? <img src={qr[p.user_id]} alt={`QR masuk ${p.username}`} className="h-[22mm] w-[22mm]" /> : <span className="h-[22mm] w-[22mm]" />}
-              <span className="text-[9px] leading-tight text-slate-500">Pindai untuk membuka halaman masuk</span>
-            </div>
-          </div>
-        </section>
+        <ParticipantCard key={p.user_id} institution={d.institution} card={card} participant={p} session={session} password={passwords[p.user_id]} qr={qr[p.user_id]} />
       ))}
     </div>
   );
 }
+
+const noParticipants: PrintParticipant[] = [];
 
 /**
  * CardPasswordPanel (screen only) asks the server for new system passwords and puts them
