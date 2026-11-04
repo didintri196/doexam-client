@@ -127,6 +127,20 @@ export const api = {
     };
   },
 
+  /**
+   * openFile downloads a public file (import templates) through a plain link, so the
+   * server's Content-Disposition names it. Blob links lose their name in browsers that
+   * ignore the download attribute (embedded/IDE browsers save a random name without extension).
+   */
+  openFile(path: string) {
+    const a = document.createElement('a');
+    a.href = `/api/v1${path}`;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  },
+
   /** download fetches a file response (xlsx exports, credentials) and saves it. */
   async download(path: string, fallbackName: string, query?: Query) {
     const res = await request('GET', path, undefined, query);

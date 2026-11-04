@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, CheckCircle2, Download, FileText, FileUp, TriangleAlert } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
-import { ApiError } from '@/shared/api/client';
 import type { WordImport, WordIssue, WordItem } from '@/shared/api/types';
 import { StaticMedia } from '@/shared/item/media';
 import { RichContent } from '@/shared/item/RichContent';
@@ -85,15 +84,6 @@ export function WordImportPage() {
       setOnlyProblems(r.invalid > 0);
     },
   });
-  const template = useAction(async () => {
-    try {
-      await bankApi.wordTemplate();
-    } catch (err) {
-      // a server older than the import feature has no template route
-      if (err instanceof ApiError && err.status === 404) throw new Error('Templat tidak ditemukan di server. Pastikan server DoExam sudah versi terbaru, lalu coba lagi.');
-      throw err;
-    }
-  });
   const save = useAction(() => bankApi.importWord(id, file!, false), {
     success: (r) => `${formatNumber(r.created)} soal tersimpan sebagai draf${r.created_stimuli ? ` dengan ${r.created_stimuli} bacaan` : ''}`,
     invalidate: [['items'], ['banks']],
@@ -158,7 +148,7 @@ export function WordImportPage() {
               </div>
             </div>
             <div className="flex shrink-0 gap-2">
-              <Button variant="ghost" icon={<Download className="h-4 w-4" />} loading={template.isPending} onClick={() => template.mutate(undefined)}>
+              <Button variant="ghost" icon={<Download className="h-4 w-4" />} onClick={() => bankApi.wordTemplate()}>
                 Unduh templat
               </Button>
               <Button variant={preview ? 'secondary' : 'primary'} icon={<FileUp className="h-4 w-4" />} loading={read.isPending} onClick={() => input.current?.click()}>
