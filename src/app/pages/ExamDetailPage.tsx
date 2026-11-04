@@ -186,7 +186,7 @@ function Settings({ exam, onExam }: { exam: Exam; onExam: (e: Exam) => void }) {
             <Input value={f.description} onChange={(e) => set('description', e.target.value)} />
           </Field>
         </div>
-        <Field label="Petunjuk untuk peserta" error={fe.instructions}>
+        <Field group label="Petunjuk untuk peserta" error={fe.instructions}>
           <RichEditor value={f.instructions} onChange={(v) => set('instructions', v)} />
         </Field>
         <fieldset disabled={!draft} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -554,7 +554,7 @@ function SectionForm({ exam, section, onExam, onClose }: { exam: Exam; section: 
           )}
         </div>
         <Checkbox label="Peserta boleh kembali ke bagian ini setelah selesai" checked={f.allow_revisit} onChange={(e) => setF({ ...f, allow_revisit: e.target.checked })} />
-        <Field label="Petunjuk bagian" error={save.fields.instructions}>
+        <Field group label="Petunjuk bagian" error={save.fields.instructions}>
           <RichEditor value={f.instructions} onChange={(v) => setF({ ...f, instructions: v })} />
         </Field>
       </div>

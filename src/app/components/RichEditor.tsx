@@ -1,9 +1,9 @@
-import { Bold, ImagePlus, Italic, List, ListOrdered, Sigma, Subscript, Superscript, Trash2, Underline } from 'lucide-react';
+import { AudioLines, Bold, ImagePlus, Italic, List, ListOrdered, Sigma, Subscript, Superscript, Trash2, Underline } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState, type ClipboardEvent, type DragEvent, type MouseEvent, type ReactNode } from 'react';
 import { hydrateMedia, useMedia } from '@/shared/item/media';
 import { RichContent, sanitize } from '@/shared/item/RichContent';
 import { errorMessage, fieldErrors } from '@/shared/lib/errors';
-import { Button, cx, Input, Spinner } from '@/shared/ui';
+import { Button, Checkbox, cx, Input, Spinner } from '@/shared/ui';
 import { mediaApi } from '../api';
 import { shrinkImage } from './imageResize';
 import { panelMedia } from './MediaProvider';
@@ -61,6 +61,9 @@ export function RichEditor({
   const [uploadError, setUploadError] = useState<string>();
   const [picked, setPicked] = useState<HTMLImageElement | null>(null);
   const [alt, setAlt] = useState('');
+  // audio: null = closed; target null = inserting a new clip
+  const [audioBar, setAudioBar] = useState<{ target: HTMLAudioElement | null; maxPlays: string; allowPause: boolean } | null>(null);
+  const audioInput = useRef<HTMLInputElement>(null);
   const media = useMedia();
   const mediaVersion = media.version();
 
@@ -167,6 +170,47 @@ export function RichEditor({
     }
   };
 
+  const audioAttrs = (maxPlays: string, allowPause: boolean) => {
+    const n = Number(maxPlays);
+    return n >= 1 && n <= 10 ? ` data-max-plays="${n}" data-allow-pause="${allowPause}"` : '';
+  };
+
+  const insertAudio = async (file: File | undefined) => {
+    if (!file || !audioBar) return;
+    setUploadError(undefined);
+    setUploading((n) => n + 1);
+    try {
+      const m = await mediaApi.upload(file, file.name);
+      panelMedia().add(m.id, { url: m.url, mime: m.mime_type });
+      placeCaret();
+      document.execCommand('insertHTML', false, `<audio data-media-id="${m.id}" controls${audioAttrs(audioBar.maxPlays, audioBar.allowPause)}></audio><p><br></p>`);
+      const el = ref.current;
+      if (el) hydrateMedia(el, panelMedia());
+      setAudioBar(null);
+      emit();
+    } catch (err) {
+      setUploadError(`${file.name}: ${fieldErrors(err).file ?? errorMessage(err)}`);
+    } finally {
+      setUploading((n) => n - 1);
+    }
+  };
+
+  /** applyAudio writes the bar's settings onto the clip being edited. */
+  const applyAudio = (next: { maxPlays: string; allowPause: boolean }) => {
+    setAudioBar((b) => (b ? { ...b, ...next } : b));
+    const a = audioBar?.target;
+    if (!a) return;
+    const n = Number(next.maxPlays);
+    if (n >= 1 && n <= 10) {
+      a.setAttribute('data-max-plays', String(n));
+      a.setAttribute('data-allow-pause', String(next.allowPause));
+    } else {
+      a.removeAttribute('data-max-plays');
+      a.removeAttribute('data-allow-pause');
+    }
+    emit();
+  };
+
   const onPaste = (e: ClipboardEvent) => {
     const files = [...e.clipboardData.files].filter((f) => f.type.startsWith('image/'));
     if (!files.length) return;
@@ -189,6 +233,10 @@ export function RichEditor({
     if (t instanceof HTMLImageElement) {
       setPicked(t);
       setAlt(t.alt);
+      setAudioBar(null);
+    } else if (t instanceof HTMLAudioElement) {
+      setPicked(null);
+      setAudioBar({ target: t, maxPlays: t.getAttribute('data-max-plays') ?? '', allowPause: t.getAttribute('data-allow-pause') !== 'false' });
     } else {
       setPicked(null);
     }
@@ -250,9 +298,14 @@ export function RichEditor({
               e.target.value = '';
             }}
           />
+          {tool('Sisipkan audio', <AudioLines className={i} />, () => {
+            rememberCaret();
+            setPicked(null);
+            setAudioBar({ target: null, maxPlays: '', allowPause: true });
+          })}
           {uploading > 0 && (
             <span className="ml-auto flex items-center gap-1.5 pr-1 text-[11px] text-slate-500">
-              <Spinner className="h-3.5 w-3.5" /> Mengunggah gambar…
+              <Spinner className="h-3.5 w-3.5" /> Mengunggah…
             </span>
           )}
         </div>
@@ -269,7 +322,70 @@ export function RichEditor({
           className={cx('rich rich-editor px-3 py-2 text-sm text-slate-900 dark:text-white', minHeight)}
         />
       </div>
-      {uploadError && <p className="text-xs text-rose-600 dark:text-rose-400">Gambar gagal diunggah. {uploadError}</p>}
+      {uploadError && <p className="text-xs text-rose-600 dark:text-rose-400">File gagal diunggah. {uploadError}</p>}
+      {audioBar && (!audioBar.target || ref.current?.contains(audioBar.target)) && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-900">
+          <AudioLines className="h-4 w-4 shrink-0 text-slate-500" />
+          <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300">
+            Batas putar
+            <Input
+              type="number"
+              min={1}
+              max={10}
+              value={audioBar.maxPlays}
+              onChange={(e) => applyAudio({ maxPlays: e.target.value, allowPause: audioBar.allowPause })}
+              placeholder="bebas"
+              aria-describedby="audio-limit-hint"
+              className="w-20"
+            />
+            <span id="audio-limit-hint" className="text-slate-500">kali (kosong = bebas)</span>
+          </label>
+          <Checkbox
+            label="Boleh dijeda"
+            checked={audioBar.allowPause}
+            disabled={!audioBar.maxPlays}
+            onChange={(e) => applyAudio({ maxPlays: audioBar.maxPlays, allowPause: e.target.checked })}
+          />
+          <div className="ml-auto flex items-center gap-2">
+            {audioBar.target ? (
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={<Trash2 className="h-4 w-4" />}
+                onClick={() => {
+                  audioBar.target?.remove();
+                  setAudioBar(null);
+                  emit();
+                }}
+              >
+                Hapus audio
+              </Button>
+            ) : (
+              <>
+                <input
+                  ref={audioInput}
+                  type="file"
+                  accept="audio/mpeg,audio/mp4,audio/x-m4a,audio/ogg,audio/wav,.mp3,.m4a,.ogg,.wav"
+                  className="sr-only"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  onChange={(e) => {
+                    void insertAudio(e.target.files?.[0]);
+                    e.target.value = '';
+                  }}
+                />
+                <Button size="sm" onClick={() => audioInput.current?.click()} loading={uploading > 0}>
+                  Pilih file audio
+                </Button>
+              </>
+            )}
+            <Button size="sm" variant="secondary" onClick={() => setAudioBar(null)}>
+              {audioBar.target ? 'Selesai' : 'Batal'}
+            </Button>
+          </div>
+          {!audioBar.target && <p className="w-full text-xs text-slate-500">MP3, M4A, Ogg, atau WAV, maks. 20 MB. Peserta memutar lewat tombol; bila dibatasi, tidak bisa digeser maju-mundur.</p>}
+        </div>
+      )}
       {picked && ref.current?.contains(picked) && (
         <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-900">
           <ImagePlus className="h-4 w-4 shrink-0 text-slate-500" />

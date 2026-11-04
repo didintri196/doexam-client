@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useState,
   type ButtonHTMLAttributes,
   type InputHTMLAttributes,
@@ -106,29 +107,46 @@ export function Textarea({ className, invalid, ...rest }: TextareaHTMLAttributes
   return <textarea {...rest} className={cx(control, width(className), 'min-h-20 leading-relaxed', invalid && invalidCls, className)} />;
 }
 
+/**
+ * Field labels one control. Set `group` for composite controls (rich editor, pickers):
+ * a <label> forwards every click inside it to its first button or input, so clicking
+ * an editor wrapped in a label would press the editor's first toolbar button.
+ */
 export function Field({
   label,
   error,
   hint,
   children,
   className,
+  group = false,
 }: {
   label: ReactNode;
   error?: string;
   hint?: ReactNode;
   children: ReactNode;
   className?: string;
+  group?: boolean;
 }) {
-  return (
-    <label className={cx('block', className)}>
-      <span className="mb-1.5 block text-xs font-medium text-slate-700 dark:text-slate-300">{label}</span>
+  const id = useId();
+  const body = (
+    <>
+      <span id={`${id}-label`} className="mb-1.5 block text-xs font-medium text-slate-700 dark:text-slate-300">
+        {label}
+      </span>
       {children}
       {error ? (
         <span className="mt-1.5 block text-xs text-rose-600 dark:text-rose-400">{error}</span>
       ) : hint ? (
         <span className="mt-1.5 block text-xs text-slate-500 dark:text-slate-400">{hint}</span>
       ) : null}
-    </label>
+    </>
+  );
+  return group ? (
+    <div role="group" aria-labelledby={`${id}-label`} className={cx('block', className)}>
+      {body}
+    </div>
+  ) : (
+    <label className={cx('block', className)}>{body}</label>
   );
 }
 

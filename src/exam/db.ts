@@ -15,6 +15,7 @@ export interface LocalAttempt {
   flags: Record<string, boolean>;
   current?: string; // attempt item id on screen
   seq: number; // last client_seq used
+  plays?: Record<string, number>; // audio plays used per media id
   saved_at: number;
 }
 

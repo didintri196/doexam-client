@@ -352,7 +352,7 @@ function StimulusForm({ bankId, stimulus, onClose }: { bankId: string; stimulus:
         <Field label="Judul" error={save.fields.title}>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} />
         </Field>
-        <Field label="Isi" error={save.fields.body}>
+        <Field group label="Isi" error={save.fields.body}>
           <RichEditor value={body} onChange={setBody} minHeight="min-h-48" />
         </Field>
       </div>

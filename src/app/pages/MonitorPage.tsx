@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, ArrowLeft, Clock, FileBarChart, Lock, MoreHorizontal, MonitorSmartphone, Send, Tv2, Unlock } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, AudioLines, Clock, FileBarChart, Lock, MoreHorizontal, MonitorSmartphone, Send, Tv2, Unlock } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import type { MonitorRow, Session } from '@/shared/api/types';
@@ -159,7 +159,7 @@ function MiniToken({ session }: { session: Session }) {
   );
 }
 
-type ActionKind = 'extend' | 'lock' | 'unlock' | 'reset' | 'submit';
+type ActionKind = 'extend' | 'lock' | 'unlock' | 'reset' | 'plays' | 'submit';
 
 function Row({ row: r, serverNow, sessionId }: { row: MonitorRow; serverNow: number; sessionId: string }) {
   const can = useCan();
@@ -177,6 +177,7 @@ function Row({ row: r, serverNow, sessionId }: { row: MonitorRow; serverNow: num
       if (k === 'lock') return attemptApi.lock(id);
       if (k === 'unlock') return attemptApi.unlock(id);
       if (k === 'reset') return attemptApi.resetDevice(id);
+      if (k === 'plays') return attemptApi.grantPlays(id, 1);
       return attemptApi.forceSubmit(id);
     },
     {
@@ -192,6 +193,7 @@ function Row({ row: r, serverNow, sessionId }: { row: MonitorRow; serverNow: num
     { k: 'lock', label: 'Kunci', icon: <Lock className="h-3.5 w-3.5" />, show: r.status === 'in_progress' },
     { k: 'unlock', label: 'Buka kunci', icon: <Unlock className="h-3.5 w-3.5" />, show: r.status === 'locked' },
     { k: 'reset', label: 'Reset perangkat', icon: <MonitorSmartphone className="h-3.5 w-3.5" />, show: r.device_bound && (r.status === 'in_progress' || r.status === 'locked') },
+    { k: 'plays', label: 'Tambah 1× putar audio', icon: <AudioLines className="h-3.5 w-3.5" />, show: r.status === 'in_progress' || r.status === 'locked' },
     { k: 'submit', label: 'Kumpulkan paksa', icon: <Send className="h-3.5 w-3.5" />, show: r.status === 'in_progress' || r.status === 'locked' },
   ];
   const shown = acts.filter((a) => a.show);
@@ -200,6 +202,7 @@ function Row({ row: r, serverNow, sessionId }: { row: MonitorRow; serverNow: num
     lock: 'Peserta tidak bisa menjawab sampai dibuka kembali.',
     unlock: 'Peserta bisa melanjutkan ujian.',
     reset: 'Peserta bisa melanjutkan di perangkat lain (mis. PC rusak).',
+    plays: 'Setiap audio yang dibatasi bisa diputar 1 kali lagi oleh peserta ini, mis. bila speaker atau headset bermasalah. Tercatat di log.',
     submit: 'Jawaban peserta dikumpulkan sekarang dan dinilai. Tidak bisa dibatalkan.',
   };
   return (

@@ -186,6 +186,8 @@ export const attemptApi = {
   unlock: (id: string) => api.post(`/attempts/${id}/unlock`),
   resetDevice: (id: string) => api.post(`/attempts/${id}/reset-device`),
   forceSubmit: (id: string) => api.post(`/attempts/${id}/force-submit`),
+  /** Every audio clip with a play limit may be played `plays` more times. */
+  grantPlays: (id: string, plays = 1) => api.post(`/attempts/${id}/grant-plays`, { plays }),
   report: (id: string) => api.get<T.AttemptReport>(`/attempts/${id}/report`),
 };
 

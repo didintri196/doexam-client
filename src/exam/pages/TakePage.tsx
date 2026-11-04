@@ -16,9 +16,10 @@ import {
   Send,
   Settings2,
 } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Navigate, useLocation, useNavigate, useParams } from 'react-router';
 import type { AttemptView, ItemView, Response } from '@/shared/api/types';
+import { AudioPlaysContext, type AudioPlays } from '@/shared/item/audio';
 import { StaticMedia } from '@/shared/item/media';
 import { RichContent } from '@/shared/item/RichContent';
 import { errorMessage } from '@/shared/lib/errors';
@@ -144,9 +145,15 @@ function ExamRoom({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
   const answered = items.filter((i) => isAnswered(s.responses[i.id])).length;
   const flagged = items.filter((i) => s.flags[i.id]).length;
   const hc = prefs.contrast;
+  const canPlay = engine.canAnswer;
+  const audioPlays = useMemo<AudioPlays>(
+    () => ({ used: (id) => s.plays[id] ?? 0, extra: s.extraPlays, canPlay, record: (id) => void engine.recordPlay(id) }),
+    [s.plays, s.extraPlays, canPlay, engine],
+  );
 
   return (
     <StaticMedia refs={view.media}>
+    <AudioPlaysContext.Provider value={audioPlays}>
     <div className={cx('flex min-h-screen flex-col', hc ? 'hc' : 'bg-slate-50 dark:bg-slate-950')}>
       {/* header */}
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
@@ -380,6 +387,7 @@ function ExamRoom({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
         </Overlay>
       )}
     </div>
+    </AudioPlaysContext.Provider>
     </StaticMedia>
   );
 }

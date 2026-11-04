@@ -47,6 +47,9 @@ export interface Snapshot {
   focusLost: number;
   /** Download of the attempt's pictures for offline use. */
   media?: MediaProgress;
+  /** Audio plays used per media id, and extra plays granted by the proctor. */
+  plays: Record<string, number>;
+  extraPlays: number;
 }
 
 const rejectMessages: Record<string, string> = {
@@ -108,6 +111,8 @@ export class AttemptEngine {
     syncing: false,
     expired: false,
     focusLost: 0,
+    plays: {},
+    extraPlays: 0,
   };
   private listeners = new Set<() => void>();
   private seq = 0;
@@ -208,6 +213,16 @@ export class AttemptEngine {
       if (ev.type === 'RESPONSE_SAVED') responses[ev.attempt_item_id] = (ev.payload as { response: Response | null }).response;
       if (ev.type === 'FLAG_SET') flags[ev.attempt_item_id] = (ev.payload as { flagged: boolean }).flagged;
     }
+    // Plays never go back: the server count plus clips started but not synced yet, or
+    // what this device already counted, whichever is higher.
+    const plays: Record<string, number> = { ...(view.media_plays ?? {}) };
+    for (const ev of pending) {
+      const id = ev.type === 'MEDIA_PLAYED' ? (ev.payload as { media_id?: string }).media_id : undefined;
+      if (id) plays[id] = (plays[id] ?? 0) + 1;
+    }
+    for (const src of [local?.plays, this.snap.plays]) {
+      for (const [id, n] of Object.entries(src ?? {})) plays[id] = Math.max(plays[id] ?? 0, n);
+    }
     const prevCurrent = this.snap.current ?? local?.current;
     const current = items.find((i) => i.id === prevCurrent)?.id ?? items[0]?.id;
     const idx = Math.max(0, items.findIndex((i) => i.id === current));
@@ -224,6 +239,8 @@ export class AttemptEngine {
       deadlineMs: effectiveDeadline(view),
       offsetMs,
       pending: pending.length,
+      plays,
+      extraPlays: Math.max(view.extra_plays ?? 0, fromLocal ? this.snap.extraPlays : 0),
     });
     if (closed(view.status)) {
       void store.clearAttempt(this.attemptId);
@@ -263,6 +280,7 @@ export class AttemptEngine {
         flags: s.flags,
         current: s.current,
         seq: this.seq,
+        plays: s.plays,
         saved_at: Date.now(),
       })
       .catch(() => {});
@@ -283,6 +301,18 @@ export class AttemptEngine {
     if (!this.canAnswer) return;
     this.set({ flags: { ...this.snap.flags, [itemId]: flagged } });
     void this.enqueue('FLAG_SET', { flagged }, itemId);
+  }
+
+  /**
+   * recordPlay counts the start of an audio clip and returns the play number, or 0 when
+   * playing is not allowed now. The limit itself is checked by the player.
+   */
+  recordPlay(mediaId: string): number {
+    if (!this.canAnswer) return 0;
+    const n = (this.snap.plays[mediaId] ?? 0) + 1;
+    this.set({ plays: { ...this.snap.plays, [mediaId]: n } });
+    void this.enqueue('MEDIA_PLAYED', { media_id: mediaId, play_no: n });
+    return n;
   }
 
   /** goTo moves to another item, recording time spent on the one being left. */
@@ -495,7 +525,7 @@ export class AttemptEngine {
 
 const idle: Snapshot = {
   phase: 'loading', items: [], responses: {}, flags: {}, furthest: 0, deadlineMs: 0, offsetMs: 0,
-  pending: 0, online: true, syncing: false, expired: false, focusLost: 0,
+  pending: 0, online: true, syncing: false, expired: false, focusLost: 0, plays: {}, extraPlays: 0,
 };
 const noop = () => () => {};
 
