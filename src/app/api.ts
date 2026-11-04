@@ -8,7 +8,7 @@ export const setupApi = {
   setup: (body: {
     tenant_name: string;
     tenant_slug?: string;
-    preset: string;
+    preset?: string;
     admin_username: string;
     admin_full_name: string;
     admin_email?: string;

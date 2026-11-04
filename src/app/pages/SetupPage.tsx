@@ -3,12 +3,12 @@ import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router';
 import { AuthShell } from '@/shared/auth/pages';
 import { errorMessage, fieldErrors } from '@/shared/lib/errors';
-import { Alert, Button, Field, Input, Select } from '@/shared/ui';
+import { Alert, Button, Field, Input } from '@/shared/ui';
 import { setupApi } from '../api';
 
 /** SetupPage runs once on a fresh installation: the institution and its first admin. */
 export function SetupPage() {
-  const [f, setF] = useState({ tenant_name: '', preset: 'school', admin_full_name: '', admin_username: 'admin', admin_email: '', admin_password: '', confirm: '' });
+  const [f, setF] = useState({ tenant_name: '', admin_full_name: '', admin_username: 'admin', admin_email: '', admin_password: '', confirm: '' });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fields, setFields] = useState<Record<string, string>>({});
@@ -27,7 +27,6 @@ export function SetupPage() {
     try {
       await setupApi.setup({
         tenant_name: f.tenant_name,
-        preset: f.preset,
         admin_full_name: f.admin_full_name,
         admin_username: f.admin_username,
         admin_email: f.admin_email || undefined,
@@ -63,15 +62,8 @@ export function SetupPage() {
                 <p className="text-xs text-slate-500">Isi data institusi dan akun admin pertama. Langkah ini hanya sekali.</p>
               </div>
               <form onSubmit={submit} className="space-y-4">
-                <Field label="Nama institusi" error={fields.tenant_name}>
-                  <Input value={f.tenant_name} onChange={set('tenant_name')} placeholder="SMA Negeri 1 Contoh" required />
-                </Field>
-                <Field label="Jenis" error={fields.preset} hint="Menentukan nama peran bawaan (Guru/Siswa atau Penyusun Tes/Kandidat).">
-                  <Select value={f.preset} onChange={set('preset')}>
-                    <option value="school">Sekolah</option>
-                    <option value="company">Perusahaan</option>
-                    <option value="custom">Lainnya</option>
-                  </Select>
+                <Field label="Nama institusi" error={fields.tenant_name} hint="Sekolah, kampus, perusahaan, atau lembaga.">
+                  <Input value={f.tenant_name} onChange={set('tenant_name')} required />
                 </Field>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field label="Nama admin" error={fields.admin_full_name}>

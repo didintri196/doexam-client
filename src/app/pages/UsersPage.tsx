@@ -34,7 +34,7 @@ export function UsersPage() {
     <>
       <PageHeader
         title="Pengguna"
-        subtitle="Akun siswa, guru, pengawas, dan admin."
+        subtitle="Akun peserta, penyusun soal, pengawas, penilai, dan admin."
         actions={
           <Button icon={<Plus className="h-4 w-4" />} onClick={() => setEditing('new')}>
             Tambah pengguna
@@ -42,7 +42,7 @@ export function UsersPage() {
         }
       />
       <div className="mb-4 flex flex-wrap gap-2">
-        <SearchInput value={filters.q} onChange={(v) => setFilter('q', v)} placeholder="Cari nama, username, NIS…" />
+        <SearchInput value={filters.q} onChange={(v) => setFilter('q', v)} placeholder="Cari nama, username, ID peserta…" />
         <Select className="w-auto" value={filters.role} onChange={(e) => setFilter('role', e.target.value)}>
           <option value="">Semua peran</option>
           {roles.data?.map((r) => (
@@ -216,7 +216,7 @@ function UserForm({ user, roles, onClose, onCreated }: { user: User | null; role
           <Field label="Username" error={fe.username}>
             <Input value={f.username} disabled={!!user} onChange={(e) => setF({ ...f, username: e.target.value })} className="font-mono" />
           </Field>
-          <Field label="NIS / ID karyawan" error={fe.external_id}>
+          <Field label="ID peserta" error={fe.external_id}>
             <Input value={f.external_id} onChange={(e) => setF({ ...f, external_id: e.target.value })} />
           </Field>
         </div>

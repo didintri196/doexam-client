@@ -50,13 +50,13 @@ export function ImportsPage() {
 
   return (
     <>
-      <PageHeader title="Impor dari Excel" subtitle="Tambahkan ratusan siswa atau kelas sekaligus. Semua baris diperiksa dulu sebelum disimpan." />
+      <PageHeader title="Impor dari Excel" subtitle="Tambahkan ratusan pengguna atau grup sekaligus. Semua baris diperiksa dulu sebelum disimpan." />
       <div className="grid gap-6 lg:grid-cols-5">
         <Card title="1. Unggah file" className="lg:col-span-2">
           <div className="space-y-4">
             <Select value={kind} onChange={(e) => setKind(e.target.value as ImportKind)}>
-              <option value="users">Pengguna (siswa, guru)</option>
-              <option value="groups">Kelas / grup</option>
+              <option value="users">Pengguna (peserta & staf)</option>
+              <option value="groups">Grup</option>
             </Select>
             <Button variant="secondary" className="w-full" icon={<Download className="h-4 w-4" />} onClick={() => void download(() => importApi.template(kind))}>
               Unduh template {kind === 'users' ? 'pengguna' : 'grup'}

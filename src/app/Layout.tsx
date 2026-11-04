@@ -46,7 +46,7 @@ const NAV: NavGroup[] = [
     items: [
       { to: '/banks', label: 'Bank soal', icon: <FileQuestion className={i} />, perms: [Perm.ItemRead, Perm.ItemWrite] },
       { to: '/exams', label: 'Ujian', icon: <Layers className={i} />, perms: [Perm.ExamRead, Perm.ExamWrite] },
-      { to: '/subjects', label: 'Mapel & kompetensi', icon: <BookOpenCheck className={i} />, perms: [Perm.ItemWrite, Perm.TenantManage] },
+      { to: '/subjects', label: 'Subjek & kompetensi', icon: <BookOpenCheck className={i} />, perms: [Perm.ItemWrite, Perm.TenantManage] },
     ],
   },
   {
@@ -60,7 +60,7 @@ const NAV: NavGroup[] = [
     label: 'Administrasi',
     items: [
       { to: '/users', label: 'Pengguna', icon: <Users className={i} />, perms: [Perm.UserManage] },
-      { to: '/groups', label: 'Kelas & grup', icon: <UsersRound className={i} />, perms: [Perm.GroupManage] },
+      { to: '/groups', label: 'Grup', icon: <UsersRound className={i} />, perms: [Perm.GroupManage] },
       { to: '/imports', label: 'Impor Excel', icon: <FileSpreadsheet className={i} />, perms: [Perm.UserManage, Perm.GroupManage] },
       { to: '/settings', label: 'Pengaturan institusi', icon: <Settings className={i} />, perms: [Perm.TenantManage] },
     ],

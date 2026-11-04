@@ -70,7 +70,7 @@ function Recap({ examId, sessionId }: { examId: string; sessionId: string }) {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Select className="w-auto" value={groupId} onChange={(e) => setGroupId(e.target.value)}>
-          <option value="">Semua kelas/grup</option>
+          <option value="">Semua grup</option>
           {groups.data?.items.map((g) => (
             <option key={g.id} value={g.id}>
               {g.name}
@@ -313,7 +313,7 @@ export function AttemptReportPage() {
         <h1 className="mt-4 text-lg font-semibold">Laporan hasil ujian</h1>
         <div className="mt-3 grid gap-x-8 gap-y-1 text-xs sm:grid-cols-2">
           <Info k="Nama" v={r.full_name} />
-          <Info k="Username / NIS" v={`${r.username}${r.external_id ? ` / ${r.external_id}` : ''}`} />
+          <Info k="Username / ID peserta" v={`${r.username}${r.external_id ? ` / ${r.external_id}` : ''}`} />
           <Info k="Ujian" v={r.exam_title} />
           <Info k="Sesi" v={`${r.session_name} · percobaan ke-${r.attempt_no}`} />
           <Info k="Mulai" v={formatDateTime(r.started_at)} />

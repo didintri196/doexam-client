@@ -41,7 +41,7 @@ export function ResultPage() {
               </span>
               <p className="mt-2 text-base font-semibold text-slate-900 dark:text-white">Jawaban Anda sudah dikumpulkan</p>
               {!r.visible ? (
-                <p className="max-w-md text-xs text-slate-500 dark:text-slate-400">Nilai belum ditampilkan. Hasil akan muncul di sini setelah dirilis oleh guru atau panitia.</p>
+                <p className="max-w-md text-xs text-slate-500 dark:text-slate-400">Nilai belum ditampilkan. Hasil akan muncul di sini setelah dirilis oleh penyelenggara.</p>
               ) : (
                 <>
                   <div className="mt-3 flex items-baseline gap-1.5 tabular-nums">
@@ -60,7 +60,7 @@ export function ResultPage() {
               )}
               {r.pending_manual > 0 && (
                 <Alert tone="blue" className="mt-3 text-left">
-                  {r.pending_manual} jawaban esai masih menunggu dinilai guru. Nilai bisa berubah.
+                  {r.pending_manual} jawaban esai masih menunggu dikoreksi. Nilai bisa berubah.
                 </Alert>
               )}
             </div>

@@ -85,7 +85,7 @@ export const labels = {
   attendance: { expected: 'Terdaftar', present: 'Hadir', absent: 'Tidak hadir', excused: 'Izin' } as Record<string, string>,
   groupKind: {
     level: 'Tingkat',
-    class: 'Kelas',
+    class: 'Kelompok',
     department: 'Departemen',
     team: 'Tim',
     batch: 'Angkatan',
