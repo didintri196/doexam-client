@@ -3,9 +3,10 @@ import { ArrowLeft, Ban, MonitorPlay, Pause, Pencil, Play, Plus, RotateCw, Squar
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import type { Attendance, Group, Participant, Session, SessionStatus, User } from '@/shared/api/types';
-import { formatClock, formatDateTime, formatTime, labels } from '@/shared/lib/format';
+import { formatClock, formatDateTime, formatNumber, formatTime, labels } from '@/shared/lib/format';
 import { Badge, Button, Card, ConfirmDialog, EmptyState, Field, IconButton, Input, Loading, Modal, PageHeader, Pagination, Select, Table, Tabs, td, th } from '@/shared/ui';
 import { sessionApi } from '../api';
+import { BulkUserAdder, MAX_BULK, type PickedUser } from '../components/BulkUserAdder';
 import { useAction } from '../components/hooks';
 import { GroupPicker, SearchInput, useDebounced, UserPicker } from '../components/pickers';
 import { Perm, useCan } from '../perm';
@@ -362,7 +363,7 @@ function Participants({ session, canManage }: { session: Session; canManage: boo
 }
 
 function AddParticipants({ session, onClose }: { session: Session; onClose: () => void }) {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<PickedUser[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [extra, setExtra] = useState('');
   const add = useAction(
@@ -380,8 +381,8 @@ function AddParticipants({ session, onClose }: { session: Session; onClose: () =
           <Button variant="secondary" onClick={onClose}>
             Batal
           </Button>
-          <Button disabled={!users.length && !groups.length} loading={add.isPending} onClick={() => add.mutate(undefined)}>
-            Tambahkan
+          <Button disabled={(!users.length && !groups.length) || users.length > MAX_BULK} loading={add.isPending} onClick={() => add.mutate(undefined)}>
+            {users.length ? `Tambahkan ${formatNumber(users.length)} orang${groups.length ? ` + ${groups.length} grup` : ''}` : 'Tambahkan'}
           </Button>
         </>
       }
@@ -390,9 +391,11 @@ function AddParticipants({ session, onClose }: { session: Session; onClose: () =
         <Field label="Dari grup" hint="Semua anggota grup ditambahkan (pembina/ketua tidak).">
           <GroupPicker selected={groups} onChange={setGroups} />
         </Field>
-        <Field label="Perorangan">
-          <UserPicker selected={users} onChange={setUsers} role="participant" />
-        </Field>
+        <div>
+          <p className="mb-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">Perorangan</p>
+          <BulkUserAdder selected={users} onChange={setUsers} role="participant" activeOnly />
+          {add.fields.user_ids && <p className="mt-2 text-xs text-rose-600">{add.fields.user_ids}</p>}
+        </div>
         <Field label="Waktu tambahan (menit)" hint="Untuk akomodasi khusus; bisa juga diatur per peserta.">
           <Input type="number" className="w-32" value={extra} onChange={(e) => setExtra(e.target.value)} />
         </Field>
