@@ -32,6 +32,7 @@ export interface TenantSettings {
   primary_color: string | null;
   tagline: string;
   letterhead: string;
+  exam_rules: string;
   logo_url: string | null;
 }
 export interface Tenant { id: ID; slug: string; name: string; preset: string; is_active: boolean; settings: TenantSettings }
@@ -602,4 +603,23 @@ export interface AttemptReport {
     visits: number;
     flagged: boolean;
   }[];
+}
+
+// ── session documents (GET /sessions/:id/print) ────────────────
+export interface PrintParticipant {
+  user_id: ID;
+  username: string;
+  full_name: string;
+  external_id: string | null;
+  seat: string | null;
+  attendance: Attendance;
+  attempt_status: AttemptStatus | null;
+}
+export interface PrintStats { registered: number; present: number; absent: number; excused: number; started: number; submitted: number }
+export interface SessionPrint {
+  session: Session;
+  institution: { name: string; letterhead: string; exam_rules: string; logo_url: string | null };
+  participants: PrintParticipant[];
+  stats: PrintStats;
+  generated_at: ISODate;
 }

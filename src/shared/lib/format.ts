@@ -19,6 +19,12 @@ export function formatDate(iso: string | null | undefined): string {
   return fmt({ day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(iso));
 }
 
+/** formatLongDate: "Selasa, 4 November 2026" (minutes, printed documents). */
+export function formatLongDate(iso: string | null | undefined): string {
+  if (!iso) return '—';
+  return fmt({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso));
+}
+
 export function formatTime(iso: string | null | undefined): string {
   if (!iso) return '—';
   return fmt({ hour: '2-digit', minute: '2-digit' }).format(new Date(iso));

@@ -96,7 +96,8 @@ export function LoginPage({
   const navigate = useNavigate();
   const loc = useLocation();
   const [slug, setSlug] = useState('');
-  const [username, setUsername] = useState('');
+  // ?u= prefills the username (QR code on the participant card)
+  const [username, setUsername] = useState(() => new URLSearchParams(window.location.search).get('u') ?? '');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);

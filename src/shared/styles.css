@@ -108,6 +108,23 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--accent); }
   .no-print { display: none !important; }
 }
 
+/* Session documents (/app/sessions/:id/print/:doc): A4, previewed as paper on screen. */
+@page { size: A4; margin: 12mm; }
+.paper { width: 210mm; min-height: 297mm; padding: 12mm; background: white; color: #0f172a; }
+/* In the base layer so utility classes (text-center, w-*) on cells and tables win. */
+@layer base {
+  .paper table { width: 100%; border-collapse: collapse; }
+  .paper th, .paper td { border: 1px solid #94a3b8; padding: 1.6mm 2mm; text-align: left; vertical-align: top; }
+  .paper thead { display: table-header-group; } /* repeated on every printed page */
+}
+.paper tr, .avoid-break { break-inside: avoid; }
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.card-cut { height: 66mm; border: 1px dashed #94a3b8; margin: -0.5px; padding: 4mm; overflow: hidden; break-inside: avoid; }
+@media print {
+  .paper { width: auto; min-height: 0; padding: 0; box-shadow: none !important; margin: 0 !important; }
+  .print-page-break { break-after: page; }
+}
+
 /* formulas inside the editor show their LaTeX as a chip; the preview typesets them */
 .rich-editor [data-math], .rich-editor [data-math-block] {
   font-family: var(--font-mono); font-size: .85em; background: var(--color-blue-100); color: var(--color-blue-800);

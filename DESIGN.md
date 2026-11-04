@@ -245,6 +245,7 @@ Slate netral yang dingin dengan satu aksen institusi dan tiga warna status yang 
 - **Exam Reading** (400, 1rem, line-height 1.65, maks 72ch): stem dan opsi soal. A / A+ / A++ = 16 / 18 / 20px.
 - **Label** (500, 0.6875rem): badge, label grup sidebar, legenda navigator, footer. Selalu sentence case.
 - **Timer** (600, 1.125rem, tabular): sisa waktu di header ruang ujian.
+- **Print** (dokumen sesi A4 di `/app/sessions/:id/print/:doc`): judul 15px/700 kapital, isi 12px, tabel dan meta 11px, label kartu 10px, catatan kecil 9px. Kertas dibaca dari dekat dan dicetak hitam-putih, jadi skala ini terpisah dari skala layar dan tidak tunduk pada The Thirteen Rule.
 
 ### Named Rules
 **The Tabular Inter Rule.** Angka (timer, hitungan, tabel, nomor soal, statistik) memakai Inter dengan `tabular-nums`. Monospace hanya untuk kode, token ruang, username, kode kompetensi, dan LaTeX.
