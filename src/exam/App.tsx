@@ -1,10 +1,9 @@
-import { GraduationCap } from 'lucide-react';
+import { Clock, Save, WifiOff } from 'lucide-react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
 import type { Me } from '@/shared/api/types';
 import { AuthProvider, RequireAuth } from '@/shared/auth/auth';
 import { ChangePasswordPage, LoginPage } from '@/shared/auth/pages';
 import { isParticipant } from '@/shared/lib/perm';
-import { Badge } from '@/shared/ui';
 import { SessionsPage } from './pages/SessionsPage';
 import { ResultPage } from './pages/ResultPage';
 import { TakePage } from './pages/TakePage';
@@ -21,21 +20,13 @@ export function App() {
             path="/login"
             element={
               <LoginPage
-                heading="Portal peserta ujian"
-                badge={
-                  <Badge tone="blue">
-                    <GraduationCap className="h-3.5 w-3.5" /> Peserta
-                  </Badge>
-                }
-                footer={
-                  <>
-                    Staf atau pengawas? Masuk lewat{' '}
-                    <a href="/app/" className="font-medium text-blue-700 hover:underline dark:text-blue-300">
-                      panel staf
-                    </a>
-                    .
-                  </>
-                }
+                heading="Masuk ke ujian"
+                subheading="Gunakan username dan password yang tertera di kartu peserta."
+                highlights={[
+                  { icon: <Save />, title: 'Jawaban tersimpan otomatis', text: 'Setiap jawaban langsung disimpan, tidak perlu menekan tombol simpan.' },
+                  { icon: <WifiOff />, title: 'Tetap lanjut saat koneksi putus', text: 'Jawaban disimpan di perangkat dan dikirim ulang begitu jaringan kembali.' },
+                  { icon: <Clock />, title: 'Waktu mengikuti server', text: 'Sisa waktu tidak berubah walau jam perangkat salah atau halaman dimuat ulang.' },
+                ]}
               />
             }
           />

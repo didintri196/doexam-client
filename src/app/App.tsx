@@ -1,4 +1,4 @@
-import { Briefcase } from 'lucide-react';
+import { ChartColumn, Library, MonitorCheck } from 'lucide-react';
 import { useCallback } from 'react';
 import { MediaProvider } from './components/MediaProvider';
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router';
@@ -6,7 +6,6 @@ import type { Me } from '@/shared/api/types';
 import { AuthProvider, RequireAuth } from '@/shared/auth/auth';
 import { ChangePasswordPage, LoginPage } from '@/shared/auth/pages';
 import { isStaff } from '@/shared/lib/perm';
-import { Badge } from '@/shared/ui';
 import { Layout } from './Layout';
 import { BankDetailPage, BanksPage } from './pages/BanksPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -36,12 +35,13 @@ function Login() {
   const toSetup = useCallback(() => navigate('/setup', { replace: true }), [navigate]);
   return (
     <LoginPage
-      heading="Panel staf: penyusun soal, pengawas, penilai, dan admin"
-      badge={
-        <Badge tone="blue">
-          <Briefcase className="h-3.5 w-3.5" /> Staf
-        </Badge>
-      }
+      heading="Masuk ke panel staf"
+      subheading="Untuk penyusun soal, pengawas, penilai, dan admin."
+      highlights={[
+        { icon: <Library />, title: 'Bank soal & penyusunan', text: 'Tulis, impor, dan susun soal menjadi ujian.' },
+        { icon: <MonitorCheck />, title: 'Pengawasan langsung', text: 'Pantau peserta, buka kunci, dan tambah waktu saat sesi berjalan.' },
+        { icon: <ChartColumn />, title: 'Penilaian & analisis', text: 'Koreksi esai, rekap nilai, dan analisis butir soal.' },
+      ]}
       onSetupRequired={toSetup}
       footer={
         <>
