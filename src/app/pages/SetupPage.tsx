@@ -62,7 +62,7 @@ export function SetupPage() {
                 <p className="text-xs text-slate-500">Isi data institusi dan akun admin pertama. Langkah ini hanya sekali.</p>
               </div>
               <form onSubmit={submit} className="space-y-4">
-                <Field label="Nama institusi" error={fields.tenant_name} hint="Sekolah, kampus, perusahaan, atau lembaga sertifikasi.">
+                <Field label="Nama institusi" error={fields.tenant_name} hint="Sekolah, kampus, perusahaan, atau lembaga.">
                   <Input value={f.tenant_name} onChange={set('tenant_name')} required />
                 </Field>
                 <div className="grid gap-4 sm:grid-cols-2">
