@@ -8,3 +8,4 @@ test-results/
 # impeccable working files
 .impeccable/hook.cache.json
 .impeccable/review/
+.impeccable/critique/
