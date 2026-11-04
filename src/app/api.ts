@@ -73,7 +73,7 @@ export const groupApi = {
 };
 
 export const importApi = {
-  template: (kind: T.ImportKind) => api.download(`/imports/templates/${kind}`, `template-impor-${kind}.xlsx`),
+  template: (kind: T.ImportKind) => api.openFile(`/public/templates/template-impor-${kind}.xlsx`),
   list: (q: Q) => api.page<T.ImportJob>('/imports', q),
   get: (id: string) => api.get<T.ImportJob>(`/imports/${id}`),
   upload: (kind: T.ImportKind, file: File) => {
@@ -118,7 +118,7 @@ export const bankApi = {
     f.append('file', file);
     return api.post<T.WordImport>(`/item-banks/${id}/import-word${preview ? '?preview=1' : ''}`, f);
   },
-  wordTemplate: () => api.download('/item-banks/import-word/template', 'template-impor-soal.docx'),
+  wordTemplate: () => api.openFile('/public/templates/template-impor-soal.docx'),
 };
 
 export interface ItemBody {

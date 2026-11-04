@@ -58,7 +58,7 @@ export function ImportsPage() {
               <option value="users">Pengguna (peserta & staf)</option>
               <option value="groups">Grup</option>
             </Select>
-            <Button variant="secondary" className="w-full" icon={<Download className="h-4 w-4" />} onClick={() => void download(() => importApi.template(kind))}>
+            <Button variant="secondary" className="w-full" icon={<Download className="h-4 w-4" />} onClick={() => importApi.template(kind)}>
               Unduh template {kind === 'users' ? 'pengguna' : 'grup'}
             </Button>
             <input
