@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, FileQuestion, FileText, Lock, Pencil, Plus, Trash2, UserMinus, Users } from 'lucide-react';
+import { ArrowLeft, FileQuestion, FileText, FileUp, Lock, Pencil, Plus, Trash2, UserMinus, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import type { Access, Bank, Stimulus, User } from '@/shared/api/types';
@@ -149,6 +149,11 @@ export function BankDetailPage() {
                   <Trash2 className="h-4 w-4 text-rose-600" />
                 </IconButton>
               </>
+            )}
+            {canWrite && (
+              <Button variant="secondary" icon={<FileUp className="h-4 w-4" />} onClick={() => navigate(`/banks/${id}/import-word`)}>
+                Impor dari Word
+              </Button>
             )}
             {canWrite && (
               <Button icon={<Plus className="h-4 w-4" />} onClick={() => navigate(`/banks/${id}/items/new`)}>

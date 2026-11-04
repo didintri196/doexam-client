@@ -24,6 +24,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { SetupPage } from './pages/SetupPage';
 import { SubjectsPage } from './pages/SubjectsPage';
 import { SessionPrintPage } from './pages/SessionPrintPage';
+import { WordImportPage } from './pages/WordImportPage';
 import { TokenBoardPage } from './pages/TokenBoardPage';
 import { UsersPage } from './pages/UsersPage';
 
@@ -73,6 +74,7 @@ export function App() {
             <Route path="banks" element={<BanksPage />} />
             <Route path="banks/:id" element={<BankDetailPage />} />
             <Route path="banks/:bankId/items/new" element={<ItemEditorPage />} />
+            <Route path="banks/:id/import-word" element={<WordImportPage />} />
             <Route path="items/:id" element={<ItemEditorPage />} />
             <Route path="subjects" element={<SubjectsPage />} />
             <Route path="exams" element={<ExamsPage />} />
