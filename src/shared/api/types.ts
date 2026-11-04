@@ -110,15 +110,21 @@ export interface RemoveMembersResult { removed: number }
 // ── imports ────────────────────────────────────────────────────
 export type ImportKind = 'users' | 'groups';
 export type ImportStatus = 'pending' | 'validating' | 'ready' | 'importing' | 'done' | 'failed';
+export type ImportAudience = 'staff' | 'participant';
 export interface ImportJob {
   id: ID;
   kind: ImportKind;
+  /** '' = the original import (any role); group_id = participants into one group. */
+  audience: ImportAudience | '';
+  group_id: ID | null;
+  summary: { created: number; added?: number; already_member?: number };
   status: ImportStatus;
   file_name: string;
   total_rows: number;
   ok_rows: number;
   error_rows: number;
-  errors: { row: number; field?: string; message: string }[];
+  /** warning: true does not stop the import (ignored column, differing name, admin account). */
+  errors: { row: number; field?: string; message: string; warning?: boolean }[];
   credentials_available: boolean;
   created_at: ISODate;
   finished_at: ISODate | null;

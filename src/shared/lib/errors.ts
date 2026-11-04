@@ -79,6 +79,14 @@ const messages: Record<string, string> = {
 const fieldMessages: Record<string, string> = {
   required: 'wajib diisi',
   'already in use': 'sudah dipakai',
+  // Excel imports (DOCS/PLAN/13-IMPOR-PER-MENU.md)
+  'required: staff roles such as proctor or author': 'wajib diisi peran staf, mis. proctor atau author',
+  'participant role: import participants from the Peserta page': 'peran peserta: impor peserta dari halaman Peserta',
+  'creates an administrator account': 'membuat akun administrator',
+  'ignored: staff are not added to groups by this import': 'diabaikan: impor staf tidak memasukkan ke grup',
+  'ignored: every row gets the participant role': 'diabaikan: semua baris menjadi peserta',
+  'ignored: every row goes to the chosen group': 'diabaikan: semua baris masuk ke grup yang dipilih',
+  'account is suspended: activate it first': 'akun nonaktif: aktifkan dulu',
   'invalid or expired token': 'token salah atau kedaluwarsa',
   'max 5 MB': 'maksimal 5 MB',
   'max 20 MB': 'maksimal 20 MB',

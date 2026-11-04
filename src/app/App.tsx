@@ -13,7 +13,7 @@ import { ExamDetailPage } from './pages/ExamDetailPage';
 import { ExamsPage } from './pages/ExamsPage';
 import { GradingIndexPage, GradingPage } from './pages/GradingPage';
 import { GroupsPage } from './pages/GroupsPage';
-import { ImportsPage } from './pages/ImportsPage';
+import { GroupImportPage, GroupListImportPage, ParticipantImportPage, StaffImportPage } from './pages/ImportPages';
 import { ItemEditorPage } from './pages/ItemEditorPage';
 import { MonitorPage } from './pages/MonitorPage';
 import { AttemptReportPage, ReportPage, ReportsIndexPage } from './pages/ReportsPage';
@@ -88,7 +88,11 @@ export function App() {
             <Route path="users/staff" element={<UsersPage key="staff" kind="staff" />} />
             <Route path="users/participants" element={<UsersPage key="participant" kind="participant" />} />
             <Route path="groups" element={<GroupsPage />} />
-            <Route path="imports" element={<ImportsPage />} />
+            <Route path="imports" element={<Navigate to="/users/participants/import" replace />} />
+            <Route path="users/staff/import" element={<StaffImportPage />} />
+            <Route path="users/participants/import" element={<ParticipantImportPage />} />
+            <Route path="groups/import" element={<GroupListImportPage />} />
+            <Route path="groups/:id/import" element={<GroupImportPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { Pencil, Plus, Trash2, UserMinus, UsersRound } from 'lucide-react';
+import { FileSpreadsheet, FileUp, Pencil, Plus, Trash2, UserMinus, UsersRound } from 'lucide-react';
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router';
 import type { AddMembersResult, Group, GroupKind } from '@/shared/api/types';
 import { formatNumber, labels } from '@/shared/lib/format';
 import { Badge, Button, ConfirmDialog, EmptyState, Field, IconButton, Input, Loading, Modal, PageHeader, Pagination, Select, Table, td, th } from '@/shared/ui';
@@ -8,6 +9,8 @@ import { groupApi } from '../api';
 import { useAction, usePaging } from '../components/hooks';
 import { BulkUserAdder, MAX_BULK, type PickedUser } from '../components/BulkUserAdder';
 import { GroupPicker, SearchInput, useDebounced } from '../components/pickers';
+import { Perm, useCan } from '../perm';
+import { GroupPickerDialog } from './ImportPages';
 
 const kinds = Object.keys(labels.groupKind) as GroupKind[];
 
@@ -20,17 +23,34 @@ export function GroupsPage() {
   const [editing, setEditing] = useState<Group | 'new' | null>(null);
   const [members, setMembers] = useState<Group | null>(null);
   const [deleting, setDeleting] = useState<Group | null>(null);
+  const [picking, setPicking] = useState(false);
+  const navigate = useNavigate();
+  const can = useCan();
+  // importing participants creates accounts, so it also needs user.manage
+  const canImport = can(Perm.UserManage);
   const remove = useAction((g: Group) => groupApi.remove(g.id), { success: 'Grup dihapus', invalidate: [['groups']], onSuccess: () => setDeleting(null) });
 
   return (
     <>
       <PageHeader
-        title="Grup"
+        title="Grup peserta"
         subtitle="Tingkat, kelompok, departemen, tim, atau angkatan. Peserta sesi bisa ditambahkan per grup."
         actions={
-          <Button icon={<Plus className="h-4 w-4" />} onClick={() => setEditing('new')}>
-            Tambah grup
-          </Button>
+          <>
+            {canImport && (
+              <Button variant="secondary" icon={<FileUp className="h-4 w-4" />} onClick={() => setPicking(true)}>
+                Impor peserta
+              </Button>
+            )}
+            <Link to="/groups/import">
+              <Button variant="ghost" icon={<FileSpreadsheet className="h-4 w-4" />}>
+                Impor daftar grup
+              </Button>
+            </Link>
+            <Button icon={<Plus className="h-4 w-4" />} onClick={() => setEditing('new')}>
+              Tambah grup
+            </Button>
+          </>
         }
       />
       <div className="mb-4 flex flex-wrap gap-2">
@@ -80,6 +100,11 @@ export function GroupsPage() {
                   </td>
                   <td className={`${td} text-right`}>
                     <div className="flex justify-end gap-1">
+                      {canImport && (
+                        <IconButton label="Impor peserta ke grup ini" onClick={() => navigate(`/groups/${g.id}/import`)}>
+                          <FileUp className="h-3.5 w-3.5" />
+                        </IconButton>
+                      )}
                       <IconButton label="Ubah" onClick={() => setEditing(g)}>
                         <Pencil className="h-3.5 w-3.5" />
                       </IconButton>
@@ -97,6 +122,7 @@ export function GroupsPage() {
       )}
       {editing && <GroupForm group={editing === 'new' ? null : editing} groups={all.data?.items ?? []} onClose={() => setEditing(null)} />}
       {members && <MembersModal group={members} onClose={() => setMembers(null)} />}
+      {picking && <GroupPickerDialog onClose={() => setPicking(false)} />}
       <ConfirmDialog
         open={!!deleting}
         title="Hapus grup?"
@@ -257,6 +283,7 @@ function MembersModal({ group, onClose }: { group: Group; onClose: () => void })
           <BulkUserAdder
             selected={picked}
             onChange={setPicked}
+            importLink={`/groups/${group.id}/import`}
             action={
               <div className="flex flex-wrap items-center justify-end gap-2">
                 {roleSelect}
