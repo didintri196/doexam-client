@@ -623,3 +623,31 @@ export interface SessionPrint {
   stats: PrintStats;
   generated_at: ISODate;
 }
+
+// ── Word import (POST /item-banks/:id/import-word) ─────────────
+export interface WordIssue { field?: string; message: string }
+export interface WordItem {
+  no: number;
+  type: ItemType;
+  stem: string;
+  options?: { label: string; body: string; correct: boolean }[];
+  key?: string;
+  points?: number;
+  competency?: string;
+  stimulus?: string;
+  explanation?: string;
+  errors: WordIssue[];
+  warnings: WordIssue[];
+}
+export interface WordImport {
+  items: WordItem[];
+  valid: number;
+  invalid: number;
+  stimuli: number;
+  readings: { title: string; body: string }[];
+  warnings: string[];
+  media?: MediaRefs;
+  created: number;
+  created_stimuli: number;
+  committed: boolean;
+}

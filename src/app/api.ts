@@ -112,6 +112,13 @@ export const bankApi = {
   updateStimulus: (id: string, body: Partial<{ title: string; body: string }>) => api.patch<T.Stimulus>(`/stimuli/${id}`, body),
   removeStimulus: (id: string) => api.del(`/stimuli/${id}`),
   items: (id: string, q: Q) => api.page<T.ItemSummary>(`/item-banks/${id}/items`, q),
+  /** importWord reads a .docx: preview only, or create the valid items as drafts. */
+  importWord: (id: string, file: File, preview: boolean) => {
+    const f = new FormData();
+    f.append('file', file);
+    return api.post<T.WordImport>(`/item-banks/${id}/import-word${preview ? '?preview=1' : ''}`, f);
+  },
+  wordTemplate: () => api.download('/item-banks/import-word/template', 'template-impor-soal.docx'),
 };
 
 export interface ItemBody {
