@@ -18,7 +18,7 @@ export const setupApi = {
 
 export const tenantApi = {
   get: () => api.get<T.Tenant>('/tenant'),
-  update: (body: Partial<{ name: string; timezone: string; locale: string; primary_color: string; tagline: string; letterhead: string }>) =>
+  update: (body: Partial<{ name: string; timezone: string; locale: string; primary_color: string; tagline: string; letterhead: string; exam_rules: string }>) =>
     api.patch<T.Tenant>('/tenant', body),
   setLogo: (file: File) => {
     const f = new FormData();
@@ -164,6 +164,7 @@ export const examApi = {
 export const sessionApi = {
   list: (q: Q) => api.page<T.SessionSummary>('/sessions', q),
   get: (id: string) => api.get<T.Session>(`/sessions/${id}`),
+  print: (id: string) => api.get<T.SessionPrint>(`/sessions/${id}/print`),
   create: (body: Record<string, unknown>) => api.post<T.Session>('/sessions', body),
   update: (id: string, body: Record<string, unknown>) => api.patch<T.Session>(`/sessions/${id}`, body),
   remove: (id: string) => api.del(`/sessions/${id}`),

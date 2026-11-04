@@ -23,6 +23,7 @@ import { SessionsPage } from './pages/SessionsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SetupPage } from './pages/SetupPage';
 import { SubjectsPage } from './pages/SubjectsPage';
+import { SessionPrintPage } from './pages/SessionPrintPage';
 import { TokenBoardPage } from './pages/TokenBoardPage';
 import { UsersPage } from './pages/UsersPage';
 
@@ -63,6 +64,7 @@ export function App() {
           <Route path="/setup" element={<SetupPage />} />
           <Route path="/change-password" element={<RequireAuth><ChangePasswordPage /></RequireAuth>} />
           <Route path="/sessions/:id/board" element={<RequireAuth><TokenBoardPage /></RequireAuth>} />
+          <Route path="/sessions/:id/print/:doc" element={<RequireAuth><SessionPrintPage /></RequireAuth>} />
           <Route element={<RequireAuth><MediaProvider><Layout /></MediaProvider></RequireAuth>}>
             <Route index element={<DashboardPage />} />
             <Route path="sessions" element={<SessionsPage />} />

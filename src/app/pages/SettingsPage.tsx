@@ -9,11 +9,11 @@ const zones = ['Asia/Jakarta', 'Asia/Makassar', 'Asia/Jayapura', 'Asia/Singapore
 
 export function SettingsPage() {
   const tenant = useQuery({ queryKey: ['tenant'], queryFn: tenantApi.get });
-  const [f, setF] = useState({ name: '', timezone: '', locale: '', primary_color: '', tagline: '', letterhead: '' });
+  const [f, setF] = useState({ name: '', timezone: '', locale: '', primary_color: '', tagline: '', letterhead: '', exam_rules: '' });
   const fileRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const t = tenant.data;
-    if (t) setF({ name: t.name, timezone: t.settings.timezone, locale: t.settings.locale, primary_color: t.settings.primary_color ?? '', tagline: t.settings.tagline, letterhead: t.settings.letterhead });
+    if (t) setF({ name: t.name, timezone: t.settings.timezone, locale: t.settings.locale, primary_color: t.settings.primary_color ?? '', tagline: t.settings.tagline, letterhead: t.settings.letterhead, exam_rules: t.settings.exam_rules ?? '' });
   }, [tenant.data]);
   const inv = [['tenant'], ['public-tenant']];
   const save = useAction(() => tenantApi.update(f), { success: 'Pengaturan disimpan', invalidate: inv, toastErrors: false });
@@ -65,6 +65,13 @@ export function SettingsPage() {
             </div>
             <Field label="Teks kop" error={fe.letterhead} hint="Dicetak di kartu ujian dan laporan, mis. alamat institusi. Maks. 500 karakter.">
               <Textarea value={f.letterhead} onChange={(e) => setF({ ...f, letterhead: e.target.value })} maxLength={500} />
+            </Field>
+            <Field
+              label="Tata tertib ujian"
+              error={fe.exam_rules}
+              hint="Dicetak di lembar pengawas. Satu aturan per baris. Kosong = memakai tata tertib bawaan. Maks. 5000 karakter."
+            >
+              <Textarea value={f.exam_rules} onChange={(e) => setF({ ...f, exam_rules: e.target.value })} maxLength={5000} rows={6} />
             </Field>
             <div className="flex justify-end">
               <Button loading={save.isPending} onClick={() => save.mutate(undefined)}>

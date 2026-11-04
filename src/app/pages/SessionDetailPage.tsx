@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Ban, MonitorPlay, Pause, Pencil, Play, Plus, RotateCw, Square, Trash2, Tv2, UserMinus } from 'lucide-react';
+import { ArrowLeft, Ban, MonitorPlay, Pause, Pencil, Play, Plus, Printer, RotateCw, Square, Trash2, Tv2, UserMinus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import type { Attendance, Group, Participant, Session, SessionStatus, User } from '@/shared/api/types';
@@ -87,6 +87,11 @@ export function SessionDetailPage() {
             <Link to={`/sessions/${id}/monitor`}>
               <Button variant="secondary" icon={<MonitorPlay className="h-4 w-4" />}>
                 Monitor
+              </Button>
+            </Link>
+            <Link to={`/sessions/${id}/print/cards`} title="Kartu peserta, daftar hadir, berita acara, lembar pengawas">
+              <Button variant="secondary" icon={<Printer className="h-4 w-4" />}>
+                Cetak dokumen
               </Button>
             </Link>
             {manager && s.status !== 'closed' && s.status !== 'cancelled' && (
