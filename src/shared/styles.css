@@ -81,6 +81,13 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--accent); }
 .dark .rich th, .dark .rich td { border-color: var(--color-slate-700); }
 .rich blockquote { border-left: 2px solid var(--color-slate-300); padding-left: .8em; color: var(--color-slate-600); }
 .dark .rich blockquote { border-color: var(--color-slate-600); color: var(--color-slate-300); }
+/* Item pictures are figures: on their own line, never wider than the column. */
+.rich img { display: block; max-width: 100%; height: auto; margin: .5em 0; border-radius: 6px; }
+.rich img:first-child { margin-top: 0; }
+.rich img:last-child { margin-bottom: 0; }
+.rich img:not([src]) { min-width: 6rem; min-height: 3rem; background: var(--color-slate-100); color: var(--color-slate-500); font-size: .75rem; }
+.dark .rich img:not([src]) { background: var(--color-slate-800); color: var(--color-slate-400); }
+.rich-zoomable img[src] { cursor: zoom-in; }
 .rich pre, .rich code { font-family: var(--font-mono); font-size: .92em; }
 .rich img { max-width: 100%; height: auto; }
 .rich .align-center { text-align: center; }

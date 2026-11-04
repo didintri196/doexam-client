@@ -1,7 +1,12 @@
-import { Bold, Italic, List, ListOrdered, Sigma, Subscript, Superscript, Underline } from 'lucide-react';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Bold, ImagePlus, Italic, List, ListOrdered, Sigma, Subscript, Superscript, Trash2, Underline } from 'lucide-react';
+import { useEffect, useLayoutEffect, useRef, useState, type ClipboardEvent, type DragEvent, type MouseEvent, type ReactNode } from 'react';
+import { hydrateMedia, useMedia } from '@/shared/item/media';
 import { RichContent, sanitize } from '@/shared/item/RichContent';
-import { Button, cx, Input } from '@/shared/ui';
+import { errorMessage, fieldErrors } from '@/shared/lib/errors';
+import { Button, cx, Input, Spinner } from '@/shared/ui';
+import { mediaApi } from '../api';
+import { shrinkImage } from './imageResize';
+import { panelMedia } from './MediaProvider';
 
 // Light rich-text editor for item stems, options, stimuli and explanations. Output is HTML
 // within the server allowlist (§4.1); formulas are stored as <span data-math="LaTeX">.
@@ -51,14 +56,33 @@ export function RichEditor({
   const [mathOpen, setMathOpen] = useState(false);
   const [tex, setTex] = useState('');
   const saved = useRef<Range | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(0);
+  const [uploadError, setUploadError] = useState<string>();
+  const [picked, setPicked] = useState<HTMLImageElement | null>(null);
+  const [alt, setAlt] = useState('');
+  const media = useMedia();
+  const mediaVersion = media.version();
 
   useEffect(() => {
     const el = ref.current;
     if (!el || value === last.current) return;
     el.innerHTML = sanitize(value);
     prepare(el);
+    // pictures right away: the layout effect below ran before this innerHTML was set
+    const missing = hydrateMedia(el, media);
+    if (missing.length) media.request(missing);
     last.current = value;
-  }, [value]);
+    setPicked(null);
+  }, [value, media]);
+
+  // Show pictures in the editor too (src is never stored: emit() sanitizes it away).
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const missing = hydrateMedia(el, media);
+    if (missing.length) media.request(missing);
+  }, [value, media, mediaVersion]);
 
   const emit = () => {
     const el = ref.current;
@@ -100,6 +124,89 @@ export function RichEditor({
     emit();
   };
 
+  const rememberCaret = () => {
+    const sel = window.getSelection();
+    saved.current = sel && sel.rangeCount && ref.current?.contains(sel.anchorNode) ? sel.getRangeAt(0).cloneRange() : null;
+  };
+
+  const placeCaret = () => {
+    const el = ref.current;
+    if (!el) return;
+    el.focus();
+    const sel = window.getSelection();
+    if (saved.current && sel && el.contains(saved.current.startContainer)) {
+      sel.removeAllRanges();
+      sel.addRange(saved.current);
+    } else if (sel) {
+      sel.selectAllChildren(el);
+      sel.collapseToEnd();
+    }
+  };
+
+  const insertImages = async (files: File[]) => {
+    const images = files.filter((f) => f.type.startsWith('image/'));
+    if (!images.length) return;
+    setUploadError(undefined);
+    setUploading((n) => n + images.length);
+    for (const file of images) {
+      try {
+        const { blob, name } = await shrinkImage(file);
+        const m = await mediaApi.upload(blob, name);
+        panelMedia().add(m.id, { url: m.url, mime: m.mime_type, w: m.width ?? undefined, h: m.height ?? undefined });
+        placeCaret();
+        document.execCommand('insertHTML', false, `<img data-media-id="${m.id}" alt="">`);
+        const el = ref.current;
+        if (el) hydrateMedia(el, panelMedia());
+        rememberCaret();
+        emit();
+      } catch (err) {
+        setUploadError(`${file.name}: ${fieldErrors(err).file ?? errorMessage(err)}`);
+      } finally {
+        setUploading((n) => n - 1);
+      }
+    }
+  };
+
+  const onPaste = (e: ClipboardEvent) => {
+    const files = [...e.clipboardData.files].filter((f) => f.type.startsWith('image/'));
+    if (!files.length) return;
+    e.preventDefault();
+    rememberCaret();
+    void insertImages(files);
+  };
+
+  const onDrop = (e: DragEvent) => {
+    const files = [...e.dataTransfer.files].filter((f) => f.type.startsWith('image/'));
+    if (!files.length) return;
+    e.preventDefault();
+    const range = document.caretRangeFromPoint?.(e.clientX, e.clientY);
+    if (range) saved.current = range;
+    void insertImages(files);
+  };
+
+  const onEditorClick = (e: MouseEvent) => {
+    const t = e.target;
+    if (t instanceof HTMLImageElement) {
+      setPicked(t);
+      setAlt(t.alt);
+    } else {
+      setPicked(null);
+    }
+  };
+
+  const saveAlt = (text: string) => {
+    setAlt(text);
+    if (!picked) return;
+    picked.alt = text;
+    emit();
+  };
+
+  const removePicked = () => {
+    picked?.remove();
+    setPicked(null);
+    emit();
+  };
+
   const tool = (label: string, icon: ReactNode, onClick: () => void) => (
     <button
       type="button"
@@ -126,6 +233,28 @@ export function RichEditor({
           {tool('Daftar', <List className={i} />, () => cmd('insertUnorderedList'))}
           {tool('Daftar bernomor', <ListOrdered className={i} />, () => cmd('insertOrderedList'))}
           {tool('Sisipkan rumus (LaTeX)', <Sigma className={i} />, openMath)}
+          {tool('Sisipkan gambar', <ImagePlus className={i} />, () => {
+            rememberCaret();
+            fileInput.current?.click();
+          })}
+          <input
+            ref={fileInput}
+            type="file"
+            accept="image/png,image/jpeg,image/gif,image/webp"
+            multiple
+            className="sr-only"
+            tabIndex={-1}
+            aria-hidden="true"
+            onChange={(e) => {
+              void insertImages([...(e.target.files ?? [])]);
+              e.target.value = '';
+            }}
+          />
+          {uploading > 0 && (
+            <span className="ml-auto flex items-center gap-1.5 pr-1 text-[11px] text-slate-500">
+              <Spinner className="h-3.5 w-3.5" /> Mengunggah gambar…
+            </span>
+          )}
         </div>
         <div
           ref={ref}
@@ -134,9 +263,38 @@ export function RichEditor({
           data-placeholder={placeholder}
           onInput={emit}
           onBlur={emit}
+          onPaste={onPaste}
+          onDrop={onDrop}
+          onClick={onEditorClick}
           className={cx('rich rich-editor px-3 py-2 text-sm text-slate-900 dark:text-white', minHeight)}
         />
       </div>
+      {uploadError && <p className="text-xs text-rose-600 dark:text-rose-400">Gambar gagal diunggah. {uploadError}</p>}
+      {picked && ref.current?.contains(picked) && (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-900">
+          <ImagePlus className="h-4 w-4 shrink-0 text-slate-500" />
+          <Input
+            autoFocus
+            value={alt}
+            onChange={(e) => saveAlt(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === 'Escape') {
+                e.preventDefault();
+                setPicked(null);
+              }
+            }}
+            aria-label="Teks alternatif gambar"
+            placeholder="Teks alternatif, mis. Grafik kecepatan terhadap waktu"
+            className="min-w-0 flex-1"
+          />
+          <Button size="sm" variant="ghost" icon={<Trash2 className="h-4 w-4" />} onClick={removePicked}>
+            Hapus gambar
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => setPicked(null)}>
+            Selesai
+          </Button>
+        </div>
+      )}
       {mathOpen && (
         <div className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 p-2 dark:border-blue-900 dark:bg-blue-950/40">
           <Sigma className="h-4 w-4 shrink-0 text-blue-600" />
@@ -163,7 +321,7 @@ export function RichEditor({
           </Button>
         </div>
       )}
-      {preview && value && /data-math/.test(value) && (
+      {preview && value && /data-math=/.test(value) && (
         <div className="rounded-xl border border-dashed border-slate-300 p-2.5 text-sm dark:border-slate-700">
           <p className="mb-1 text-xs font-medium text-slate-500">Pratinjau</p>
           <RichContent html={value} />

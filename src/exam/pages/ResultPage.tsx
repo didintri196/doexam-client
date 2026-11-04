@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Award, CheckCircle2, Clock, MinusCircle, XCircle } from 'lucide-react';
 import { Link, useParams } from 'react-router';
+import { StaticMedia } from '@/shared/item/media';
 import { RichContent } from '@/shared/item/RichContent';
 import { errorMessage } from '@/shared/lib/errors';
 import { formatNumber } from '@/shared/lib/format';
@@ -19,6 +20,7 @@ export function ResultPage() {
   const r = result.data;
 
   return (
+    <StaticMedia refs={r?.media}>
     <Shell>
       <PageHeader
         title="Hasil ujian"
@@ -103,5 +105,6 @@ export function ResultPage() {
         </div>
       ) : null}
     </Shell>
+    </StaticMedia>
   );
 }
