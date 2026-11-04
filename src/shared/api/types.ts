@@ -34,7 +34,25 @@ export interface TenantSettings {
   letterhead: string;
   exam_rules: string;
   logo_url: string | null;
+  card: CardSettings;
 }
+/** Participant card settings (Pengaturan → Kartu peserta). signature_url is a signed, expiring link. */
+export interface CardSettings {
+  title: string;
+  id_label: string;
+  note: string;
+  signer_title: string;
+  signer_name: string;
+  signer_number: string;
+  signature_url: string | null;
+  show_external_id: boolean;
+  show_exam: boolean;
+  show_session: boolean;
+  show_seat: boolean;
+  show_schedule: boolean;
+  show_qr: boolean;
+}
+export type CardInput = Omit<CardSettings, 'signature_url'>;
 export interface Tenant { id: ID; slug: string; name: string; preset: string; is_active: boolean; settings: TenantSettings }
 
 // ── users & groups ─────────────────────────────────────────────
@@ -618,7 +636,7 @@ export interface PrintParticipant {
 export interface PrintStats { registered: number; present: number; absent: number; excused: number; started: number; submitted: number }
 export interface SessionPrint {
   session: Session;
-  institution: { name: string; letterhead: string; exam_rules: string; logo_url: string | null };
+  institution: { name: string; letterhead: string; exam_rules: string; logo_url: string | null; card: CardSettings };
   participants: PrintParticipant[];
   stats: PrintStats;
   generated_at: ISODate;

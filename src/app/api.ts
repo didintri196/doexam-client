@@ -18,7 +18,7 @@ export const setupApi = {
 
 export const tenantApi = {
   get: () => api.get<T.Tenant>('/tenant'),
-  update: (body: Partial<{ name: string; timezone: string; locale: string; primary_color: string; tagline: string; letterhead: string; exam_rules: string }>) =>
+  update: (body: Partial<{ name: string; timezone: string; locale: string; primary_color: string; tagline: string; letterhead: string; exam_rules: string; card: T.CardInput }>) =>
     api.patch<T.Tenant>('/tenant', body),
   setLogo: (file: File) => {
     const f = new FormData();
@@ -26,6 +26,12 @@ export const tenantApi = {
     return api.put<T.Tenant>('/tenant/logo', f);
   },
   removeLogo: () => api.del<T.Tenant>('/tenant/logo'),
+  setCardSignature: (file: File) => {
+    const f = new FormData();
+    f.append('file', file);
+    return api.put<T.Tenant>('/tenant/card-signature', f);
+  },
+  removeCardSignature: () => api.del<T.Tenant>('/tenant/card-signature'),
 };
 
 export const userApi = {
