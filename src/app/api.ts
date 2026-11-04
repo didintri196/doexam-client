@@ -172,6 +172,8 @@ export const sessionApi = {
   list: (q: Q) => api.page<T.SessionSummary>('/sessions', q),
   get: (id: string) => api.get<T.Session>(`/sessions/${id}`),
   print: (id: string) => api.get<T.SessionPrint>(`/sessions/${id}/print`),
+  /** New system passwords for the participant cards (shown once). */
+  cardPasswords: (id: string, only_new: boolean) => api.post<T.CardPasswords>(`/sessions/${id}/card-passwords`, { only_new }),
   create: (body: Record<string, unknown>) => api.post<T.Session>('/sessions', body),
   update: (id: string, body: Record<string, unknown>) => api.patch<T.Session>(`/sessions/${id}`, body),
   remove: (id: string) => api.del(`/sessions/${id}`),

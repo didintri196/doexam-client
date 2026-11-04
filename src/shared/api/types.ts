@@ -651,3 +651,4 @@ export interface WordImport {
   created_stimuli: number;
   committed: boolean;
 }
+export interface CardPasswords { passwords: { user_id: ID; password: string }[]; skipped: number }
