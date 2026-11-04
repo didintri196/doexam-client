@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { FileSpreadsheet, Search, X } from 'lucide-react';
 import { useRef, useState, type ReactNode } from 'react';
+import { Link } from 'react-router';
 import type { ResolveResult, UserStatus } from '@/shared/api/types';
 import { errorMessage, fieldErrors } from '@/shared/lib/errors';
 import { formatNumber } from '@/shared/lib/format';
 import { Alert, Badge, Button, Field, Input, Spinner, Tabs, Textarea, cx } from '@/shared/ui';
 import { userApi } from '../api';
+import { Perm, useCan } from '../perm';
 import { useDebounced } from './pickers';
 
 /** The fields of a user the adder needs; both User and ResolvedUser fit. */
@@ -290,14 +292,19 @@ function SearchSource({
 }
 
 function ReportView({ report: r, onDismiss }: { report: Report; onDismiss: () => void }) {
+  const can = useCan();
   const problems = r.notFound.length + r.ambiguous.length + r.suspended;
   return (
     <div className="space-y-2" aria-live="polite">
       <div className="flex items-start justify-between gap-3 text-xs text-slate-700 dark:text-slate-300">
-        <p>
-          <span className="font-semibold tabular-nums">{formatNumber(r.added)}</span> orang masuk daftar.
-          {r.already > 0 && <> {formatNumber(r.already)} sudah ada di daftar.</>}
-        </p>
+        {r.added + r.already === 0 ? (
+          <p>Tidak ada yang cocok.</p>
+        ) : (
+          <p>
+            <span className="font-semibold tabular-nums">{formatNumber(r.added)}</span> orang masuk daftar.
+            {r.already > 0 && <> {formatNumber(r.already)} sudah ada di daftar.</>}
+          </p>
+        )}
         <button type="button" onClick={onDismiss} className="text-slate-400 hover:text-slate-600" aria-label="Tutup ringkasan">
           <X className="h-3.5 w-3.5" />
         </button>
@@ -306,6 +313,15 @@ function ReportView({ report: r, onDismiss }: { report: Report; onDismiss: () =>
         <Alert tone="amber">
           <div className="space-y-1.5">
             {r.notFound.length > 0 && <IdentifierList label="Tidak ditemukan" items={r.notFound} />}
+            {r.notFound.length > 0 && can(Perm.UserManage) && (
+              <p>
+                Belum punya akun?{' '}
+                <Link to="/imports" className="font-semibold underline underline-offset-2">
+                  Buat lewat Impor Excel
+                </Link>
+                , isi kolom <span className="font-mono">groups</span> agar langsung masuk grup.
+              </p>
+            )}
             {r.ambiguous.length > 0 && <IdentifierList label="Cocok dengan lebih dari satu orang, pakai username" items={r.ambiguous} />}
             {r.suspended > 0 && <p>{formatNumber(r.suspended)} akun nonaktif dilewati.</p>}
           </div>
