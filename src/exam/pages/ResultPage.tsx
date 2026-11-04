@@ -60,7 +60,7 @@ export function ResultPage() {
               )}
               {r.pending_manual > 0 && (
                 <Alert tone="blue" className="mt-3 text-left">
-                  {r.pending_manual} jawaban esai masih menunggu dinilai penilai. Nilai bisa berubah.
+                  {r.pending_manual} jawaban esai masih menunggu dikoreksi. Nilai bisa berubah.
                 </Alert>
               )}
             </div>
