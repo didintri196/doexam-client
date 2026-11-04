@@ -88,6 +88,7 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--accent); }
 .rich img:not([src]) { min-width: 6rem; min-height: 3rem; background: var(--color-slate-100); color: var(--color-slate-500); font-size: .75rem; }
 .dark .rich img:not([src]) { background: var(--color-slate-800); color: var(--color-slate-400); }
 .rich-zoomable img[src] { cursor: zoom-in; }
+.rich audio { display: block; width: 100%; max-width: 36rem; margin: .5em 0; }
 .rich pre, .rich code { font-family: var(--font-mono); font-size: .92em; }
 .rich img { max-width: 100%; height: auto; }
 .rich .align-center { text-align: center; }

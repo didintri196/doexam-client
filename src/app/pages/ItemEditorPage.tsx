@@ -134,7 +134,16 @@ function toBody(f: Form): ItemBody {
 
 const nextOptionId = (opts: { id: string }[]) => 'abcdefghij'.split('').find((c) => !opts.some((o) => o.id === c)) ?? `o${opts.length + 1}`;
 
+/**
+ * ItemEditorPage remounts the editor per item: going from an item to "Soal baru" (or to
+ * another item) must not carry the previous form over.
+ */
 export function ItemEditorPage() {
+  const { id, bankId } = useParams();
+  return <ItemEditor key={id ?? `new:${bankId}`} />;
+}
+
+function ItemEditor() {
   const { id, bankId: bankParam } = useParams();
   const navigate = useNavigate();
   const item = useQuery({ queryKey: ['item', id], queryFn: () => itemApi.get(id!), enabled: !!id });
@@ -256,7 +265,7 @@ export function ItemEditorPage() {
                   ))}
                 </Select>
               </Field>
-              <Field label="Pertanyaan" error={err('content.stem')}>
+              <Field group label="Pertanyaan" error={err('content.stem')}>
                 <RichEditor value={f.stem} onChange={(v) => set('stem', v)} placeholder="Tulis pertanyaan…" minHeight="min-h-32" invalid={!!err('content.stem')} />
               </Field>
 
@@ -372,7 +381,7 @@ export function ItemEditorPage() {
                   <Field label="Batas kata (opsional)" error={fe['content.max_words']}>
                     <Input type="number" value={f.maxWords} onChange={(e) => set('maxWords', e.target.value)} className="w-40" />
                   </Field>
-                  <Field label="Jawaban model (untuk korektor)">
+                  <Field group label="Jawaban model (untuk korektor)">
                     <RichEditor value={f.modelAnswer} onChange={(v) => set('modelAnswer', v)} />
                   </Field>
                   <div className="space-y-2">
@@ -393,7 +402,7 @@ export function ItemEditorPage() {
                 </div>
               )}
 
-              <Field label="Pembahasan (opsional)">
+              <Field group label="Pembahasan (opsional)">
                 <RichEditor value={f.explanation} onChange={(v) => set('explanation', v)} />
               </Field>
             </fieldset>

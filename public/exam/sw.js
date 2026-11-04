@@ -62,7 +62,9 @@ self.addEventListener('fetch', (event) => {
         const hit = await cache.match(url.pathname, { ignoreVary: true });
         if (hit) return hit;
         const res = await fetch(req);
-        if (res.ok) await cache.put(url.pathname, res.clone());
+        // Keeping a copy is best effort: audio elements send Range requests, and a partial
+        // (206) or failed put must never break the response itself.
+        if (res.status === 200) event.waitUntil(cache.put(url.pathname, res.clone()).catch(() => {}));
         return res;
       })(),
     );

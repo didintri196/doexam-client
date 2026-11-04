@@ -389,8 +389,11 @@ export interface AttemptView {
   sections: SectionView[];
   /** Signed links for every data-media-id in the delivered items. */
   media: MediaRefs;
+  /** Plays recorded on the server per audio clip; extra_plays is granted by proctors. */
+  media_plays: Record<string, number>;
+  extra_plays: number;
 }
-export type EventType = 'RESPONSE_SAVED' | 'FLAG_SET' | 'ITEM_VIEWED' | 'FOCUS_LOST' | 'FOCUS_RETURNED' | 'FULLSCREEN_EXIT';
+export type EventType = 'RESPONSE_SAVED' | 'FLAG_SET' | 'ITEM_VIEWED' | 'FOCUS_LOST' | 'FOCUS_RETURNED' | 'FULLSCREEN_EXIT' | 'MEDIA_PLAYED';
 export interface ClientEvent {
   client_event_id: string;
   client_seq: number;

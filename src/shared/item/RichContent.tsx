@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { cx } from '@/shared/ui';
+import { LimitedAudio, useAudioPlays } from './audio';
 import { hydrateMedia, useMedia } from './media';
 
 // Same allowlist as the server (apps/server/pkg/richtext). The server already sanitized
@@ -12,7 +13,9 @@ const ALLOWED_TAGS = [
   'p', 'br', 'strong', 'em', 'u', 's', 'sub', 'sup', 'ul', 'ol', 'li', 'blockquote',
   'table', 'thead', 'tbody', 'tr', 'th', 'td', 'span', 'div', 'pre', 'code', 'img', 'audio', 'video', 'source',
 ];
-const ALLOWED_ATTR = ['data-math', 'data-math-block', 'data-media-id', 'alt', 'controls', 'colspan', 'rowspan', 'dir', 'lang', 'class'];
+const ALLOWED_ATTR = [
+  'data-math', 'data-math-block', 'data-media-id', 'data-max-plays', 'data-allow-pause', 'alt', 'controls', 'colspan', 'rowspan', 'dir', 'lang', 'class',
+];
 
 export function sanitize(html: string): string {
   return DOMPurify.sanitize(html, { ALLOWED_TAGS, ALLOWED_ATTR, ALLOW_DATA_ATTR: false });
@@ -49,13 +52,17 @@ export function RichContent({ html, className, inline }: { html: string | null |
   const media = useMedia();
   const clean = useMemo(() => sanitize(html ?? ''), [html]);
   const [zoom, setZoom] = useState<{ src: string; alt: string } | null>(null);
+  const plays = useAudioPlays();
+  const limited = plays !== null;
+  const [clips, setClips] = useState<Clip[]>([]);
 
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     el.innerHTML = clean;
     renderMath(el);
-  }, [clean]);
+    setClips(prepareAudio(el, limited));
+  }, [clean, limited]);
 
   // Links can arrive after the first paint (panel), so hydrate on every new version.
   const version = media.version();
@@ -79,9 +86,41 @@ export function RichContent({ html, className, inline }: { html: string | null |
   return (
     <>
       <Tag ref={ref} onClick={onClick} className={cx('rich rich-zoomable', className)} />
+      {clips.map((c) => createPortal(<LimitedAudio mediaId={c.mediaId} max={c.max} allowPause={c.allowPause} />, c.slot, c.key))}
       {zoom && <ImageZoom src={zoom.src} alt={zoom.alt} onClose={() => setZoom(null)} />}
     </>
   );
+}
+
+interface Clip {
+  key: string;
+  slot: HTMLElement;
+  mediaId: string;
+  max: number;
+  allowPause: boolean;
+}
+
+/**
+ * prepareAudio gives every clip native controls, except clips with a play limit while an
+ * exam engine counts plays: those are swapped for a slot that LimitedAudio renders into.
+ */
+function prepareAudio(root: HTMLElement, limited: boolean): Clip[] {
+  const clips: Clip[] = [];
+  root.querySelectorAll<HTMLAudioElement>('audio[data-media-id]').forEach((a, i) => {
+    const max = Number(a.getAttribute('data-max-plays'));
+    if (limited && max >= 1) {
+      const slot = document.createElement('span');
+      slot.className = 'block';
+      a.replaceWith(slot);
+      clips.push({ key: `${i}-${a.getAttribute('data-media-id')}`, slot, mediaId: a.getAttribute('data-media-id') ?? '', max, allowPause: a.getAttribute('data-allow-pause') === 'true' });
+      return;
+    }
+    a.controls = true;
+    a.preload = 'metadata';
+    a.setAttribute('controlslist', 'nodownload noplaybackrate');
+    if (max >= 1) a.title = `Peserta: maksimal ${max}× putar${a.getAttribute('data-allow-pause') === 'true' ? '' : ', tanpa jeda'}`;
+  });
+  return clips;
 }
 
 /** ImageZoom shows one picture over the page; click or Escape closes it. */
