@@ -67,3 +67,7 @@ Image memakai `nginxinc/nginx-unprivileged` (tidak berjalan sebagai root) dan pu
 | `npm run build` | Typecheck + build kedua entry ke `dist/all` |
 | `npm run build:exam` / `build:panel` | Build satu entry ke `dist/exam` / `dist/panel` |
 | `npm run check` | Typecheck, cek batas import, build, cek anggaran ukuran bundle exam (≤ 200 KB gzip) |
+
+## Lisensi
+
+DoExam dirilis di bawah [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0). Anda bebas memakai, mempelajari, mengubah, dan mendistribusikannya. Bila versi yang diubah dijalankan sebagai layanan untuk pengguna lain, kode sumbernya wajib dibuka untuk pengguna tersebut.
