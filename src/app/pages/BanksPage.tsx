@@ -6,10 +6,10 @@ import type { Access, Bank, Stimulus, User } from '@/shared/api/types';
 import { RichContent } from '@/shared/item/RichContent';
 import { formatDateTime, labels } from '@/shared/lib/format';
 import { Badge, Button, Card, ConfirmDialog, EmptyState, Field, IconButton, Input, Loading, Modal, PageHeader, Pagination, Select, Table, Tabs, td, Textarea, th } from '@/shared/ui';
-import { bankApi } from '../api';
+import { bankApi, subjectApi } from '../api';
 import { RichEditor } from '../components/RichEditor';
 import { useAction, usePaging } from '../components/hooks';
-import { SearchInput, SubjectSelect, useDebounced, UserPicker, useSubjects } from '../components/pickers';
+import { SearchInput, SubjectSelect, useDebounced, useLookup, UserPicker } from '../components/pickers';
 import { orderCompetencies, useCompetencies } from './SubjectsPage';
 
 const accessTone = { owner: 'blue', editor: 'blue', viewer: 'slate' } as const;
@@ -18,8 +18,8 @@ export function BanksPage() {
   const { page, setPage, filters, setFilter, query } = usePaging({ q: '', subject_id: '' });
   const q = useDebounced(filters.q);
   const list = useQuery({ queryKey: ['banks', { ...query, q }], queryFn: () => bankApi.list({ ...query, q }) });
-  const subjects = useSubjects();
-  const subjectName = (id: string) => subjects.data?.items.find((s) => s.id === id)?.name ?? '';
+  const subject = useLookup('subjects', list.data?.items.map((b) => b.subject_id) ?? [], subjectApi.get);
+  const subjectName = (id: string) => subject(id)?.name ?? '';
   const [creating, setCreating] = useState(false);
 
   return (

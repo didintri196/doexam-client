@@ -80,9 +80,10 @@ export function IconButton({ className, label, children, ...rest }: ButtonHTMLAt
 // ── form controls ──────────────────────────────────────────────
 // Full width unless the caller sets a width (Tailwind cannot tell w-full and w-auto apart by order).
 const width = (className?: string) => (/(^|\s)(w-|max-w-)/.test(className ?? '') ? '' : 'w-full');
-const control =
+/** control is the look of every form control (also used by SearchSelect's trigger). */
+export const control =
   'rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 shadow-xs transition-[border-color,box-shadow] placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-3 focus:ring-blue-500/20 disabled:bg-slate-50 disabled:text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500 dark:disabled:bg-slate-800/60';
-const invalidCls = 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 dark:border-rose-700';
+export const invalidCls = 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 dark:border-rose-700';
 
 export function Input({ className, invalid, ...rest }: InputHTMLAttributes<HTMLInputElement> & { invalid?: boolean }) {
   return <input {...rest} className={cx(control, 'h-8 py-0', width(className), invalid && invalidCls, className)} />;

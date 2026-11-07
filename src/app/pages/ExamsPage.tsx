@@ -5,9 +5,9 @@ import { Link, useNavigate } from 'react-router';
 import type { ExamStatus } from '@/shared/api/types';
 import { formatDateTime, labels } from '@/shared/lib/format';
 import { Badge, Button, Checkbox, EmptyState, Field, Input, Loading, Modal, PageHeader, Pagination, Select, Table, td, th } from '@/shared/ui';
-import { examApi } from '../api';
+import { examApi, subjectApi } from '../api';
 import { useAction, usePaging } from '../components/hooks';
-import { SearchInput, SubjectSelect, useDebounced, useSubjects } from '../components/pickers';
+import { SearchInput, SubjectSelect, useDebounced, useLookup } from '../components/pickers';
 import { Perm, useCan } from '../perm';
 
 export const examTone: Record<ExamStatus, 'amber' | 'green' | 'slate'> = { draft: 'amber', published: 'green', archived: 'slate' };
@@ -18,8 +18,8 @@ export function ExamsPage() {
   const [mine, setMine] = useState(false);
   const q = useDebounced(filters.q);
   const list = useQuery({ queryKey: ['exams', { ...query, q, mine }], queryFn: () => examApi.list({ ...query, q, mine: mine || undefined }) });
-  const subjects = useSubjects();
-  const subjectName = (id: string | null) => subjects.data?.items.find((s) => s.id === id)?.name ?? '—';
+  const subject = useLookup('subjects', list.data?.items.map((e) => e.subject_id) ?? [], subjectApi.get);
+  const subjectName = (id: string | null) => subject(id)?.name ?? '—';
   const [creating, setCreating] = useState(false);
 
   return (

@@ -5,9 +5,10 @@ import { Link, useNavigate } from 'react-router';
 import type { Session, SessionStatus } from '@/shared/api/types';
 import { formatDateTime, formatTime, fromLocalInput, labels, toLocalInput } from '@/shared/lib/format';
 import { Badge, Button, Checkbox, EmptyState, Field, Input, Loading, Modal, PageHeader, Pagination, Select, Table, td, th } from '@/shared/ui';
-import { examApi, sessionApi } from '../api';
+import { sessionApi } from '../api';
 import { AnnounceDialog } from '../components/Announcements';
 import { useAction, usePaging } from '../components/hooks';
+import { ExamSelect } from '../components/pickers';
 import { Perm, useCan } from '../perm';
 
 export const sessionTone: Record<SessionStatus, 'slate' | 'green' | 'amber' | 'red'> = {
@@ -109,7 +110,6 @@ export function SessionsPage() {
 
 export function SessionForm({ session, onClose, onSaved }: { session: Session | null; onClose: () => void; onSaved?: (s: Session) => void }) {
   const navigate = useNavigate();
-  const exams = useQuery({ queryKey: ['exams', 'published'], queryFn: () => examApi.list({ status: 'published', per_page: 100 }) });
   const now = new Date();
   now.setMinutes(0, 0, 0);
   now.setHours(now.getHours() + 1);
@@ -165,16 +165,7 @@ export function SessionForm({ session, onClose, onSaved }: { session: Session | 
       <div className="space-y-4">
         {!session && (
           <Field label="Ujian" error={fe.exam_id} hint="Hanya ujian yang sudah terbit.">
-            <Select value={f.exam_id} onChange={(e) => setF({ ...f, exam_id: e.target.value })}>
-              <option value="" disabled>
-                Pilih ujian…
-              </option>
-              {exams.data?.items.map((e) => (
-                <option key={e.id} value={e.id}>
-                  {e.title}
-                </option>
-              ))}
-            </Select>
+            <ExamSelect value={f.exam_id} onChange={(id) => setF({ ...f, exam_id: id })} status="published" invalid={!!fe.exam_id} />
           </Field>
         )}
         <div className="grid gap-4 sm:grid-cols-2">

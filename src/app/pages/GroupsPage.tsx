@@ -8,7 +8,7 @@ import { Badge, Button, ConfirmDialog, EmptyState, Field, IconButton, Input, Loa
 import { groupApi } from '../api';
 import { useAction, usePaging } from '../components/hooks';
 import { BulkUserAdder, MAX_BULK, type PickedUser } from '../components/BulkUserAdder';
-import { GroupPicker, SearchInput, useDebounced } from '../components/pickers';
+import { GroupPicker, GroupSelect, SearchInput, useDebounced, useLookup } from '../components/pickers';
 import { Perm, useCan } from '../perm';
 import { GroupPickerDialog } from './ImportPages';
 
@@ -18,8 +18,8 @@ export function GroupsPage() {
   const { page, setPage, filters, setFilter, query } = usePaging({ q: '', kind: '' });
   const q = useDebounced(filters.q);
   const list = useQuery({ queryKey: ['groups', { ...query, q }], queryFn: () => groupApi.list({ ...query, q }) });
-  const all = useQuery({ queryKey: ['groups', 'all'], queryFn: () => groupApi.list({ per_page: 100 }) });
-  const nameOf = (id: string | null) => (id ? all.data?.items.find((g) => g.id === id)?.name ?? '—' : '—');
+  const parent = useLookup('groups', list.data?.items.map((g) => g.parent_id) ?? [], groupApi.get);
+  const nameOf = (id: string | null) => parent(id)?.name ?? '—';
   const [editing, setEditing] = useState<Group | 'new' | null>(null);
   const [members, setMembers] = useState<Group | null>(null);
   const [deleting, setDeleting] = useState<Group | null>(null);
@@ -120,7 +120,7 @@ export function GroupsPage() {
           <Pagination page={page} perPage={list.data.perPage} total={list.data.total} onPage={setPage} />
         </>
       )}
-      {editing && <GroupForm group={editing === 'new' ? null : editing} groups={all.data?.items ?? []} onClose={() => setEditing(null)} />}
+      {editing && <GroupForm group={editing === 'new' ? null : editing} onClose={() => setEditing(null)} />}
       {members && <MembersModal group={members} onClose={() => setMembers(null)} />}
       {picking && <GroupPickerDialog onClose={() => setPicking(false)} />}
       <ConfirmDialog
@@ -138,7 +138,7 @@ export function GroupsPage() {
   );
 }
 
-function GroupForm({ group, groups, onClose }: { group: Group | null; groups: Group[]; onClose: () => void }) {
+function GroupForm({ group, onClose }: { group: Group | null; onClose: () => void }) {
   const [f, setF] = useState({
     name: group?.name ?? '',
     kind: group?.kind ?? ('class' as GroupKind),
@@ -190,16 +190,7 @@ function GroupForm({ group, groups, onClose }: { group: Group | null; groups: Gr
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Induk" error={fe.parent_id}>
-            <Select value={f.parent_id} onChange={(e) => setF({ ...f, parent_id: e.target.value })}>
-              <option value="">— tanpa induk —</option>
-              {groups
-                .filter((g) => g.id !== group?.id)
-                .map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.name}
-                  </option>
-                ))}
-            </Select>
+            <GroupSelect value={f.parent_id} onChange={(id) => setF({ ...f, parent_id: id })} emptyLabel="— tanpa induk —" exclude={group?.id} invalid={!!fe.parent_id} aria-label="Induk" />
           </Field>
           <Field label="Periode" error={fe.period} hint="mis. 2026/2027">
             <Input value={f.period} onChange={(e) => setF({ ...f, period: e.target.value })} />

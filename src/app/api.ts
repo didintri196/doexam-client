@@ -96,10 +96,11 @@ export const importApi = {
 };
 
 export const subjectApi = {
-  list: (q: Q = {}) => api.page<T.Subject>('/subjects', { per_page: 100, ...q }),
+  list: (q: Q = {}) => api.page<T.Subject>('/subjects', q),
   create: (body: { code: string; name: string }) => api.post<T.Subject>('/subjects', body),
   update: (id: string, body: Partial<{ code: string; name: string }>) => api.patch<T.Subject>(`/subjects/${id}`, body),
   remove: (id: string) => api.del(`/subjects/${id}`),
+  get: (id: string) => api.get<T.Subject>(`/subjects/${id}`),
   competencies: (id: string) => api.get<T.Competency[]>(`/subjects/${id}/competencies`),
   createCompetency: (id: string, body: { code: string; name: string; parent_id?: string | null; sort_order?: number }) =>
     api.post<T.Competency>(`/subjects/${id}/competencies`, body),
@@ -117,6 +118,7 @@ export const bankApi = {
   setMember: (id: string, user_id: string, access: T.Access) => api.post(`/item-banks/${id}/members`, { user_id, access }),
   removeMember: (id: string, userId: string) => api.del(`/item-banks/${id}/members/${userId}`),
   stimuli: (id: string, q: Q) => api.page<T.Stimulus>(`/item-banks/${id}/stimuli`, q),
+  stimulus: (id: string) => api.get<T.Stimulus>(`/stimuli/${id}`),
   createStimulus: (id: string, body: { title: string; body: string }) => api.post<T.Stimulus>(`/item-banks/${id}/stimuli`, body),
   updateStimulus: (id: string, body: Partial<{ title: string; body: string }>) => api.patch<T.Stimulus>(`/stimuli/${id}`, body),
   removeStimulus: (id: string) => api.del(`/stimuli/${id}`),

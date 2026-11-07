@@ -8,6 +8,7 @@ import { formatDateTime, labels } from '@/shared/lib/format';
 import { Alert, Badge, Button, Card, Checkbox, ConfirmDialog, cx, Field, IconButton, Input, Loading, PageHeader, Select } from '@/shared/ui';
 import { bankApi, itemApi, type ItemBody } from '../api';
 import { RichEditor } from '../components/RichEditor';
+import { StimulusSelect } from '../components/pickers';
 import { useAction } from '../components/hooks';
 import { orderCompetencies, useCompetencies } from './SubjectsPage';
 
@@ -150,7 +151,6 @@ function ItemEditor() {
   const bankId = bankParam ?? item.data?.bank_id;
   const bank = useQuery({ queryKey: ['banks', bankId], queryFn: () => bankApi.get(bankId!), enabled: !!bankId });
   const comps = useCompetencies(bank.data?.subject_id);
-  const stimuli = useQuery({ queryKey: ['stimuli', bankId, 'all'], queryFn: () => bankApi.stimuli(bankId!, { per_page: 100 }), enabled: !!bankId });
   const versions = useQuery({ queryKey: ['item', id, 'versions'], queryFn: () => itemApi.versions(id!), enabled: !!id });
   const [f, setF] = useState<Form>(blank);
   const [deleting, setDeleting] = useState(false);
@@ -256,14 +256,7 @@ function ItemEditor() {
                 </div>
               </Field>
               <Field label="Stimulus / bacaan (opsional)">
-                <Select value={f.stimulus} onChange={(e) => set('stimulus', e.target.value)}>
-                  <option value="">— tanpa stimulus —</option>
-                  {stimuli.data?.items.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.title}
-                    </option>
-                  ))}
-                </Select>
+                {bankId && <StimulusSelect bankId={bankId} value={f.stimulus} onChange={(id) => set('stimulus', id)} emptyLabel="— tanpa stimulus —" />}
               </Field>
               <Field group label="Pertanyaan" error={err('content.stem')}>
                 <RichEditor value={f.stem} onChange={(v) => set('stem', v)} placeholder="Tulis pertanyaan…" minHeight="min-h-32" invalid={!!err('content.stem')} />
