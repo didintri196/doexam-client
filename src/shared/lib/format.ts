@@ -87,6 +87,7 @@ export const labels = {
     graded: 'Dinilai',
     void: 'Batal',
     not_started: 'Belum mulai',
+    pending_grading: 'Menunggu koreksi', // recap: submitted, not fully graded yet
   } as Record<string, string>,
   attendance: { expected: 'Terdaftar', present: 'Hadir', absent: 'Tidak hadir', excused: 'Izin' } as Record<string, string>,
   groupKind: {

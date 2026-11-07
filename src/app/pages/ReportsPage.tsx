@@ -1,11 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { AlertTriangle, ArrowLeft, Download, Printer, RefreshCw } from 'lucide-react';
 import { Fragment, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import type { Analysis, AnswerKey, ItemStat, Response } from '@/shared/api/types';
 import { errorMessage } from '@/shared/lib/errors';
 import { formatDateTime, formatNumber, formatPercent, labels } from '@/shared/lib/format';
-import { Alert, Badge, Button, Card, cx, EmptyState, Loading, PageHeader, Select, Stat, Table, Tabs, td, th, useToast } from '@/shared/ui';
+import { Alert, Badge, Button, Card, cx, EmptyState, Loading, PageHeader, Pagination, Select, Stat, Table, Tabs, td, th, useToast } from '@/shared/ui';
 import { attemptApi, examApi, groupApi, reportApi, sessionApi, tenantApi } from '../api';
 import { useAction } from '../components/hooks';
 import { ExamChooser } from './GradingPage';
@@ -43,17 +43,24 @@ export function ReportPage() {
         }
       />
       <Tabs value={tab} onChange={setTab} items={[{ value: 'recap', label: 'Rekap nilai' }, { value: 'analysis', label: 'Analisis butir' }]} />
-      {tab === 'recap' ? <Recap examId={examId} sessionId={sessionId} /> : <AnalysisView examId={examId} sessionId={sessionId} />}
+      {tab === 'recap' ? <Recap key={sessionId} examId={examId} sessionId={sessionId} /> : <AnalysisView examId={examId} sessionId={sessionId} />}
     </>
   );
 }
 
+const RECAP_PER_PAGE = 50;
+
 function Recap({ examId, sessionId }: { examId: string; sessionId: string }) {
   const toast = useToast();
   const [groupId, setGroupId] = useState('');
+  const [page, setPage] = useState(1);
   const groups = useQuery({ queryKey: ['groups', 'all'], queryFn: () => groupApi.list({ per_page: 100 }) });
   const q = { session_id: sessionId, group_id: groupId };
-  const recap = useQuery({ queryKey: ['recap', examId, q], queryFn: () => reportApi.recap(examId, q) });
+  const recap = useQuery({
+    queryKey: ['recap', examId, q, page],
+    queryFn: () => reportApi.recap(examId, { ...q, page, per_page: RECAP_PER_PAGE }),
+    placeholderData: keepPreviousData, // stats stay put while the next page loads
+  });
   const [busy, setBusy] = useState(false);
   const exportXlsx = async () => {
     setBusy(true);
@@ -65,11 +72,20 @@ function Recap({ examId, sessionId }: { examId: string; sessionId: string }) {
       setBusy(false);
     }
   };
-  const r = recap.data;
+  const r = recap.data?.data;
+  const total = recap.data?.total ?? 0;
+  const offset = (page - 1) * RECAP_PER_PAGE;
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <Select className="w-auto" value={groupId} onChange={(e) => setGroupId(e.target.value)}>
+        <Select
+          className="w-auto"
+          value={groupId}
+          onChange={(e) => {
+            setGroupId(e.target.value);
+            setPage(1);
+          }}
+        >
           <option value="">Semua grup</option>
           {groups.data?.items.map((g) => (
             <option key={g.id} value={g.id}>
@@ -88,16 +104,16 @@ function Recap({ examId, sessionId }: { examId: string; sessionId: string }) {
       ) : r ? (
         <>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat label="Peserta" value={r.rows.length} />
+            <Stat label="Peserta" value={total} />
             <Stat label="Dinilai" value={r.counts.graded ?? 0} tone="green" />
-            <Stat label="Belum lengkap" value={(r.counts.submitted ?? 0) + (r.counts.in_progress ?? 0)} tone="amber" />
+            <Stat label="Belum lengkap" value={(r.counts.pending_grading ?? 0) + (r.counts.in_progress ?? 0)} tone="amber" />
             <Stat label="Belum mulai" value={r.counts.not_started ?? 0} />
           </div>
           <p className="text-[11px] text-slate-500">
             Nilai memakai percobaan {{ highest: 'tertinggi', latest: 'terakhir', average: 'rata-rata' }[r.attempt_scoring]}
             {r.passing_score !== null && ` · KKM ${r.passing_score}`}.
           </p>
-          {r.rows.length === 0 ? (
+          {total === 0 ? (
             <EmptyState title="Belum ada peserta" />
           ) : (
             <Table>
@@ -115,7 +131,7 @@ function Recap({ examId, sessionId }: { examId: string; sessionId: string }) {
               <tbody>
                 {r.rows.map((row, i) => (
                   <tr key={row.user_id}>
-                    <td className={td}>{i + 1}</td>
+                    <td className={td}>{offset + i + 1}</td>
                     <td className={td}>
                       <p className="font-semibold">{row.full_name}</p>
                       <p className="font-mono text-[11px] text-slate-500">
@@ -133,6 +149,7 @@ function Recap({ examId, sessionId }: { examId: string; sessionId: string }) {
               </tbody>
             </Table>
           )}
+          <Pagination page={page} perPage={RECAP_PER_PAGE} total={total} onPage={setPage} />
         </>
       ) : null}
     </div>

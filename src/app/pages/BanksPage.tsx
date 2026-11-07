@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ArrowLeft, FileQuestion, FileText, FileUp, Lock, Pencil, Plus, Trash2, UserMinus, Users } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import type { Access, Bank, Stimulus, User } from '@/shared/api/types';
 import { RichContent } from '@/shared/item/RichContent';
@@ -366,7 +366,16 @@ function StimulusForm({ bankId, stimulus, onClose }: { bankId: string; stimulus:
 }
 
 function BankMembers({ bank, isOwner }: { bank: Bank; isOwner: boolean }) {
-  const list = useQuery({ queryKey: ['bank-members', bank.id], queryFn: () => bankApi.members(bank.id) });
+  const [page, setPage] = useState(1);
+  const list = useQuery({
+    queryKey: ['bank-members', bank.id, page],
+    queryFn: () => bankApi.members(bank.id, { page, per_page: 20 }),
+    placeholderData: keepPreviousData, // the table stays while the next page loads
+  });
+  // removing the last member of a page leaves it empty: step back to the previous one
+  useEffect(() => {
+    if (list.data && list.data.items.length === 0 && page > 1) setPage(page - 1);
+  }, [list.data, page]);
   const [picked, setPicked] = useState<User[]>([]);
   const [access, setAccess] = useState<Access>('editor');
   const add = useAction(async () => {
@@ -397,12 +406,12 @@ function BankMembers({ bank, isOwner }: { bank: Bank; isOwner: boolean }) {
       )}
       {list.isLoading ? (
         <Loading />
-      ) : !list.data?.length ? (
+      ) : !list.data?.total ? (
         <EmptyState icon={<Users className="h-10 w-10" />} title="Belum ada anggota" />
       ) : (
         <Table>
           <tbody>
-            {list.data.map((m) => (
+            {list.data.items.map((m) => (
               <tr key={m.user_id}>
                 <td className={td}>
                   <p className="font-semibold">{m.full_name}</p>
@@ -431,6 +440,7 @@ function BankMembers({ bank, isOwner }: { bank: Bank; isOwner: boolean }) {
           </tbody>
         </Table>
       )}
+      {list.data && <Pagination page={page} perPage={20} total={list.data.total} onPage={setPage} />}
     </div>
   );
 }

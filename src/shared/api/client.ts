@@ -127,6 +127,13 @@ export const api = {
     };
   },
 
+  /** paged reads a paginated object (data is not a list, e.g. a recap with counts and rows). */
+  async paged<D>(path: string, query?: Query): Promise<{ data: D; total: number; page: number; perPage: number }> {
+    const res = await request('GET', path, undefined, query);
+    const env = await res.json();
+    return { data: env.data as D, total: env.meta?.total ?? 0, page: env.meta?.page ?? 1, perPage: env.meta?.per_page ?? 20 };
+  },
+
   /**
    * openFile downloads a public file (import templates) through a plain link, so the
    * server's Content-Disposition names it. Blob links lose their name in browsers that
