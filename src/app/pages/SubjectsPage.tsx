@@ -27,7 +27,7 @@ export function orderCompetencies(list: Competency[]): (Competency & { depth: nu
   return out;
 }
 
-const SUBJECTS_PER_PAGE = 20;
+const SUBJECTS_PER_PAGE = 10;
 
 export function SubjectsPage() {
   const [q, setQ] = useState('');

@@ -269,7 +269,7 @@ function Participants({ session, canManage }: { session: Session; canManage: boo
   const dq = useDebounced(q);
   const list = useQuery({
     queryKey: ['session', session.id, 'participants', page, dq, attendance],
-    queryFn: () => sessionApi.participants(session.id, { page, per_page: 25, q: dq, attendance }),
+    queryFn: () => sessionApi.participants(session.id, { page, per_page: 10, q: dq, attendance }),
   });
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Participant | null>(null);
@@ -358,7 +358,7 @@ function Participants({ session, canManage }: { session: Session; canManage: boo
               ))}
             </tbody>
           </Table>
-          <Pagination page={page} perPage={25} total={list.data.total} onPage={setPage} />
+          <Pagination page={page} perPage={10} total={list.data.total} onPage={setPage} />
         </>
       )}
       {adding && <AddParticipants session={session} onClose={() => setAdding(false)} />}
