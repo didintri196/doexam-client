@@ -330,7 +330,7 @@ export function AttemptReportPage() {
         </div>
         {violations.length > 0 && (
           <p className="mt-3 text-[11px] text-amber-700">
-            Catatan pengawasan: {violations.map(([k, n]) => `${{ FOCUS_LOST: 'pindah tab', FULLSCREEN_EXIT: 'keluar layar penuh', DEVICE_CHANGED: 'ganti perangkat' }[k] ?? k} ${n}×`).join(', ')}
+            Catatan pengawasan: {violations.map(([k, n]) => `${{ FOCUS_LOST: 'pindah tab', FULLSCREEN_EXIT: 'keluar layar penuh', DEVICE_CHANGED: 'ganti perangkat', CAMERA_STOPPED: 'kamera mati', SCREEN_SHARE_STOPPED: 'layar berhenti dibagikan', EXTRA_DISPLAY_DETECTED: 'monitor tambahan' }[k] ?? k} ${n}×`).join(', ')}
           </p>
         )}
         {r.sections.length > 1 && (

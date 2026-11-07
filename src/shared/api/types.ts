@@ -327,6 +327,9 @@ export interface Session {
   token_rotation_minutes: number;
   status: SessionStatus;
   is_makeup: boolean;
+  /** Participants must share their camera / whole screen; proctors may watch live (DOCS/PLAN/19). */
+  require_camera: boolean;
+  require_screen: boolean;
   participant_count: number;
   attendance: Record<string, number>;
   proctors: Person[];
@@ -357,6 +360,8 @@ export interface MySession {
   ends_at: ISODate;
   status: SessionStatus;
   token_required: boolean;
+  require_camera: boolean;
+  require_screen: boolean;
   total_minutes: number | null;
   extra_time_minutes: number;
   seat: string | null;
@@ -409,6 +414,8 @@ export interface AttemptView {
   section_mode: 'shared' | 'sequential';
   security_profile: 'light' | 'standard';
   settings: Record<string, unknown>;
+  require_camera: boolean;
+  require_screen: boolean;
   started_at: ISODate;
   deadline_at: ISODate;
   server_time: ISODate;
@@ -419,7 +426,23 @@ export interface AttemptView {
   media_plays: Record<string, number>;
   extra_plays: number;
 }
-export type EventType = 'RESPONSE_SAVED' | 'FLAG_SET' | 'ITEM_VIEWED' | 'FOCUS_LOST' | 'FOCUS_RETURNED' | 'FULLSCREEN_EXIT' | 'MEDIA_PLAYED' | 'ANNOUNCEMENT_READ';
+export type MediaEventType =
+  | 'CAMERA_STOPPED'
+  | 'CAMERA_RESUMED'
+  | 'SCREEN_SHARE_STOPPED'
+  | 'SCREEN_SHARE_RESUMED'
+  | 'EXTRA_DISPLAY_DETECTED'
+  | 'EXTRA_DISPLAY_REMOVED';
+export type EventType =
+  | 'RESPONSE_SAVED'
+  | 'FLAG_SET'
+  | 'ITEM_VIEWED'
+  | 'FOCUS_LOST'
+  | 'FOCUS_RETURNED'
+  | 'FULLSCREEN_EXIT'
+  | 'MEDIA_PLAYED'
+  | 'ANNOUNCEMENT_READ'
+  | MediaEventType;
 export interface ClientEvent {
   client_event_id: string;
   client_seq: number;
@@ -509,8 +532,11 @@ export interface MonitorRow {
   last_violation_at: ISODate | null;
   locked_at: ISODate | null; // last LOCKED event
   submitted_at: ISODate | null;
+  /** Latest sharing state; set when the session requires camera/screen and the attempt exists. */
+  media: MediaState | null;
 }
-export type ViolationType = 'focus_lost' | 'fullscreen_exit' | 'device_changed';
+export interface MediaState { camera_off: boolean; screen_off: boolean; extra_display: boolean }
+export type ViolationType = 'focus_lost' | 'fullscreen_exit' | 'device_changed' | 'camera_stopped' | 'screen_stopped' | 'extra_display';
 export type MonitorView = 'all' | 'violations' | 'idle' | 'locked' | 'not_started' | 'in_progress' | 'submitted';
 export interface Monitor {
   session_id: ID;
@@ -518,7 +544,24 @@ export interface Monitor {
   server_time: ISODate;
   counts: Record<string, number>;
   rows: MonitorRow[];
+  require_camera: boolean;
+  require_screen: boolean;
 }
+
+// ── live views (DOCS/PLAN/19) ─────────────────────────────────
+export type SignalKind = 'view_request' | 'offer' | 'answer' | 'ice' | 'end';
+export interface LiveView {
+  id: ID;
+  session_id: ID;
+  attempt_id: ID;
+  camera: boolean;
+  screen: boolean;
+  started_at: ISODate;
+  expires_at: ISODate;
+  ice_servers: RTCIceServer[];
+}
+export interface Signal { id: number; view_id: ID; kind: SignalKind; payload: Record<string, unknown>; created_at: ISODate }
+export interface SignalPoll { signals: Signal[]; cursor: number; ended: boolean }
 
 // ── grading ────────────────────────────────────────────────────
 export interface GradingSummaryRow {

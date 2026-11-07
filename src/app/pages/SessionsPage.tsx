@@ -123,17 +123,22 @@ export function SessionForm({ session, onClose, onSaved }: { session: Session | 
     token_required: session?.token_required ?? true,
     rotation: String(session?.token_rotation_minutes ?? 15),
     is_makeup: session?.is_makeup ?? false,
+    require_camera: session?.require_camera ?? false,
+    require_screen: session?.require_screen ?? false,
   });
+  // a running session only accepts these fields (the server answers 409 otherwise)
+  const running = session?.status === 'open' || session?.status === 'paused';
   const body = {
     ...(session ? {} : { exam_id: f.exam_id }),
     name: f.name,
     room: f.room,
-    starts_at: fromLocalInput(f.starts_at),
     ends_at: fromLocalInput(f.ends_at),
     late_entry_minutes: f.late === '' ? null : Number(f.late),
     token_required: f.token_required,
     token_rotation_minutes: Number(f.rotation),
-    is_makeup: f.is_makeup,
+    ...(running
+      ? {}
+      : { starts_at: fromLocalInput(f.starts_at), is_makeup: f.is_makeup, require_camera: f.require_camera, require_screen: f.require_screen }),
   };
   const save = useAction(() => (session ? sessionApi.update(session.id, body) : sessionApi.create(body)), {
     success: 'Sesi disimpan',
@@ -176,7 +181,7 @@ export function SessionForm({ session, onClose, onSaved }: { session: Session | 
             <Input value={f.room} onChange={(e) => setF({ ...f, room: e.target.value })} placeholder="Lab Komputer 1" />
           </Field>
           <Field label="Mulai" error={fe.starts_at}>
-            <Input type="datetime-local" value={f.starts_at} onChange={(e) => setF({ ...f, starts_at: e.target.value })} />
+            <Input type="datetime-local" value={f.starts_at} onChange={(e) => setF({ ...f, starts_at: e.target.value })} disabled={running} />
           </Field>
           <Field label="Selesai" error={fe.ends_at}>
             <Input type="datetime-local" value={f.ends_at} onChange={(e) => setF({ ...f, ends_at: e.target.value })} />
@@ -192,6 +197,34 @@ export function SessionForm({ session, onClose, onSaved }: { session: Session | 
           <Checkbox label="Wajib token ruang" checked={f.token_required} onChange={(e) => setF({ ...f, token_required: e.target.checked })} />
           {!session && <Checkbox label="Sesi susulan" checked={f.is_makeup} onChange={(e) => setF({ ...f, is_makeup: e.target.checked })} />}
         </div>
+        <fieldset className="space-y-2.5 rounded-xl border border-slate-200 px-3.5 py-3 dark:border-slate-700">
+          <legend className="px-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Pengawasan kamera &amp; layar</legend>
+          <div className="flex flex-wrap gap-4">
+            <Checkbox
+              label="Wajibkan kamera"
+              checked={f.require_camera}
+              disabled={running}
+              onChange={(e) => setF({ ...f, require_camera: e.target.checked })}
+            />
+            <Checkbox
+              label="Wajibkan berbagi seluruh layar"
+              checked={f.require_screen}
+              disabled={running}
+              onChange={(e) => setF({ ...f, require_screen: e.target.checked })}
+            />
+          </div>
+          <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+            {running
+              ? 'Tidak bisa diubah selama sesi berjalan.'
+              : 'Peserta harus menyalakan kamera dan/atau membagikan seluruh layar sebelum mulai. Pengawas bisa melihatnya kapan saja dari monitor; video hanya dikirim saat dilihat dan tidak direkam.'}
+          </p>
+          {(f.require_camera || f.require_screen) && !running && (
+            <ul className="list-disc space-y-0.5 pl-5 text-xs text-amber-700 marker:text-amber-400 dark:text-amber-300">
+              <li>Server harus dibuka lewat HTTPS (lihat panduan <code>doexam tls init</code>).</li>
+              {f.require_screen && <li>Berbagi layar hanya bisa di browser komputer (Chrome/Edge disarankan); peserta dari HP tidak bisa mulai.</li>}
+            </ul>
+          )}
+        </fieldset>
       </div>
     </Modal>
   );

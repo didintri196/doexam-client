@@ -9,6 +9,8 @@ import { formatDateTime, formatTime, labels } from '@/shared/lib/format';
 import { Alert, Badge, Button, Card, EmptyState, Field, Input, Loading, Modal, PageHeader } from '@/shared/ui';
 import { examApi } from '../api';
 import { AnnouncementInbox, AnnouncementLayer } from '../Announcements';
+import { media, useMedia } from '../media';
+import { needsSharing, SharingPrep, sharingOk } from '../Sharing';
 import { Shell } from '../Shell';
 
 const statusTone = { scheduled: 'slate', open: 'green', paused: 'amber', closed: 'slate', cancelled: 'red' } as const;
@@ -160,9 +162,18 @@ function StartModal({ session, onClose }: { session: MySession; onClose: () => v
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fields, setFields] = useState<Record<string, string>>({});
+  const req = { camera: session.require_camera, screen: session.require_screen };
+  const [consent, setConsent] = useState(false);
+  const shares = useMedia();
+  const ready = sharingOk(shares, req, consent);
+  const close = () => {
+    if (needsSharing(req)) media.stop(); // nothing stays shared when the dialog is dismissed
+    onClose();
+  };
 
   const start = async (e?: FormEvent) => {
     e?.preventDefault();
+    if (!ready) return;
     setBusy(true);
     setError(null);
     setFields({});
@@ -180,15 +191,15 @@ function StartModal({ session, onClose }: { session: MySession; onClose: () => v
   return (
     <Modal
       open
-      onClose={onClose}
+      onClose={close}
       title="Mulai ujian"
-      size="sm"
+      size={needsSharing(req) ? 'md' : 'sm'}
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" onClick={close}>
             Batal
           </Button>
-          <Button onClick={() => void start()} loading={busy} disabled={session.token_required && token.trim().length < 6}>
+          <Button onClick={() => void start()} loading={busy} disabled={!ready || (session.token_required && token.trim().length < 6)}>
             Mulai sekarang
           </Button>
         </>
@@ -204,6 +215,7 @@ function StartModal({ session, onClose }: { session: MySession; onClose: () => v
           <li>Jawaban tersimpan otomatis, juga saat jaringan terputus.</li>
           <li>Berpindah tab atau keluar layar penuh tercatat oleh pengawas.</li>
         </ul>
+        {needsSharing(req) && <SharingPrep req={req} consent={consent} onConsent={setConsent} />}
         {session.token_required && (
           <Field label="Token ruang" error={fields.token} hint="Lihat token di layar pengawas.">
             <Input

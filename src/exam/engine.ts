@@ -1,6 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { ApiError } from '@/shared/api/client';
-import type { AttemptStatus, AttemptView, EventType, ItemView, MyAnnouncement, Response, SectionView } from '@/shared/api/types';
+import type { AttemptStatus, AttemptView, EventType, ItemView, MediaEventType, MyAnnouncement, Response, SectionView } from '@/shared/api/types';
 import { examApi } from './api';
 import { store, type LocalAttempt, type OutboxEvent } from './db';
 import { clearMediaCache, prefetchMedia, type MediaProgress } from './mediaCache';
@@ -348,6 +348,12 @@ export class AttemptEngine {
   recordFocus(type: 'FOCUS_LOST' | 'FOCUS_RETURNED' | 'FULLSCREEN_EXIT') {
     if (this.snap.status !== 'in_progress') return;
     if (type === 'FOCUS_LOST') this.set({ focusLost: this.snap.focusLost + 1 });
+    void this.enqueue(type, {});
+  }
+
+  /** recordMedia logs a camera/screen/display change (DOCS/PLAN/19 §4.2) through the outbox. */
+  recordMedia(type: MediaEventType) {
+    if (this.snap.status !== 'in_progress') return;
     void this.enqueue(type, {});
   }
 

@@ -202,6 +202,11 @@ export const sessionApi = {
   monitorList: (id: string, q: Q) => api.paged<T.Monitor>(`/sessions/${id}/monitor/list`, q),
   /** monitorWatch: the watched participants (at most 25), plus the session's counts. */
   monitorWatch: (id: string, userIds: string[]) => api.post<T.Monitor>(`/sessions/${id}/monitor/watch`, { user_ids: userIds }),
+  /** Live camera/screen views (DOCS/PLAN/19): open, long-poll the participant's signals, answer, close. */
+  liveOpen: (id: string, attemptId: string) => api.post<T.LiveView>(`/sessions/${id}/live-views`, { attempt_id: attemptId }),
+  liveSignals: (id: string, viewId: string, after: number, wait: number) => api.get<T.SignalPoll>(`/sessions/${id}/live-views/${viewId}/signal`, { after, wait }),
+  liveSignal: (id: string, viewId: string, kind: 'answer' | 'ice', payload: unknown) => api.post<null>(`/sessions/${id}/live-views/${viewId}/signal`, { kind, payload }),
+  liveClose: (id: string, viewId: string) => api.del(`/sessions/${id}/live-views/${viewId}`),
   announce: (id: string, body: { body: string; priority: T.AnnouncementPriority; target: 'all' | 'selected'; user_ids?: string[] }) =>
     api.post<{ id: string; recipients: number; skipped: number }>(`/sessions/${id}/announcements`, body),
   announcements: (id: string) => api.get<T.AnnouncementList>(`/sessions/${id}/announcements`),
