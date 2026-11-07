@@ -1,11 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { BookOpenCheck, Pencil, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Competency, Subject } from '@/shared/api/types';
-import { Button, Card, ConfirmDialog, cx, EmptyState, Field, IconButton, Input, Loading, Modal, PageHeader, Select } from '@/shared/ui';
+import { Button, Card, ConfirmDialog, cx, EmptyState, Field, IconButton, Input, Loading, Modal, PageHeader, Pagination, Select } from '@/shared/ui';
 import { subjectApi } from '../api';
 import { useAction } from '../components/hooks';
-import { useSubjects } from '../components/pickers';
+import { SearchInput, useDebounced, useLookup } from '../components/pickers';
 
 export function useCompetencies(subjectId?: string) {
   return useQuery({ queryKey: ['competencies', subjectId], queryFn: () => subjectApi.competencies(subjectId!), enabled: !!subjectId, staleTime: 60_000 });
@@ -27,10 +27,24 @@ export function orderCompetencies(list: Competency[]): (Competency & { depth: nu
   return out;
 }
 
+const SUBJECTS_PER_PAGE = 20;
+
 export function SubjectsPage() {
-  const subjects = useSubjects();
+  const [q, setQ] = useState('');
+  const dq = useDebounced(q);
+  const [page, setPage] = useState(1);
+  const subjects = useQuery({
+    queryKey: ['subjects', 'page', dq, page],
+    queryFn: () => subjectApi.list({ q: dq, page, per_page: SUBJECTS_PER_PAGE }),
+    placeholderData: keepPreviousData,
+  });
   const [selected, setSelected] = useState<string>('');
-  const current = subjects.data?.items.find((s) => s.id === selected) ?? subjects.data?.items[0];
+  // the chosen subject stays open while browsing other pages or searching
+  const chosen = useLookup('subjects', [selected], subjectApi.get)(selected);
+  const current = subjects.data?.items.find((s) => s.id === selected) ?? chosen ?? subjects.data?.items[0];
+  useEffect(() => {
+    if (subjects.data && subjects.data.items.length === 0 && page > 1) setPage(page - 1);
+  }, [subjects.data, page]);
   const [editSubject, setEditSubject] = useState<Subject | 'new' | null>(null);
   const [deleting, setDeleting] = useState<Subject | null>(null);
   const remove = useAction((s: Subject) => subjectApi.remove(s.id), { success: 'Subjek dihapus', invalidate: [['subjects']], onSuccess: () => setDeleting(null) });
@@ -48,15 +62,26 @@ export function SubjectsPage() {
       />
       {subjects.isLoading ? (
         <Loading />
-      ) : !subjects.data?.items.length ? (
+      ) : !subjects.data?.total && !dq ? (
         <EmptyState icon={<BookOpenCheck className="h-10 w-10" />} title="Belum ada subjek">
           Buat subjek dulu sebelum membuat bank soal.
         </EmptyState>
       ) : (
         <div className="grid gap-6 lg:grid-cols-3">
           <Card title="Subjek">
+            <div className="mb-3 [&>div]:w-full">
+              <SearchInput
+                value={q}
+                onChange={(v) => {
+                  setQ(v);
+                  setPage(1);
+                }}
+                placeholder="Cari kode atau nama…"
+              />
+            </div>
+            {subjects.data?.items.length === 0 && <p className="px-3 py-2 text-xs text-slate-500">Tidak ada subjek yang cocok.</p>}
             <div className="space-y-1">
-              {subjects.data.items.map((s) => (
+              {subjects.data?.items.map((s) => (
                 <div
                   key={s.id}
                   className={cx(
@@ -78,6 +103,7 @@ export function SubjectsPage() {
                 </div>
               ))}
             </div>
+            {subjects.data && <Pagination page={page} perPage={SUBJECTS_PER_PAGE} total={subjects.data.total} onPage={setPage} />}
           </Card>
           <div className="lg:col-span-2">{current && <CompetencyList subject={current} />}</div>
         </div>

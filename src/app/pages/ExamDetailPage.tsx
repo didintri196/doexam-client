@@ -8,7 +8,7 @@ import { Alert, Badge, Button, Card, Checkbox, ConfirmDialog, EmptyState, Field,
 import { bankApi, examApi } from '../api';
 import { RichEditor } from '../components/RichEditor';
 import { useAction } from '../components/hooks';
-import { SearchInput, useDebounced } from '../components/pickers';
+import { BankSelect, SearchInput, useDebounced, useLookup } from '../components/pickers';
 import { Perm, useCan } from '../perm';
 import { examTone } from './ExamsPage';
 import { orderCompetencies, useCompetencies } from './SubjectsPage';
@@ -441,8 +441,8 @@ function SectionCard({
 }
 
 function RuleTable({ rules, editable, onEdit, onRemove }: { exam: Exam; rules: Rule[]; editable: boolean; onEdit: (r: Rule) => void; onRemove: (id: string) => void }) {
-  const banks = useQuery({ queryKey: ['banks', 'all'], queryFn: () => bankApi.list({ per_page: 100 }) });
-  const bankName = (id: string) => banks.data?.items.find((b) => b.id === id)?.name ?? '—';
+  const bank = useLookup('banks', rules.map((r) => r.bank_id), bankApi.get);
+  const bankName = (id: string) => bank(id)?.name ?? '—';
   return (
     <Table>
       <thead>
@@ -559,22 +559,6 @@ function SectionForm({ exam, section, onExam, onClose }: { exam: Exam; section: 
         </Field>
       </div>
     </Modal>
-  );
-}
-
-function BankSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const banks = useQuery({ queryKey: ['banks', 'all'], queryFn: () => bankApi.list({ per_page: 100 }) });
-  return (
-    <Select value={value} onChange={(e) => onChange(e.target.value)}>
-      <option value="" disabled>
-        Pilih bank soal…
-      </option>
-      {banks.data?.items.map((b) => (
-        <option key={b.id} value={b.id}>
-          {b.name} ({b.item_count})
-        </option>
-      ))}
-    </Select>
   );
 }
 

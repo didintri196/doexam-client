@@ -5,9 +5,10 @@ import { Link, useParams } from 'react-router';
 import type { Analysis, AnswerKey, ItemStat, Response } from '@/shared/api/types';
 import { errorMessage } from '@/shared/lib/errors';
 import { formatDateTime, formatNumber, formatPercent, labels } from '@/shared/lib/format';
-import { Alert, Badge, Button, Card, cx, EmptyState, Loading, PageHeader, Pagination, Select, Stat, Table, Tabs, td, th, useToast } from '@/shared/ui';
-import { attemptApi, examApi, groupApi, reportApi, sessionApi, tenantApi } from '../api';
+import { Alert, Badge, Button, Card, cx, EmptyState, Loading, PageHeader, Pagination, Stat, Table, Tabs, td, th, useToast } from '@/shared/ui';
+import { attemptApi, examApi, reportApi, tenantApi } from '../api';
 import { useAction } from '../components/hooks';
+import { GroupSelect, SessionSelect } from '../components/pickers';
 import { ExamChooser } from './GradingPage';
 
 export function ReportsIndexPage() {
@@ -17,7 +18,6 @@ export function ReportsIndexPage() {
 export function ReportPage() {
   const { examId = '' } = useParams();
   const exam = useQuery({ queryKey: ['exam', examId], queryFn: () => examApi.get(examId) });
-  const sessions = useQuery({ queryKey: ['sessions', 'exam', examId], queryFn: () => sessionApi.list({ exam_id: examId, per_page: 100 }) });
   const [tab, setTab] = useState<'recap' | 'analysis'>('recap');
   const [sessionId, setSessionId] = useState('');
   if (!exam.data) return <Loading />;
@@ -32,14 +32,7 @@ export function ReportPage() {
           </Link>
         }
         actions={
-          <Select className="w-auto" value={sessionId} onChange={(e) => setSessionId(e.target.value)}>
-            <option value="">Semua sesi</option>
-            {sessions.data?.items.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </Select>
+          <SessionSelect className="w-64" examId={examId} value={sessionId} onChange={setSessionId} emptyLabel="Semua sesi" />
         }
       />
       <Tabs value={tab} onChange={setTab} items={[{ value: 'recap', label: 'Rekap nilai' }, { value: 'analysis', label: 'Analisis butir' }]} />
@@ -54,7 +47,6 @@ function Recap({ examId, sessionId }: { examId: string; sessionId: string }) {
   const toast = useToast();
   const [groupId, setGroupId] = useState('');
   const [page, setPage] = useState(1);
-  const groups = useQuery({ queryKey: ['groups', 'all'], queryFn: () => groupApi.list({ per_page: 100 }) });
   const q = { session_id: sessionId, group_id: groupId };
   const recap = useQuery({
     queryKey: ['recap', examId, q, page],
@@ -78,21 +70,15 @@ function Recap({ examId, sessionId }: { examId: string; sessionId: string }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <Select
-          className="w-auto"
+        <GroupSelect
+          className="w-64"
           value={groupId}
-          onChange={(e) => {
-            setGroupId(e.target.value);
+          onChange={(id) => {
+            setGroupId(id);
             setPage(1);
           }}
-        >
-          <option value="">Semua grup</option>
-          {groups.data?.items.map((g) => (
-            <option key={g.id} value={g.id}>
-              {g.name}
-            </option>
-          ))}
-        </Select>
+          emptyLabel="Semua grup"
+        />
         <Button variant="secondary" icon={<Download className="h-4 w-4" />} loading={busy} onClick={() => void exportXlsx()}>
           Ekspor Excel
         </Button>
