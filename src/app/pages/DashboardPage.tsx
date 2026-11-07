@@ -22,7 +22,7 @@ export function DashboardPage() {
   const [page, setPage] = useState(1);
   const today = useQuery({
     queryKey: ['sessions', 'today', start.toISOString(), page],
-    queryFn: () => sessionApi.list({ from: start.toISOString(), to: end.toISOString(), page, per_page: TODAY_PER_PAGE }),
+    queryFn: () => sessionApi.list({ from: start.toISOString(), to: end.toISOString(), sort: 'asc', page, per_page: TODAY_PER_PAGE }),
     enabled: canSessions,
     refetchInterval: 30_000,
     placeholderData: keepPreviousData, // the list stays while the next page loads

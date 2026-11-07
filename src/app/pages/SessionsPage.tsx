@@ -19,9 +19,11 @@ export const sessionTone: Record<SessionStatus, 'slate' | 'green' | 'amber' | 'r
   cancelled: 'red',
 };
 
+const SESSIONS_PER_PAGE = 10;
+
 export function SessionsPage() {
   const can = useCan();
-  const { page, setPage, filters, setFilter, query } = usePaging({ status: '' });
+  const { page, setPage, filters, setFilter, query } = usePaging({ status: '' }, SESSIONS_PER_PAGE);
   const list = useQuery({ queryKey: ['sessions', query], queryFn: () => sessionApi.list(query), refetchInterval: 30_000 });
   const [creating, setCreating] = useState(false);
   const [broadcasting, setBroadcasting] = useState(false);
