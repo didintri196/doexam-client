@@ -113,7 +113,7 @@ export const bankApi = {
   create: (body: { subject_id: string; name: string; description?: string }) => api.post<T.Bank>('/item-banks', body),
   update: (id: string, body: Partial<{ name: string; description: string }>) => api.patch<T.Bank>(`/item-banks/${id}`, body),
   remove: (id: string) => api.del(`/item-banks/${id}`),
-  members: (id: string) => api.get<T.BankMember[]>(`/item-banks/${id}/members`),
+  members: (id: string, q: Q) => api.page<T.BankMember>(`/item-banks/${id}/members`, q),
   setMember: (id: string, user_id: string, access: T.Access) => api.post(`/item-banks/${id}/members`, { user_id, access }),
   removeMember: (id: string, userId: string) => api.del(`/item-banks/${id}/members/${userId}`),
   stimuli: (id: string, q: Q) => api.page<T.Stimulus>(`/item-banks/${id}/stimuli`, q),
@@ -224,14 +224,15 @@ export const gradingApi = {
   item: (attemptItemId: string) => api.get<T.GradingItem>(`/grading/items/${attemptItemId}`),
   grade: (attemptItemId: string, body: { score?: number; rubric_scores?: { criterion: string; score: number }[]; comment?: string }) =>
     api.post<T.GradingItem>(`/grading/items/${attemptItemId}`, body),
-  adjustments: (examId: string) => api.get<T.Adjustment[]>(`/exams/${examId}/adjustments`),
+  adjustments: (examId: string, q: Q) => api.page<T.Adjustment>(`/exams/${examId}/adjustments`, q),
   createAdjustment: (examId: string, body: { item_version_id: string; action: T.AdjustmentAction; answer_key?: T.AnswerKey; reason: string }) =>
     api.post<T.Adjustment>(`/exams/${examId}/adjustments`, body),
   revokeAdjustment: (id: string) => api.del<T.Adjustment>(`/adjustments/${id}`),
 };
 
 export const reportApi = {
-  recap: (examId: string, q: Q) => api.get<T.Recap>(`/exams/${examId}/recap`, q),
+  /** recap: rows are one page of participants; counts and total cover every match. */
+  recap: (examId: string, q: Q) => api.paged<T.Recap>(`/exams/${examId}/recap`, q),
   exportRecap: (examId: string, q: Q) => api.download(`/exams/${examId}/recap/export`, 'rekap-nilai.xlsx', q),
   analysis: (examId: string, q: Q) => api.get<T.Analysis>(`/exams/${examId}/analysis`, q),
   recompute: (examId: string, q: Q) => api.post<T.Analysis>(`/exams/${examId}/analysis`, undefined, q),

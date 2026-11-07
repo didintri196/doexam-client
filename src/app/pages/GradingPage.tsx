@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, CheckCircle2, CheckSquare, ChevronRight, EyeOff, Plus, Undo2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router';
@@ -288,7 +288,12 @@ const actionLabel: Record<AdjustmentAction, string> = {
 };
 
 function Adjustments({ exam }: { exam: Exam }) {
-  const list = useQuery({ queryKey: ['adjustments', exam.id], queryFn: () => gradingApi.adjustments(exam.id) });
+  const [page, setPage] = useState(1);
+  const list = useQuery({
+    queryKey: ['adjustments', exam.id, page],
+    queryFn: () => gradingApi.adjustments(exam.id, { page, per_page: 20 }),
+    placeholderData: keepPreviousData, // the table stays while the next page loads
+  });
   const [creating, setCreating] = useState(false);
   const [revoking, setRevoking] = useState<string | null>(null);
   const items = exam.sections.flatMap((s) => s.items);
@@ -311,7 +316,7 @@ function Adjustments({ exam }: { exam: Exam }) {
       </div>
       {list.isLoading ? (
         <Loading />
-      ) : !list.data?.length ? (
+      ) : !list.data?.total ? (
         <EmptyState title="Belum ada penyesuaian" />
       ) : (
         <Table>
@@ -325,7 +330,7 @@ function Adjustments({ exam }: { exam: Exam }) {
             </tr>
           </thead>
           <tbody>
-            {list.data.map((a) => (
+            {list.data.items.map((a) => (
               <tr key={a.id} className={a.revoked_at ? 'opacity-50' : ''}>
                 <td className={`${td} max-w-xs truncate`}>{label(a.item_version_id)}</td>
                 <td className={td}>{actionLabel[a.action]}</td>
@@ -346,6 +351,7 @@ function Adjustments({ exam }: { exam: Exam }) {
           </tbody>
         </Table>
       )}
+      {list.data && <Pagination page={page} perPage={20} total={list.data.total} onPage={setPage} />}
       {creating && <AdjustmentForm exam={exam} onClose={() => setCreating(false)} />}
       <ConfirmDialog open={!!revoking} title="Cabut penyesuaian?" loading={revoke.isPending} onClose={() => setRevoking(null)} onConfirm={() => revoking && revoke.mutate(revoking)}>
         Nilai semua peserta yang terdampak dihitung ulang seperti semula.
