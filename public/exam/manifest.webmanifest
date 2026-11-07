@@ -1,6 +1,6 @@
 {
-  "name": "DoExam Ujian",
-  "short_name": "DoExam",
+  "name": "Ujian",
+  "short_name": "Ujian",
   "start_url": "/exam/",
   "scope": "/exam/",
   "display": "standalone",
