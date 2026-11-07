@@ -60,7 +60,7 @@ const tabs: { v: Tab; label: string; count: string; dot?: string }[] = [
 const watchFilters: { v: string; label: string; match: (r: MonitorRow) => boolean }[] = [
   { v: '', label: 'Semua', match: () => true },
   { v: 'violations', label: 'Pelanggaran', match: (r) => r.violations > 0 },
-  { v: 'idle', label: 'Tidak aktif', match: (r) => !!r.idle },
+  { v: 'idle', label: 'Tidak aktif', match: (r) => r.idle },
   { v: 'locked', label: 'Dikunci', match: (r) => r.status === 'locked' },
   { v: 'in_progress', label: 'Mengerjakan', match: (r) => r.status === 'in_progress' },
   { v: 'submitted', label: 'Dikumpulkan', match: (r) => r.status === 'submitted' || r.status === 'graded' },
@@ -450,7 +450,7 @@ function MonitorCard({
   const [menu, setMenu] = useState(false);
   const [action, setAction] = useState<ActionKind | null>(null);
   const [minutes, setMinutes] = useState('10');
-  const idle = !!r.idle;
+  const idle = r.idle;
   const pct = r.item_count ? Math.round((r.answered / r.item_count) * 100) : 0;
   const left = r.deadline_at && r.status === 'in_progress' ? Math.max(0, (Date.parse(r.deadline_at) - serverNow) / 1000) : null;
   const run = useAction(
@@ -489,7 +489,7 @@ function MonitorCard({
     plays: 'Setiap audio yang dibatasi bisa diputar 1 kali lagi oleh peserta ini, mis. bila speaker atau headset bermasalah. Tercatat di log.',
     submit: 'Jawaban peserta dikumpulkan sekarang dan dinilai. Tidak bisa dibatalkan.',
   };
-  const kinds = (Object.keys(violationLabel) as ViolationType[]).filter((k) => (r.violation_counts?.[k] ?? 0) > 0);
+  const kinds = (Object.keys(violationLabel) as ViolationType[]).filter((k) => r.violation_counts[k] > 0);
   const edge = selected
     ? 'border-blue-400 ring-2 ring-blue-500/20 dark:border-blue-600'
     : idle || r.violations > 2
@@ -561,7 +561,7 @@ function MonitorCard({
       )}
       {kinds.length > 0 && (
         <p className="text-[11px] text-rose-700 dark:text-rose-400">
-          {kinds.map((k) => `${violationLabel[k]} ×${r.violation_counts![k]}`).join(' · ')}
+          {kinds.map((k) => `${violationLabel[k]} ×${r.violation_counts[k]}`).join(' · ')}
           {r.last_violation_at && <span className="text-slate-500"> · terakhir {ago(r.last_violation_at, serverNow)}</span>}
         </p>
       )}
