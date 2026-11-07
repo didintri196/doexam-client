@@ -16,7 +16,7 @@ export function ExamChooser({ title, subtitle, to }: { title: string; subtitle: 
   const [q, setQ] = useState('');
   const [page, setPage] = useState(1);
   const dq = useDebounced(q);
-  const list = useQuery({ queryKey: ['exams', 'post', dq, page], queryFn: () => examApi.list({ q: dq, page, per_page: 20 }) });
+  const list = useQuery({ queryKey: ['exams', 'post', dq, page], queryFn: () => examApi.list({ q: dq, page, per_page: 10 }) });
   const items = (list.data?.items ?? []).filter((e) => e.status !== 'draft');
   return (
     <>
@@ -44,7 +44,7 @@ export function ExamChooser({ title, subtitle, to }: { title: string; subtitle: 
               </Link>
             ))}
           </div>
-          <Pagination page={page} perPage={20} total={list.data?.total ?? 0} onPage={setPage} />
+          <Pagination page={page} perPage={10} total={list.data?.total ?? 0} onPage={setPage} />
         </>
       )}
     </>
@@ -87,7 +87,7 @@ function EssayGrading({ examId }: { examId: string }) {
   const [current, setCurrent] = useState<string | null>(null);
   const queue = useQuery({
     queryKey: ['grading', examId, 'queue', versionId, status, blind, page],
-    queryFn: () => gradingApi.queue(examId, { item_version_id: versionId, status, blind, page, per_page: 20 }),
+    queryFn: () => gradingApi.queue(examId, { item_version_id: versionId, status, blind, page, per_page: 10 }),
     enabled: !!versionId,
   });
   useEffect(() => {
@@ -145,7 +145,7 @@ function EssayGrading({ examId }: { examId: string }) {
               {rows.map((r, i) => (
                 <QueueRow key={r.attempt_item_id} row={r} index={(page - 1) * 20 + i + 1} active={current === r.attempt_item_id} onClick={() => setCurrent(r.attempt_item_id)} />
               ))}
-              <Pagination page={page} perPage={20} total={queue.data?.total ?? 0} onPage={setPage} />
+              <Pagination page={page} perPage={10} total={queue.data?.total ?? 0} onPage={setPage} />
             </div>
           )}
         </Card>
@@ -291,7 +291,7 @@ function Adjustments({ exam }: { exam: Exam }) {
   const [page, setPage] = useState(1);
   const list = useQuery({
     queryKey: ['adjustments', exam.id, page],
-    queryFn: () => gradingApi.adjustments(exam.id, { page, per_page: 20 }),
+    queryFn: () => gradingApi.adjustments(exam.id, { page, per_page: 10 }),
     placeholderData: keepPreviousData, // the table stays while the next page loads
   });
   const [creating, setCreating] = useState(false);
@@ -351,7 +351,7 @@ function Adjustments({ exam }: { exam: Exam }) {
           </tbody>
         </Table>
       )}
-      {list.data && <Pagination page={page} perPage={20} total={list.data.total} onPage={setPage} />}
+      {list.data && <Pagination page={page} perPage={10} total={list.data.total} onPage={setPage} />}
       {creating && <AdjustmentForm exam={exam} onClose={() => setCreating(false)} />}
       <ConfirmDialog open={!!revoking} title="Cabut penyesuaian?" loading={revoke.isPending} onClose={() => setRevoking(null)} onConfirm={() => revoking && revoke.mutate(revoking)}>
         Nilai semua peserta yang terdampak dihitung ulang seperti semula.

@@ -41,7 +41,7 @@ export function ReportPage() {
   );
 }
 
-const RECAP_PER_PAGE = 50;
+const RECAP_PER_PAGE = 10;
 
 function Recap({ examId, sessionId }: { examId: string; sessionId: string }) {
   const toast = useToast();

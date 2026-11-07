@@ -210,7 +210,7 @@ function addedMessage(r: AddMembersResult): string {
 
 function MembersModal({ group, onClose }: { group: Group; onClose: () => void }) {
   const [page, setPage] = useState(1);
-  const list = useQuery({ queryKey: ['groups', group.id, 'members', page], queryFn: () => groupApi.members(group.id, { page, per_page: 20 }) });
+  const list = useQuery({ queryKey: ['groups', group.id, 'members', page], queryFn: () => groupApi.members(group.id, { page, per_page: 10 }) });
   const [picked, setPicked] = useState<PickedUser[]>([]);
   const [sources, setSources] = useState<Group[]>([]);
   const [role, setRole] = useState<'member' | 'leader'>('member');
@@ -370,7 +370,7 @@ function MembersModal({ group, onClose }: { group: Group; onClose: () => void })
                   ))}
                 </tbody>
               </Table>
-              <Pagination page={page} perPage={20} total={list.data?.total ?? 0} onPage={setPage} />
+              <Pagination page={page} perPage={10} total={list.data?.total ?? 0} onPage={setPage} />
             </>
           )}
         </section>

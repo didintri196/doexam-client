@@ -274,7 +274,7 @@ function ItemList({ bank }: { bank: Bank }) {
 
 function StimulusList({ bank, canWrite }: { bank: Bank; canWrite: boolean }) {
   const [page, setPage] = useState(1);
-  const list = useQuery({ queryKey: ['stimuli', bank.id, page], queryFn: () => bankApi.stimuli(bank.id, { page, per_page: 20 }) });
+  const list = useQuery({ queryKey: ['stimuli', bank.id, page], queryFn: () => bankApi.stimuli(bank.id, { page, per_page: 10 }) });
   const [editing, setEditing] = useState<Stimulus | 'new' | null>(null);
   const remove = useAction((s: Stimulus) => bankApi.removeStimulus(s.id), { success: 'Stimulus dihapus', invalidate: [['stimuli']] });
   return (
@@ -318,7 +318,7 @@ function StimulusList({ bank, canWrite }: { bank: Bank; canWrite: boolean }) {
               <RichContent html={s.body} className="line-clamp-4 text-xs text-slate-700 dark:text-slate-300" />
             </Card>
           ))}
-          <Pagination page={page} perPage={20} total={list.data.total} onPage={setPage} />
+          <Pagination page={page} perPage={10} total={list.data.total} onPage={setPage} />
         </div>
       )}
       {editing && <StimulusForm bankId={bank.id} stimulus={editing === 'new' ? null : editing} onClose={() => setEditing(null)} />}
@@ -369,7 +369,7 @@ function BankMembers({ bank, isOwner }: { bank: Bank; isOwner: boolean }) {
   const [page, setPage] = useState(1);
   const list = useQuery({
     queryKey: ['bank-members', bank.id, page],
-    queryFn: () => bankApi.members(bank.id, { page, per_page: 20 }),
+    queryFn: () => bankApi.members(bank.id, { page, per_page: 10 }),
     placeholderData: keepPreviousData, // the table stays while the next page loads
   });
   // removing the last member of a page leaves it empty: step back to the previous one
@@ -440,7 +440,7 @@ function BankMembers({ bank, isOwner }: { bank: Bank; isOwner: boolean }) {
           </tbody>
         </Table>
       )}
-      {list.data && <Pagination page={page} perPage={20} total={list.data.total} onPage={setPage} />}
+      {list.data && <Pagination page={page} perPage={10} total={list.data.total} onPage={setPage} />}
     </div>
   );
 }

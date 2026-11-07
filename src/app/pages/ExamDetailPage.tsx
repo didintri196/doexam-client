@@ -572,7 +572,7 @@ function ItemPicker({ exam, section, onExam, onClose }: { exam: Exam; section: S
   const used = new Set(exam.sections.flatMap((s) => s.items.map((i) => i.item_id)));
   const items = useQuery({
     queryKey: ['items', bankId, 'picker', dq, type, page],
-    queryFn: () => bankApi.items(bankId, { q: dq, type, status: 'active', page, per_page: 20 }),
+    queryFn: () => bankApi.items(bankId, { q: dq, type, status: 'active', page, per_page: 10 }),
     enabled: !!bankId,
   });
   const add = useAction(() => examApi.addItems(section.id, [...picked].map((item_id) => ({ item_id }))), {
@@ -648,7 +648,7 @@ function ItemPicker({ exam, section, onExam, onClose }: { exam: Exam; section: S
                 );
               })}
             </div>
-            <Pagination page={page} perPage={20} total={items.data.total} onPage={setPage} />
+            <Pagination page={page} perPage={10} total={items.data.total} onPage={setPage} />
           </>
         )}
       </div>

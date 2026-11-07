@@ -32,7 +32,7 @@ export function useAction<A, R>(
 }
 
 /** usePaging keeps page + filters together; changing a filter returns to page 1. */
-export function usePaging<F extends Record<string, string>>(initial: F, perPage = 20) {
+export function usePaging<F extends Record<string, string>>(initial: F, perPage = 10) {
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<F>(initial);
   const setFilter = <K extends keyof F>(k: K, v: F[K]) => {
