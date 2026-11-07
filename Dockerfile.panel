@@ -2,7 +2,8 @@
 #   docker build -f Dockerfile.panel -t doexam-panel .
 #   docker run -p 8082:8080 -e API_UPSTREAM=http://host.docker.internal:8080 doexam-panel
 
-FROM node:22-alpine AS build
+# static output is the same on every architecture: build natively, not under QEMU
+FROM --platform=$BUILDPLATFORM node:22-alpine AS build
 WORKDIR /src
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
