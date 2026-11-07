@@ -1,8 +1,9 @@
 import { Clock, Save, WifiOff } from 'lucide-react';
+import { useEffect } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
 import type { Me } from '@/shared/api/types';
 import { AuthProvider, RequireAuth } from '@/shared/auth/auth';
-import { ChangePasswordPage, LoginPage } from '@/shared/auth/pages';
+import { ChangePasswordPage, LoginPage, usePublicTenant } from '@/shared/auth/pages';
 import { isParticipant } from '@/shared/lib/perm';
 import { SessionsPage } from './pages/SessionsPage';
 import { ResultPage } from './pages/ResultPage';
@@ -11,9 +12,27 @@ import { TakePage } from './pages/TakePage';
 // Only participants sign in here; staff use the panel (/app/), with their own session.
 const accept = (me: Me) => (isParticipant(me.permissions) ? null : 'Akun ini bukan akun peserta ujian. Gunakan panel staf di /app/.');
 
+const TITLE_KEY = 'doexam.exam.title';
+
+/**
+ * TenantTitle names the browser tab after the institution (name — tagline). The
+ * last title is kept on the device, so a reload while offline still shows it.
+ */
+function TenantTitle() {
+  const { data: tenant } = usePublicTenant();
+  useEffect(() => {
+    const title = tenant ? [tenant.name, tenant.tagline].filter(Boolean).join(' — ') : localStorage.getItem(TITLE_KEY);
+    if (!title) return;
+    document.title = title;
+    if (tenant) localStorage.setItem(TITLE_KEY, title);
+  }, [tenant]);
+  return null;
+}
+
 export function App() {
   return (
     <BrowserRouter basename="/exam">
+      <TenantTitle />
       <AuthProvider accept={accept}>
         <Routes>
           <Route
