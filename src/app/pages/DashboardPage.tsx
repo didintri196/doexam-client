@@ -1,13 +1,15 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ArrowRight, BarChart3, CalendarClock, CheckSquare, FileQuestion, Layers, MonitorPlay, Users } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { useAuth } from '@/shared/auth/auth';
 import { formatTime, labels } from '@/shared/lib/format';
-import { Badge, Card, EmptyState, Loading, PageHeader } from '@/shared/ui';
+import { Badge, Card, EmptyState, Loading, PageHeader, Pagination } from '@/shared/ui';
 import { sessionApi } from '../api';
 import { Perm, useCan } from '../perm';
 import { sessionTone } from './SessionsPage';
+
+const TODAY_PER_PAGE = 10;
 
 export function DashboardPage() {
   const { me } = useAuth();
@@ -17,12 +19,18 @@ export function DashboardPage() {
   start.setHours(0, 0, 0, 0);
   const end = new Date(start);
   end.setDate(end.getDate() + 1);
+  const [page, setPage] = useState(1);
   const today = useQuery({
-    queryKey: ['sessions', 'today', start.toISOString()],
-    queryFn: () => sessionApi.list({ from: start.toISOString(), to: end.toISOString(), per_page: 50 }),
+    queryKey: ['sessions', 'today', start.toISOString(), page],
+    queryFn: () => sessionApi.list({ from: start.toISOString(), to: end.toISOString(), page, per_page: TODAY_PER_PAGE }),
     enabled: canSessions,
     refetchInterval: 30_000,
+    placeholderData: keepPreviousData, // the list stays while the next page loads
   });
+  // a session cancelled or moved off today can empty the last page: step back
+  useEffect(() => {
+    if (today.data && today.data.items.length === 0 && page > 1) setPage(page - 1);
+  }, [today.data, page]);
 
   const links: { to: string; label: string; desc: string; icon: ReactNode; ok: boolean }[] = [
     { to: '/sessions', label: 'Sesi ujian', desc: 'Jadwal, token ruang, peserta, monitor', icon: <CalendarClock className="h-5 w-5" />, ok: canSessions },
@@ -78,6 +86,7 @@ export function DashboardPage() {
                 ))}
               </ul>
             )}
+            {today.data && <Pagination page={page} perPage={TODAY_PER_PAGE} total={today.data.total} onPage={setPage} />}
           </Card>
         )}
         {shortcuts.length > 0 && (
