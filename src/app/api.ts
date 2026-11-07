@@ -199,6 +199,10 @@ export const sessionApi = {
     api.patch<T.Participant>(`/sessions/${id}/participants/${userId}`, body),
   removeParticipant: (id: string, userId: string) => api.del(`/sessions/${id}/participants/${userId}`),
   monitor: (id: string) => api.get<T.Monitor>(`/sessions/${id}/monitor`),
+  /** monitorList: one page (10 cards) of a monitor view, plus the session's counts. */
+  monitorList: (id: string, q: Q) => api.paged<T.Monitor>(`/sessions/${id}/monitor/list`, q),
+  /** monitorWatch: the watched participants (at most 25), plus the session's counts. */
+  monitorWatch: (id: string, userIds: string[]) => api.post<T.Monitor>(`/sessions/${id}/monitor/watch`, { user_ids: userIds }),
   announce: (id: string, body: { body: string; priority: T.AnnouncementPriority; target: 'all' | 'selected'; user_ids?: string[] }) =>
     api.post<{ id: string; recipients: number; skipped: number }>(`/sessions/${id}/announcements`, body),
   announcements: (id: string) => api.get<T.AnnouncementList>(`/sessions/${id}/announcements`),
