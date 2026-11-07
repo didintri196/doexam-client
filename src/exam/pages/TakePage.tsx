@@ -29,6 +29,7 @@ import { Alert, Badge, Button, cx, IconButton, Loading, Modal, useToast } from '
 import { activeSection, isAnswered, useAttemptEngine, type AttemptEngine, type FlatItem, type Snapshot } from '../engine';
 import type { MediaProgress } from '../mediaCache';
 import { AnnouncementInbox, AnnouncementLayer } from '../Announcements';
+import { needsSharing, SharingGuard } from '../Sharing';
 
 type FontScale = 'normal' | 'large' | 'xl';
 const fontClass: Record<FontScale, string> = { normal: 'text-base', large: 'text-lg', xl: 'text-xl' };
@@ -72,6 +73,7 @@ function ExamRoom({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
   const [fullscreen, setFullscreen] = useState(() => !!document.fullscreenElement);
   const { data: tenant } = usePublicTenant();
   const view = s.view!;
+  const sharing = useMemo(() => ({ camera: !!view.require_camera, screen: !!view.require_screen }), [view.require_camera, view.require_screen]);
   const items = s.items;
   const idx = Math.max(0, items.findIndex((i) => i.id === s.current));
   const item = items[idx];
@@ -193,6 +195,7 @@ function ExamRoom({ engine, s }: { engine: AttemptEngine; s: Snapshot }) {
       </header>
 
       <MediaStatus progress={s.media} />
+      {needsSharing(sharing) && <SharingGuard engine={engine} s={s} req={sharing} />}
       <AnnouncementLayer items={s.announcements} onConfirm={(id) => engine.confirmAnnouncement(id)} className="mt-4" />
 
       {s.notice && (

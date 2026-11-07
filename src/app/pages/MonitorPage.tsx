@@ -3,17 +3,22 @@ import {
   AlertTriangle,
   ArrowLeft,
   AudioLines,
+  Camera,
+  CameraOff,
   Clock,
   Eye,
   EyeOff,
   FileBarChart,
   Lock,
   Megaphone,
+  Monitor,
+  MonitorOff,
   MonitorSmartphone,
   MoreHorizontal,
   Send,
   Tv2,
   Unlock,
+  Video,
   WifiOff,
   X,
 } from 'lucide-react';
@@ -24,6 +29,7 @@ import { formatClock, labels } from '@/shared/lib/format';
 import { Alert, Badge, Button, ConfirmDialog, cx, EmptyState, Field, Input, Loading, Modal, PageHeader, Pagination, Select, useToast } from '@/shared/ui';
 import { attemptApi, sessionApi } from '../api';
 import { AnnounceDialog, AnnouncementHistory, useAnnouncements } from '../components/Announcements';
+import { LiveViewModal } from '../components/LiveView';
 import { useAction } from '../components/hooks';
 import { GroupSelect, SearchInput, useDebounced } from '../components/pickers';
 import { Perm, useCan } from '../perm';
@@ -40,6 +46,9 @@ const violationLabel: Record<ViolationType, string> = {
   focus_lost: 'Keluar halaman',
   fullscreen_exit: 'Keluar layar penuh',
   device_changed: 'Ganti perangkat',
+  camera_stopped: 'Kamera mati',
+  screen_stopped: 'Layar berhenti dibagikan',
+  extra_display: 'Monitor tambahan',
 };
 
 type Tab = 'watch' | MonitorView;
@@ -129,6 +138,7 @@ export function MonitorPage() {
   const m = tab === 'watch' ? watched.data : listed.data?.data;
   const counts = m?.counts ?? {};
   const serverNow = m ? Date.parse(m.server_time) : Date.now();
+  const sharing = useMemo(() => ({ camera: !!m?.require_camera, screen: !!m?.require_screen }), [m?.require_camera, m?.require_screen]);
 
   // rows of this page: the server's page, or the filtered watch list cut into pages here
   const watchRows = useMemo(() => {
@@ -372,6 +382,7 @@ export function MonitorPage() {
                 watched={watch.ids.has(r.user_id)}
                 onWatch={() => toggleWatch(r)}
                 unreadImportant={unreadImportant.has(r.user_id)}
+                sharing={sharing}
               />
             ))}
           </div>
@@ -435,6 +446,7 @@ function MonitorCard({
   watched,
   onWatch,
   unreadImportant,
+  sharing,
 }: {
   row: MonitorRow;
   serverNow: number;
@@ -444,12 +456,14 @@ function MonitorCard({
   watched: boolean;
   onWatch: () => void;
   unreadImportant: boolean;
+  sharing: { camera: boolean; screen: boolean };
 }) {
   const can = useCan();
   const qc = useQueryClient();
   const [menu, setMenu] = useState(false);
   const [action, setAction] = useState<ActionKind | null>(null);
   const [minutes, setMinutes] = useState('10');
+  const [live, setLive] = useState(false);
   const idle = r.idle;
   const pct = r.item_count ? Math.round((r.answered / r.item_count) * 100) : 0;
   const left = r.deadline_at && r.status === 'in_progress' ? Math.max(0, (Date.parse(r.deadline_at) - serverNow) / 1000) : null;
@@ -559,6 +573,7 @@ function MonitorCard({
           </p>
         </div>
       )}
+      {r.media && running && <MediaChips media={r.media} req={sharing} />}
       {kinds.length > 0 && (
         <p className="text-[11px] text-rose-700 dark:text-rose-400">
           {kinds.map((k) => `${violationLabel[k]} ×${r.violation_counts[k]}`).join(' · ')}
@@ -570,12 +585,23 @@ function MonitorCard({
           {idle && <WifiOff className="h-3 w-3" />}
           {r.status === 'locked' && r.locked_at ? `Dikunci ${ago(r.locked_at, serverNow)}` : r.status ? `Aktif ${ago(r.last_seen_at, serverNow)}` : 'Belum mulai'}
         </span>
+        {r.media && running && r.attempt_id && (
+          <button
+            type="button"
+            onClick={() => setLive(true)}
+            className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-medium text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-950"
+            aria-label={`Lihat layar dan kamera ${r.full_name}`}
+          >
+            <Video className="h-3.5 w-3.5" /> Lihat
+          </button>
+        )}
         {r.attempt_id && (r.status === 'submitted' || r.status === 'graded') && can(Perm.ReportRead, Perm.TenantManage, Perm.GradeWrite) && (
           <Link to={`/reports/attempts/${r.attempt_id}`} className="inline-flex items-center gap-1 font-medium text-slate-500 hover:text-slate-900 dark:hover:text-white">
             <FileBarChart className="h-3.5 w-3.5" /> Laporan
           </Link>
         )}
       </div>
+      {live && r.attempt_id && <LiveViewModal sessionId={sessionId} attemptId={r.attempt_id} name={r.full_name} onClose={() => setLive(false)} />}
       {menu && (
         <div className="absolute right-2 top-11 z-20 w-48 rounded-xl border border-slate-200 bg-white p-1 text-left shadow-lg dark:border-slate-700 dark:bg-slate-800" onMouseLeave={() => setMenu(false)}>
           {shown.map((a) => (
@@ -632,5 +658,28 @@ function MonitorCard({
         )
       )}
     </article>
+  );
+}
+
+/** MediaChips: the participant's latest camera/screen/display state (DOCS/PLAN/19 §5). */
+function MediaChips({ media, req }: { media: NonNullable<MonitorRow['media']>; req: { camera: boolean; screen: boolean } }) {
+  const chip = (ok: boolean, on: React.ReactNode, off: React.ReactNode, label: string) => (
+    <span
+      title={label}
+      className={cx(
+        'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium',
+        ok ? 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300',
+      )}
+    >
+      {ok ? on : off}
+      {label}
+    </span>
+  );
+  return (
+    <div className="flex flex-wrap gap-1">
+      {req.camera && chip(!media.camera_off, <Camera className="h-3 w-3" />, <CameraOff className="h-3 w-3" />, media.camera_off ? 'Kamera mati' : 'Kamera')}
+      {req.screen && chip(!media.screen_off, <Monitor className="h-3 w-3" />, <MonitorOff className="h-3 w-3" />, media.screen_off ? 'Layar mati' : 'Layar')}
+      {req.screen && media.extra_display && chip(false, null, <AlertTriangle className="h-3 w-3" />, 'Monitor tambahan')}
+    </div>
   );
 }
