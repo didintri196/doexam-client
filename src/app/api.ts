@@ -198,7 +198,6 @@ export const sessionApi = {
   updateParticipant: (id: string, userId: string, body: Partial<{ extra_time_minutes: number; attendance: T.Attendance; seat: string; notes: string }>) =>
     api.patch<T.Participant>(`/sessions/${id}/participants/${userId}`, body),
   removeParticipant: (id: string, userId: string) => api.del(`/sessions/${id}/participants/${userId}`),
-  monitor: (id: string) => api.get<T.Monitor>(`/sessions/${id}/monitor`),
   /** monitorList: one page (10 cards) of a monitor view, plus the session's counts. */
   monitorList: (id: string, q: Q) => api.paged<T.Monitor>(`/sessions/${id}/monitor/list`, q),
   /** monitorWatch: the watched participants (at most 25), plus the session's counts. */

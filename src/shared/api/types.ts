@@ -504,12 +504,11 @@ export interface MonitorRow {
   violations: number;
   device_bound: boolean;
   final_score: number | null;
-  // list/watch only (GET /monitor/list, POST /monitor/watch)
-  idle?: boolean;
-  violation_counts?: Record<ViolationType, number>;
-  last_violation_at?: ISODate | null;
-  locked_at?: ISODate | null;
-  submitted_at?: ISODate | null;
+  idle: boolean; // in progress without a sync for over 2 minutes
+  violation_counts: Record<ViolationType, number>;
+  last_violation_at: ISODate | null;
+  locked_at: ISODate | null; // last LOCKED event
+  submitted_at: ISODate | null;
 }
 export type ViolationType = 'focus_lost' | 'fullscreen_exit' | 'device_changed';
 export type MonitorView = 'all' | 'violations' | 'idle' | 'locked' | 'not_started' | 'in_progress' | 'submitted';
